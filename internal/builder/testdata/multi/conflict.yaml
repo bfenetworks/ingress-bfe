@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-A
+spec:
+  rules:
+    - host: example.foo.com
+      http:
+        paths:
+          - path: /foo
+            pathType: Prefix
+            backend:
+              serviceName: service1
+              servicePort: 80
+
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-B
+spec:
+  rules:
+    - host: example.foo.com
+      http:
+        paths:
+          - path: /foo
+            pathType: Prefix
+            backend:
+              serviceName: service2
+              servicePort: 80

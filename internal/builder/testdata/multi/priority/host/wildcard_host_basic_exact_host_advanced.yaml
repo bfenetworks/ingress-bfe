@@ -1,0 +1,61 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: "advanced"
+  namespace: production
+  annotations:
+    bfe.ingress.kubernetes.io/router.header: "key: value"
+
+spec:
+  rules:
+    - host: bar.foo.host.com
+      http:
+        paths:
+          - path: /foo
+            backend:
+              serviceName: service1
+              servicePort: 80
+    - host: bar.host.com
+      http:
+        paths:
+          - path: /foo
+            backend:
+              serviceName: service2
+              servicePort: 80
+    - host: foo.bar.baz.host.com
+      http:
+        paths:
+          - path: /foo
+            backend:
+              serviceName: service3
+              servicePort: 80
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: "basic"
+  namespace: production
+spec:
+  rules:
+    - host: "*.foo.host.com"
+      http:
+        paths:
+          - path: /foo
+            backend:
+              serviceName: service4
+              servicePort: 80
+    - host: "*.bar.host.com"
+      http:
+        paths:
+          - path: /foo
+            backend:
+              serviceName: service5
+              servicePort: 80
+    - host: "*.baz.host.com"
+      http:
+        paths:
+          - path: /foo
+            backend:
+              serviceName: service6
+              servicePort: 80

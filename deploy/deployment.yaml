@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: bfe-ingress-controller
+  namespace: default
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: bfe
+  namespace: default
+  labels:
+    app: bfe
+
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: bfe
+  template:
+    metadata:
+      labels:
+        app: bfe
+    spec:
+      serviceAccountName: bfe-ingress-controller
+      imagePullSecrets:
+        - name: bfe
+      containers:
+        - name: bfe-ingress-controller
+          image: ${image_repo}:${version}
+          ports:
+            - name: http
+              containerPort: 8900
+            - name: https
+              containerPort: 8445
+            - name: monitor
+              containerPort: 8299
+          env:
+            - name: INGRESS_LISTEN_NAMESPACE
+              value: "default"
