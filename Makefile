@@ -46,12 +46,7 @@ GIT_COMMIT ?= $(shell git rev-parse HEAD)
 INGRESS_PACKAGES := $(shell go list ./...)
 
 # make, make all
-all: prepare compile package
-
-# make prepare, download dependencies
-prepare: prepare-dep
-prepare-dep:
-	$(GO) get golang.org/x/tools/cmd/goyacc
+all: compile package
 
 # make compile, go build
 compile: test build
@@ -98,4 +93,4 @@ clean:
 	rm -rf $(GOPATH)/pkg/linux_amd64
 
 # avoid filename conflict and speed up build
-.PHONY: all prepare compile test package clean build
+.PHONY: all compile test package clean build

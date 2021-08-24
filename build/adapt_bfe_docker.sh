@@ -5,7 +5,7 @@ set -x
 # see https://github.com/bfenetworks/bfe/blob/develop/Dockerfile
 DOCKER_BFE_ROOT=/bfe
 # new BFE root for ingress
-WORK_BFE_ROOT=/home/work/go-bfe
+WORK_BFE_ROOT=/home/work/bfe
 
 mkdir -p ${WORK_BFE_ROOT}
 cp -r ${DOCKER_BFE_ROOT}/bin ${WORK_BFE_ROOT}/

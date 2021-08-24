@@ -15,6 +15,7 @@
 package builder
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -77,6 +78,7 @@ func (r *Reloader) DoReload(newConfig interface{}, configName string) error {
 }
 
 func (r *Reloader) reloadBfe(configName string) error {
+	// reload BFE
 	url := r.urlPrefix + configName
 	res, err := http.Get(url)
 	if err != nil {
@@ -84,15 +86,19 @@ func (r *Reloader) reloadBfe(configName string) error {
 	}
 	defer res.Body.Close()
 
+	// reload succeed
 	if res.StatusCode == http.StatusOK {
 		return nil
 	}
 
+	// reload fail
+	// parse reason from response body
 	failReason, err := ioutil.ReadAll(io.LimitReader(res.Body, BodyLimit))
 	if err != nil {
-		log.Logger.Warn("Failed to reload %s: %s", configName, failReason)
-		return err
+		err = fmt.Errorf("failed to reload %s, and parse fail reason error: %s", configName, err)
+	} else {
+		err = fmt.Errorf("failed to reload %s: %s", configName, failReason)
 	}
-
-	return nil
+	log.Logger.Warn(err)
+	return err
 }

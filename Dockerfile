@@ -8,7 +8,7 @@ RUN sh /adapt_bfe_docker.sh
 # pack /home/work directory for COPY in stage 2
 COPY build/output/bfe_ingress_controller \
     output/ingress.commit \
-    /home/work/go-bfe/bin/
+    /home/work/bfe/bin/
 COPY build/output/start.sh /home/work/start.sh
 
 ##################################### stage  2 #####################################
@@ -35,7 +35,7 @@ RUN mkdir -p /opt/compiler/gcc-4.8.2/lib64 && \
     ln -sf /home/work/opbin/bns_tool_stub/bns_tool_stub /usr/bin/get_instance_by_service && \
     mv /home/work/start.sh /start.sh
 
-WORKDIR /home/work/go-bfe/
+WORKDIR /home/work/bfe/
 USER work
 EXPOSE 8080 8443 8421
 ENTRYPOINT ["/start.sh"]
