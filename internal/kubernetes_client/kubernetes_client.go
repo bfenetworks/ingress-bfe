@@ -17,7 +17,6 @@ package kubernetes_client
 import (
 	"context"
 	"fmt"
-	v1 "k8s.io/client-go/informers/core/v1"
 	"reflect"
 	"strings"
 	"time"
@@ -33,6 +32,7 @@ import (
 	util "k8s.io/apimachinery/pkg/util/version"
 	"k8s.io/apimachinery/pkg/version"
 	"k8s.io/client-go/informers"
+	v1 "k8s.io/client-go/informers/core/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
@@ -192,7 +192,6 @@ func (c *KubernetesClient) GetNamespaceByLabel() []*core.Namespace {
 	if !c.watchAll || !c.watchLabel {
 		return nil
 	}
-	factory := c.factories[meta.NamespaceAll]
 	labelsMap := make(map[string]string)
 	for _, label := range c.labels {
 		kV := strings.Split(label, "=")
@@ -202,7 +201,7 @@ func (c *KubernetesClient) GetNamespaceByLabel() []*core.Namespace {
 		labelsMap[kV[0]] = kV[1]
 	}
 	labelSelector := labels.Set(labelsMap).AsSelector()
-	namespaces, err := factory.Core().V1().Namespaces().Lister().List(labelSelector)
+	namespaces, err := c.GetResources(meta.NamespaceAll).Namespaces().Lister().List(labelSelector)
 	if err != nil {
 		log.Logger.Warn("fail to list namespace by label %s: %s", c.labels, err)
 		return nil

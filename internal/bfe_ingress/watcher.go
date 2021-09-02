@@ -16,7 +16,6 @@ package bfe_ingress
 
 import (
 	"fmt"
-	"github.com/bfenetworks/ingress-bfe/internal/utils"
 	"reflect"
 	"sort"
 	"sync"
@@ -32,6 +31,7 @@ import (
 
 import (
 	"github.com/bfenetworks/ingress-bfe/internal/kubernetes_client"
+	"github.com/bfenetworks/ingress-bfe/internal/utils"
 )
 
 type IngressWatcher struct {

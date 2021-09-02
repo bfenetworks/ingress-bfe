@@ -71,14 +71,16 @@ type BfeTLSConfigBuilder struct {
 	tc *BfeTLSConf
 }
 
-func NewBfeTLSConfigBuilder(client *kubernetes_client.KubernetesClient, version string, dumper *Dumper, r *Reloader) *BfeTLSConfigBuilder {
-	c := &BfeTLSConfigBuilder{}
-	c.client = client
-	c.version = version
-	c.dumper = dumper
-	c.reloader = r
-	c.certKeyConf = make(map[string]certKeyConf)
-	c.hostRefCount = make(map[string]int)
+func NewBfeTLSConfigBuilder(client *kubernetes_client.KubernetesClient, version string, dumper *Dumper,
+	reloader *Reloader) *BfeTLSConfigBuilder {
+	c := &BfeTLSConfigBuilder{
+		client:       client,
+		dumper:       dumper,
+		reloader:     reloader,
+		version:      version,
+		certKeyConf:  make(map[string]certKeyConf),
+		hostRefCount: make(map[string]int),
+	}
 	return c
 }
 
@@ -240,15 +242,12 @@ func (c *BfeTLSConfigBuilder) Dump() error {
 	// dump key and cert for hosts
 	for host, ck := range c.tc.certKeyConf {
 		certFile := c.getCertFilePath(host)
-		keyFile := c.getKeyFilePath(host)
-
-		err := c.dumper.DumpBytes(ck.cert, certFile)
-		if err != nil {
+		if err := c.dumper.DumpBytes(ck.cert, certFile); err != nil {
 			return fmt.Errorf("write [%s] cert file fail, err: %s", host, err)
 		}
 
-		err = c.dumper.DumpBytes(ck.key, keyFile)
-		if err != nil {
+		keyFile := c.getKeyFilePath(host)
+		if err := c.dumper.DumpBytes(ck.key, keyFile); err != nil {
 			return fmt.Errorf("write [%s] key file fail, err: %s", host, err)
 		}
 	}
