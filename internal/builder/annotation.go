@@ -92,7 +92,6 @@ func (header *headerAnnotation) Build() string {
 
 // BuildBfeAnnotations extract sorted BFE annotations for k8s annotations
 func BuildBfeAnnotations(k8sAnnotations map[string]string) []BfeAnnotation {
-
 	bfeAnnotations := make([]BfeAnnotation, 0)
 
 	// build annotations

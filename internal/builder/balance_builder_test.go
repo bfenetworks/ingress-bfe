@@ -144,7 +144,7 @@ func balanceConfigBuilderGenerator(name string) (*BfeBalanceConfigBuilder, error
 
 	// submit ingress to builder
 	var submitErr error
-	builder := NewBfeBalanceConfigBuilder(client, "0", nil)
+	builder := NewBfeBalanceConfigBuilder(client, "0", nil, nil)
 	for _, ingress := range ingresses {
 		err := builder.Submit(ingress)
 		if err != nil {

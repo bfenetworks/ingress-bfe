@@ -33,10 +33,13 @@ import (
 )
 
 type Processor struct {
-	client    *kubernetes_client.KubernetesClient
+	client *kubernetes_client.KubernetesClient
+
 	ingressCh chan ingressList
 	stopCh    chan struct{}
-	reloader  *builder.Reloader
+
+	dumper   *builder.Dumper   // for dumping BFE config
+	reloader *builder.Reloader // for reloading BFE config
 
 	statusWriter *IngressStatusWriter
 }
@@ -45,9 +48,9 @@ func (p *Processor) initBfeConfigBuilder() []builder.BfeConfigBuilder {
 	version := "reload"
 	var builders []builder.BfeConfigBuilder
 
-	builders = append(builders, builder.NewBfeBalanceConfigBuilder(p.client, version, p.reloader))
-	builders = append(builders, builder.NewBfeRouteConfigBuilder(p.client, version, p.reloader))
-	builders = append(builders, builder.NewBfeTLSConfigBuilder(p.client, version, p.reloader))
+	builders = append(builders, builder.NewBfeBalanceConfigBuilder(p.client, version, p.dumper, p.reloader))
+	builders = append(builders, builder.NewBfeRouteConfigBuilder(p.client, version, p.dumper, p.reloader))
+	builders = append(builders, builder.NewBfeTLSConfigBuilder(p.client, version, p.dumper, p.reloader))
 
 	return builders
 }
@@ -162,8 +165,9 @@ func NewProcessor(c *kubernetes_client.KubernetesClient, ingressCh chan ingressL
 		client:       c,
 		ingressCh:    ingressCh,
 		stopCh:       stopCh,
-		reloader:     builder.NewReloader(utils.ReloadUrlPrefix),
 		statusWriter: &IngressStatusWriter{client: c},
+		dumper:       builder.NewDumper(utils.DefaultBfeConfigRoot),
+		reloader:     builder.NewReloader(utils.DefaultReloadURLPrefix),
 	}, nil
 }
 

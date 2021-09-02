@@ -18,9 +18,13 @@ import (
 	"testing"
 )
 
+import (
+	"github.com/bfenetworks/ingress-bfe/internal/utils"
+)
+
 func Test_checkLabels(t *testing.T) {
 	type args struct {
-		namespaces Namespaces
+		namespaces utils.Namespaces
 		labels     string
 	}
 	tests := []struct {

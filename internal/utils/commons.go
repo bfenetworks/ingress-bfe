@@ -15,13 +15,8 @@
 package utils
 
 import (
-	"os"
 	"strings"
 	"time"
-)
-
-const (
-	FilePerm os.FileMode = 0744
 )
 
 // Namespaces implements flag.Value interface as []string
@@ -38,8 +33,9 @@ func (n *Namespaces) Set(v string) error {
 	return nil
 }
 
-var (
-	ReloadUrlPrefix = "http://localhost:8421/reload/"
-	ReSyncPeriod    = 20 * time.Second
-	ConfigPath      = "/bfe/output/conf/"
+// ingress controller default settings
+const (
+	DefaultBfeConfigRoot   = "/home/work/bfe/conf/"
+	DefaultReloadURLPrefix = "http://localhost:8421/reload/"
+	DefaultSyncPeriod      = 20 * time.Second
 )

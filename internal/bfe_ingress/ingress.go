@@ -18,6 +18,7 @@ import (
 	"os"
 	"sync"
 	"syscall"
+	"time"
 )
 
 import (
@@ -27,6 +28,7 @@ import (
 )
 
 import (
+	"github.com/bfenetworks/ingress-bfe/internal/builder"
 	"github.com/bfenetworks/ingress-bfe/internal/kubernetes_client"
 )
 
@@ -47,6 +49,10 @@ type BfeIngress struct {
 
 	status int            // status for staring process
 	wg     sync.WaitGroup // wait group for graceful exit
+
+	BfeConfigRoot   string        // BFE config root path, for config dumping
+	ReloadURLPrefix string        // common prefix for BFE reload URL
+	SyncPeriod      time.Duration // period for ingress watcher to re-sync
 }
 
 func NewBfeIngress(namespaces, labels []string, ingressClass string) *BfeIngress {
@@ -67,7 +73,7 @@ func (ing *BfeIngress) Start() {
 	}
 
 	ing.initSignalTable()
-	ing.startWatcher(client, ingressesCh)
+	ing.startWatcher(client, ingressesCh, ing.SyncPeriod)
 	ing.startProcessor(client, ingressesCh)
 
 	if ing.status == statusFailed {
@@ -97,6 +103,8 @@ func (ing *BfeIngress) startProcessor(client *kubernetes_client.KubernetesClient
 		ing.status = statusFailed
 		return
 	}
+	processor.dumper = builder.NewDumper(ing.BfeConfigRoot)
+	processor.reloader = builder.NewReloader(ing.ReloadURLPrefix)
 
 	// start processor goroutine
 	ing.wg.Add(1)
@@ -104,7 +112,8 @@ func (ing *BfeIngress) startProcessor(client *kubernetes_client.KubernetesClient
 }
 
 // start ingress watcher goroutine
-func (ing *BfeIngress) startWatcher(client *kubernetes_client.KubernetesClient, ingressesCh chan ingressList) {
+func (ing *BfeIngress) startWatcher(client *kubernetes_client.KubernetesClient, ingressesCh chan ingressList,
+	syncPeriod time.Duration) {
 	// skip when ingress failed for some reason
 	if ing.status == statusFailed {
 		return
@@ -117,6 +126,7 @@ func (ing *BfeIngress) startWatcher(client *kubernetes_client.KubernetesClient, 
 		ing.status = statusFailed
 		return
 	}
+	watcher.syncPeriod = syncPeriod
 
 	// start watcher
 	ing.wg.Add(1)

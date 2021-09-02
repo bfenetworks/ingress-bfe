@@ -905,7 +905,7 @@ func routeConfigBuilderGenerator(name string) (*BfeRouteConfigBuilder, error) {
 
 	// submit ingress to builder
 	var submitErr error
-	builder := NewBfeRouteConfigBuilder(nil, "0", nil)
+	builder := NewBfeRouteConfigBuilder(nil, "0", nil, nil)
 	for _, ingress := range ingresses {
 		err := builder.Submit(ingress)
 		if err != nil {

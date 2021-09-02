@@ -23,14 +23,12 @@ import (
 import (
 	"github.com/bfenetworks/bfe/bfe_config/bfe_cluster_conf/cluster_table_conf"
 	"github.com/bfenetworks/bfe/bfe_config/bfe_cluster_conf/gslb_conf"
-	"github.com/bfenetworks/bfe/bfe_util"
 	core "k8s.io/api/core/v1"
 	networking "k8s.io/api/networking/v1beta1"
 )
 
 import (
 	"github.com/bfenetworks/ingress-bfe/internal/kubernetes_client"
-	"github.com/bfenetworks/ingress-bfe/internal/utils"
 )
 
 const (
@@ -59,8 +57,11 @@ type ingressSubClusters struct {
 type ingressClusters map[string]*ingressSubClusters
 
 type BfeBalanceConfigBuilder struct {
-	client   *kubernetes_client.KubernetesClient
+	client *kubernetes_client.KubernetesClient
+
+	dumper   *Dumper
 	reloader *Reloader
+
 	version  string
 	hostName string
 
@@ -69,10 +70,11 @@ type BfeBalanceConfigBuilder struct {
 	clusters ingressClusters
 }
 
-func NewBfeBalanceConfigBuilder(client *kubernetes_client.KubernetesClient, version string, reloader *Reloader) *BfeBalanceConfigBuilder {
+func NewBfeBalanceConfigBuilder(client *kubernetes_client.KubernetesClient, version string, dumper *Dumper, reloader *Reloader) *BfeBalanceConfigBuilder {
 	c := &BfeBalanceConfigBuilder{}
 	c.client = client
 	c.version = version
+	c.dumper = dumper
 	c.reloader = reloader
 	c.hostName = "bfe-ingress-controller"
 	c.clusters = make(ingressClusters)
@@ -127,7 +129,7 @@ func (c *BfeBalanceConfigBuilder) Submit(ingress *networking.Ingress) error {
 	for _, rule := range ingress.Spec.Rules {
 		for _, p := range rule.HTTP.Paths {
 			if !balance.ContainService(p.Backend.ServiceName) {
-				clusterName := GetSingleClusterName(ingress.Namespace, p.Backend.ServiceName)
+				clusterName := SingleClusterName(ingress.Namespace, p.Backend.ServiceName)
 				subClusterName := p.Backend.ServiceName
 
 				eps, err := c.client.GetEndpoints(ingress.Namespace, p.Backend.ServiceName)
@@ -147,7 +149,7 @@ func (c *BfeBalanceConfigBuilder) Submit(ingress *networking.Ingress) error {
 				cache = append(cache, cacheItem{clusterName, []*ingressSubCluster{&subClusterObj}})
 
 			} else {
-				clusterName := GetMultiClusterName(ingress.Namespace, ingress.Name, p.Backend.ServiceName)
+				clusterName := MultiClusterName(ingress.Namespace, ingress.Name, p.Backend.ServiceName)
 				subClusters, _ := balance.GetService(p.Backend.ServiceName)
 
 				ingressSubList := make([]*ingressSubCluster, 0)
@@ -198,9 +200,9 @@ func (c *BfeBalanceConfigBuilder) Rollback(ingress *networking.Ingress) error {
 		for _, p := range rule.HTTP.Paths {
 			var clusterName string
 			if !balance.ContainService(p.Backend.ServiceName) {
-				clusterName = GetSingleClusterName(ingress.Namespace, p.Backend.ServiceName)
+				clusterName = SingleClusterName(ingress.Namespace, p.Backend.ServiceName)
 			} else {
-				clusterName = GetMultiClusterName(ingress.Namespace, ingress.Name, p.Backend.ServiceName)
+				clusterName = MultiClusterName(ingress.Namespace, ingress.Name, p.Backend.ServiceName)
 			}
 			err := c.rollbackClusters(clusterName)
 			if err != nil {
@@ -212,28 +214,27 @@ func (c *BfeBalanceConfigBuilder) Rollback(ingress *networking.Ingress) error {
 }
 
 func (c *BfeBalanceConfigBuilder) Build() error {
-	var gslbConf gslb_conf.GslbConf
-	var clusterTableConf cluster_table_conf.ClusterTableConf
 	c.balanceConf = BfeBalanceConf{
-		clusterTableConf: &clusterTableConf,
-		gslbConf:         &gslbConf,
+		clusterTableConf: new(cluster_table_conf.ClusterTableConf),
+		gslbConf:         new(gslb_conf.GslbConf),
 	}
 
-	c.balanceConf.clusterTableConf.Version = &c.version
-	c.balanceConf.gslbConf.Ts = &c.version
-	c.balanceConf.gslbConf.Hostname = &c.hostName
-
+	// build clusterTableConf
 	allCluster, err := c.buildAllClusterBackend()
 	if err != nil {
 		return err
 	}
 	c.balanceConf.clusterTableConf.Config = &allCluster
+	c.balanceConf.clusterTableConf.Version = &c.version
 
+	// build gslbConf
 	gslbCluster, err := c.buildGslbConf()
 	if err != nil {
 		return err
 	}
 	c.balanceConf.gslbConf.Clusters = &gslbCluster
+	c.balanceConf.gslbConf.Ts = &c.version
+	c.balanceConf.gslbConf.Hostname = &c.hostName
 
 	return nil
 }
@@ -241,12 +242,12 @@ func (c *BfeBalanceConfigBuilder) Build() error {
 func (c *BfeBalanceConfigBuilder) buildGslbConf() (gslb_conf.GslbClustersConf, error) {
 	gslbClustersConf := make(gslb_conf.GslbClustersConf)
 
-	for key, subClusters := range c.clusters {
+	for clusterName, subClusters := range c.clusters {
 		gslbClusterConf := make(gslb_conf.GslbClusterConf)
 		for _, subCluster := range (*subClusters).subClusters {
 			gslbClusterConf[subCluster.name] = subCluster.weight
 		}
-		gslbClustersConf[key] = gslbClusterConf
+		gslbClustersConf[clusterName] = gslbClusterConf
 	}
 
 	return gslbClustersConf, nil
@@ -255,23 +256,21 @@ func (c *BfeBalanceConfigBuilder) buildGslbConf() (gslb_conf.GslbClustersConf, e
 func (c *BfeBalanceConfigBuilder) buildAllClusterBackend() (cluster_table_conf.AllClusterBackend, error) {
 	allClusterBackend := make(cluster_table_conf.AllClusterBackend)
 
-	for key, subClusters := range c.clusters {
-		namespace := strings.Split(key, "_")[0]
+	for clusterName, subClusters := range c.clusters {
 		for _, subCluster := range (*subClusters).subClusters {
-			clusterBackend, err := c.buildClusterBackend(namespace, (*subCluster).name, (*subCluster).port)
+			clusterBackend, err := c.buildClusterBackend(Namespace(clusterName), (*subCluster).name, (*subCluster).port)
 			if err != nil {
 				return allClusterBackend, err
 			}
-			if _, ok := allClusterBackend[key]; !ok {
-				allClusterBackend[key] = make(cluster_table_conf.ClusterBackend)
+			if _, ok := allClusterBackend[clusterName]; !ok {
+				allClusterBackend[clusterName] = make(cluster_table_conf.ClusterBackend)
 			}
 			for subClusterName, val := range clusterBackend {
-				allClusterBackend[key][subClusterName] = val
+				allClusterBackend[clusterName][subClusterName] = val
 			}
 		}
 	}
 	return allClusterBackend, nil
-
 }
 
 func (c *BfeBalanceConfigBuilder) buildClusterBackend(namespace, serviceName string, port string) (cluster_table_conf.ClusterBackend, error) {
@@ -282,7 +281,7 @@ func (c *BfeBalanceConfigBuilder) buildClusterBackend(namespace, serviceName str
 	if err != nil {
 		return clusterBackend, err
 	}
-	subClusterBackend := c.buildSubClusterBackend(eps, port)
+	subClusterBackend := buildSubClusterBackend(eps, port)
 	clusterBackend = make(cluster_table_conf.ClusterBackend)
 
 	sort.Slice(subClusterBackend, func(i, j int) bool {
@@ -295,51 +294,58 @@ func (c *BfeBalanceConfigBuilder) buildClusterBackend(namespace, serviceName str
 
 	clusterBackend[serviceName] = subClusterBackend
 	return clusterBackend, nil
-
 }
 
-func (c *BfeBalanceConfigBuilder) buildSubClusterBackend(eps *core.Endpoints, port string) cluster_table_conf.SubClusterBackend {
-	var subClusterBackend cluster_table_conf.SubClusterBackend
+func buildSubClusterBackend(eps *core.Endpoints, port string) cluster_table_conf.SubClusterBackend {
+	var subClusterBackends cluster_table_conf.SubClusterBackend
 	defaultWeight := 1
 	for _, subsets := range eps.Subsets {
-		for _, addr := range subsets.Addresses {
-			if port != "" {
-				name := fmt.Sprintf("%s:%s", addr.IP, port)
+		backends := buildBackends(subsets, port, defaultWeight)
+		subClusterBackends = append(subClusterBackends, backends...)
+	}
+	return subClusterBackends
+}
+
+// buildBackends builds backends for given subsets with port and weight
+func buildBackends(subsets core.EndpointSubset, port string, weight int) cluster_table_conf.SubClusterBackend {
+	var subClusterBackends cluster_table_conf.SubClusterBackend
+	for _, addr := range subsets.Addresses {
+		if port != "" {
+			name := fmt.Sprintf("%s:%s", addr.IP, port)
+			ip := addr.IP
+			portVal, _ := strconv.Atoi(port)
+			backendConf := cluster_table_conf.BackendConf{
+				Name:   &name,
+				Addr:   &ip,
+				Port:   &portVal,
+				Weight: &weight,
+			}
+			subClusterBackends = append(subClusterBackends, &backendConf)
+		} else {
+			for _, setPort := range subsets.Ports {
+				name := fmt.Sprintf("%s:%d", addr.IP, setPort.Port)
+				portVal := int(setPort.Port)
 				ip := addr.IP
-				portVal, _ := strconv.Atoi(port)
 				backendConf := cluster_table_conf.BackendConf{
 					Name:   &name,
 					Addr:   &ip,
 					Port:   &portVal,
-					Weight: &defaultWeight,
+					Weight: &weight,
 				}
-				subClusterBackend = append(subClusterBackend, &backendConf)
-			} else {
-				for _, setPort := range subsets.Ports {
-					name := fmt.Sprintf("%s:%d", addr.IP, setPort.Port)
-					portVal := int(setPort.Port)
-					ip := addr.IP
-					backendConf := cluster_table_conf.BackendConf{
-						Name:   &name,
-						Addr:   &ip,
-						Port:   &portVal,
-						Weight: &defaultWeight,
-					}
-					subClusterBackend = append(subClusterBackend, &backendConf)
-				}
+				subClusterBackends = append(subClusterBackends, &backendConf)
 			}
 		}
 	}
-	return subClusterBackend
+	return subClusterBackends
 }
 
 func (c *BfeBalanceConfigBuilder) Dump() error {
-	err := bfe_util.DumpJson(c.balanceConf.gslbConf, utils.ConfigPath+GslbData, utils.FilePerm)
+	err := c.dumper.DumpJson(c.balanceConf.gslbConf, GslbData)
 	if err != nil {
 		return fmt.Errorf("dump gslb.data error: %v", err)
 	}
 
-	err = bfe_util.DumpJson(c.balanceConf.clusterTableConf, utils.ConfigPath+ClusterTableData, utils.FilePerm)
+	err = c.dumper.DumpJson(c.balanceConf.clusterTableConf, ClusterTableData)
 	if err != nil {
 		return fmt.Errorf("dump cluster_table.data error: %v", err)
 	}
@@ -351,9 +357,27 @@ func (c *BfeBalanceConfigBuilder) Reload() error {
 	return c.reloader.DoReload(c.balanceConf, ConfigNameBalanceConf)
 }
 
-func GetSingleClusterName(namespace, serviceName string) string {
+func ClusterName(ingress *networking.Ingress, balance LoadBalance, p networking.HTTPIngressPath) string {
+	if !balance.ContainService(p.Backend.ServiceName) {
+		return SingleClusterName(ingress.Namespace, p.Backend.ServiceName)
+	}
+
+	return MultiClusterName(ingress.Namespace, ingress.Name, p.Backend.ServiceName)
+}
+
+// SingleClusterName return cluster name for single k8s service
+// e.g. "default_whoAmI"
+func SingleClusterName(namespace, serviceName string) string {
 	return fmt.Sprintf("%s_%s", namespace, serviceName)
 }
-func GetMultiClusterName(namespace, ingressName, serviceKey string) string {
+
+// MultiClusterName return cluster name for multi k8s service
+// e.g. "default_ingressTest_whoAmI"
+func MultiClusterName(namespace, ingressName, serviceKey string) string {
 	return fmt.Sprintf("%s_%s_%s", namespace, ingressName, serviceKey)
+}
+
+// Namespace return namespace which parsed from cluster name
+func Namespace(clusterName string) string {
+	return strings.Split(clusterName, "_")[0]
 }

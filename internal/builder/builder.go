@@ -18,22 +18,46 @@ import (
 	networking "k8s.io/api/networking/v1beta1"
 )
 
+// BfeConfigCache is interface for cacheable BfeConfigBuilder,
+// which can cache ingresses one-by-one for specific BFE config
+type BfeConfigCache interface {
+	/*
+		Submit an ingress resource to cache of specific BFE config.
+
+		All ingress resources will be submitted in sequence.
+		It supposed that: Submit with error won't change BfeConfigCache.
+	*/
+	Submit(ingress *networking.Ingress) error
+
+	/*
+		Rollback is reverse operation of Submit.
+		It changes cache of BFE config with a submitted ingress resource, as if it hadn't been submitted.
+	*/
+	Rollback(ingress *networking.Ingress) error
+}
+
+// BfeConfigDumper dumps specific BFE config
 type BfeConfigDumper interface {
 	Dump() error
 }
 
-type BfeConfigCache interface {
-	Submit(ingress *networking.Ingress) error
-	Rollback(ingress *networking.Ingress) error
-}
-
+// BfeConfigReloader reloads specific BFE config
+// usually work with BfeConfigDumper( reload after dump)
 type BfeConfigReloader interface {
 	Reload() error
 }
 
+// BfeConfigBuilder build specific BFE config
 type BfeConfigBuilder interface {
-	BfeConfigReloader
+	// cache information from ingresses
 	BfeConfigCache
-	BfeConfigDumper
+
+	// Build builds BFE config, usually use information cached before
 	Build() error
+
+	// dump BFE config for subsequent use (e.g. reloading, troubleshooting ...)
+	BfeConfigDumper
+
+	// reload BFE config
+	BfeConfigReloader
 }

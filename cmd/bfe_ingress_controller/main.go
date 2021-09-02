@@ -34,44 +34,24 @@ import (
 )
 
 var (
-	help            *bool   = flag.Bool("h", false, "to show help")
-	stdOut          *bool   = flag.Bool("s", false, "to show log in stdout")
-	showVersion     *bool   = flag.Bool("v", false, "to show version of bfe_ingress_controller")
-	showVerbose     *bool   = flag.Bool("V", false, "to show verbose information about bfe_ingress_controller")
-	debugLog        *bool   = flag.Bool("d", false, "to show debug log (otherwise >= info)")
-	logPath         *string = flag.String("l", "./log", "dir path of log")
-	reloadUrlPrefix *string = flag.String("u", utils.ReloadUrlPrefix, "reload URL prefix")
-	configPath      *string = flag.String("c", utils.ConfigPath, "config path")
-	resyncPeriod    *int    = flag.Int("p", 20, "resync period")
-	namespaces      utils.Namespaces
-	namespaceLabels *string = flag.String("f", "", "namespace label selector, split by ,")
+	help            = flag.Bool("h", false, "to show help")
+	stdOut          = flag.Bool("s", false, "to show log in stdout")
+	showVersion     = flag.Bool("v", false, "to show version of BFE ingress controller")
+	showVerbose     = flag.Bool("V", false, "to show verbose information")
+	debugLog        = flag.Bool("d", false, "to show debug log (otherwise >= info)")
+	logPath         = flag.String("l", "./log", "dir path of log")
+	bfeConfigRoot   = flag.String("c", utils.DefaultBfeConfigRoot, "root dir path of BFE config")
+	reloadURLPrefix = flag.String("u", utils.DefaultReloadURLPrefix, "BFE reload URL prefix")
+	syncPeriod      = flag.Int("p", int(utils.DefaultSyncPeriod/time.Second),
+		"sync period (in second) for Ingress watcher")
+	namespaceLabels = flag.String("f", "", "namespace label selector, split by ,")
+	ingressClass    = flag.String("k", "", "listen ingress class name")
 
-	ingressClass *string = flag.String("k", "", "listen ingress class name")
+	namespaces utils.Namespaces
 )
 
 var version string
 var commit string
-
-func initIngressParams() {
-	utils.ReloadUrlPrefix = *reloadUrlPrefix
-	utils.ConfigPath = *configPath
-	utils.ReSyncPeriod = time.Duration(*resyncPeriod) * time.Second
-}
-
-func initLog() error {
-	var logSwitch string
-	if *debugLog {
-		logSwitch = "DEBUG"
-	} else {
-		logSwitch = "INFO"
-	}
-
-	log4go.SetLogBufferLength(10000)
-	log4go.SetLogWithBlocking(false)
-	log4go.SetLogFormat(log4go.FORMAT_DEFAULT_WITH_PID)
-	log4go.SetSrcLineForBinLog(false)
-	return log.Init("bfe_ingress_controller", logSwitch, *logPath, *stdOut, "midnight", 7)
-}
 
 func checkLabels(namespaces utils.Namespaces, labels string) error {
 	if labels == "" {
@@ -98,17 +78,19 @@ func main() {
 		flag.PrintDefaults()
 		return
 	}
-	if *showVersion {
-		fmt.Printf("bfe_ingress_controller version: %s\n", version)
-		return
-	}
 	if *showVerbose {
-		fmt.Printf("bfe_ingress_controller version: %s\n", version)
+		printIngressVersion(version)
 		fmt.Printf("go version: %s\n", runtime.Version())
 		fmt.Printf("git commit: %s\n", commit)
 		return
 	}
-	if err := checkLabels(namespaces, *namespaceLabels); err != nil {
+	if *showVersion {
+		printIngressVersion(version)
+		return
+	}
+
+	// check ingress parameters
+	if err := checkParams(); err != nil {
 		fmt.Printf("bfe_ingress_controller: check params error[%s]", err.Error())
 		return
 	}
@@ -120,13 +102,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	// init ingress parameters
-	initIngressParams()
-
 	labels := strings.Split(*namespaceLabels, ",")
 
 	// create BFE Ingress controller
 	bfeIngress := bfe_ingress.NewBfeIngress(namespaces, labels, *ingressClass)
+	bfeIngress.ReloadURLPrefix = *reloadURLPrefix
+	bfeIngress.BfeConfigRoot = *bfeConfigRoot
+	bfeIngress.SyncPeriod = time.Duration(*syncPeriod) * time.Second
 
 	// start BFE Ingress controller
 	log.Logger.Info("bfe_ingress_controller[version:%s] start", version)
@@ -134,4 +116,43 @@ func main() {
 
 	time.Sleep(1 * time.Second)
 	log.Logger.Close()
+}
+
+func initLog() error {
+	var logSwitch string
+	if *debugLog {
+		logSwitch = "DEBUG"
+	} else {
+		logSwitch = "INFO"
+	}
+
+	log4go.SetLogBufferLength(10000)
+	log4go.SetLogWithBlocking(false)
+	log4go.SetLogFormat(log4go.FORMAT_DEFAULT_WITH_PID)
+	log4go.SetSrcLineForBinLog(false)
+	return log.Init("bfe_ingress_controller", logSwitch, *logPath, *stdOut, "midnight", 7)
+}
+
+func checkParams() error {
+	if err := checkLabels(namespaces, *namespaceLabels); err != nil {
+		return err
+	}
+
+	if *bfeConfigRoot == "" {
+		return fmt.Errorf("BFE config root path should not be empty")
+	}
+
+	if *reloadURLPrefix == "" {
+		return fmt.Errorf("BFE reload URL prefix should not be empty")
+	}
+
+	if *syncPeriod <= 0 {
+		return fmt.Errorf("sync period for Ingress watcher sholud be greater then 0, period[%d]", *syncPeriod)
+	}
+
+	return nil
+}
+
+func printIngressVersion(version string) {
+	fmt.Printf("bfe_ingress_controller version: %s\n", version)
 }

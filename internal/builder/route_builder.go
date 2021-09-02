@@ -24,14 +24,12 @@ import (
 	"github.com/bfenetworks/bfe/bfe_config/bfe_cluster_conf/cluster_conf"
 	"github.com/bfenetworks/bfe/bfe_config/bfe_route_conf/host_rule_conf"
 	"github.com/bfenetworks/bfe/bfe_config/bfe_route_conf/route_rule_conf"
-	"github.com/bfenetworks/bfe/bfe_util"
 	networking "k8s.io/api/networking/v1beta1"
 	"k8s.io/utils/pointer"
 )
 
 import (
 	"github.com/bfenetworks/ingress-bfe/internal/kubernetes_client"
-	"github.com/bfenetworks/ingress-bfe/internal/utils"
 )
 
 const (
@@ -80,10 +78,12 @@ type ingressRouteRuleFile struct {
 	ConditionType int
 }
 
-var (
-	HostRuleData    = "server_data_conf/host_rule.data"
-	RouteRuleData   = "server_data_conf/route_rule.data"
-	ClusterConfData = "server_data_conf/cluster_conf.data"
+const (
+	ServerDataConfDir = "server_data_conf/"
+
+	HostRuleData    = ServerDataConfDir + "host_rule.data"
+	RouteRuleData   = ServerDataConfDir + "route_rule.data"
+	ClusterConfData = ServerDataConfDir + "cluster_conf.data"
 )
 
 type ingressRecordRule struct {
@@ -97,8 +97,41 @@ type Rule map[string]*ingressRecordRule
 // record host-> route config of this host
 type HostRule map[string]Rule
 
+// Get rule by host and condition
+func (r HostRule) Get(host, condition string) (*ingressRecordRule, bool) {
+	conditionRule, ok := r[host]
+	if !ok {
+		return nil, false
+	}
+
+	if rule, ok := conditionRule[condition]; !ok {
+		return nil, false
+	} else {
+		return rule, true
+	}
+}
+
+// DisposableSet sets rule for host and condition, set only success once for same host and condition
+// previous set value will returned when failed
+func (r HostRule) DisposableSet(host, condition string, value *ingressRecordRule) (*ingressRecordRule, bool) {
+	conditionRule, ok := r[host]
+	if !ok {
+		conditionRule = make(Rule)
+		r[host] = conditionRule
+	}
+
+	if rule, ok := conditionRule[condition]; !ok {
+		conditionRule[condition] = value
+		return nil, true
+	} else {
+		return rule, false
+	}
+}
+
 type BfeRouteConfigBuilder struct {
-	client   *kubernetes_client.KubernetesClient
+	client *kubernetes_client.KubernetesClient
+
+	dumper   *Dumper
 	reloader *Reloader
 	version  string
 
@@ -112,16 +145,18 @@ type advancedRuleCoverage struct {
 	HostPath map[string]map[string]bool
 }
 
-func NewBfeRouteConfigBuilder(client *kubernetes_client.KubernetesClient, version string, r *Reloader) *BfeRouteConfigBuilder {
+func NewBfeRouteConfigBuilder(client *kubernetes_client.KubernetesClient, version string, dumper *Dumper, r *Reloader) *BfeRouteConfigBuilder {
 	c := &BfeRouteConfigBuilder{}
 	c.client = client
 	c.version = version
+	c.dumper = dumper
 	c.reloader = r
 	c.rules = make(HostRule)
 	return c
 }
 
 func (c *BfeRouteConfigBuilder) Submit(ingress *networking.Ingress) error {
+	// build balance from annotation
 	var balance LoadBalance
 	var err error
 	for key, value := range ingress.Annotations {
@@ -134,74 +169,68 @@ func (c *BfeRouteConfigBuilder) Submit(ingress *networking.Ingress) error {
 		}
 	}
 
-	annotationConds := BuildBfeAnnotations(ingress.Annotations)
+	// generate rules in cache
 	var cacheHostRule = make(HostRule)
+	annotationConds := BuildBfeAnnotations(ingress.Annotations)
 	for _, rule := range ingress.Spec.Rules {
 		for _, p := range rule.HTTP.Paths {
-			var clusterName string
-			if !balance.ContainService(p.Backend.ServiceName) {
-				clusterName = GetSingleClusterName(ingress.Namespace, p.Backend.ServiceName)
-			} else {
-				clusterName = GetMultiClusterName(ingress.Namespace, ingress.Name, p.Backend.ServiceName)
+			product := rule.Host
+			if product == "" {
+				product = DefaultProduct
+			}
+			cond, conditionType := buildCondition(rule.Host, p.Path, p.PathType, annotationConds)
+
+			// check conflict with previous rules in previous ingress
+			if conflictRule, ok := c.rules.Get(product, cond); ok {
+				conflictIngress := conflictRule.ingress
+				return fmt.Errorf("route cond conflict, ingress[%s/%s] ingored cause other ingress[%s/%s]",
+					ingress.Namespace, ingress.Name, conflictIngress.Namespace, conflictIngress.Name)
 			}
 
-			cond, conditionType := buildCondition(rule.Host, p.Path, p.PathType, annotationConds)
-			routeRuleFileVal := ingressRouteRuleFile{
-				RouteRuleFile: route_rule_conf.AdvancedRouteRuleFile{
-					Cond:        &cond,
-					ClusterName: &clusterName,
-				},
-				RawRuleInfo: ingressRawRuleInfo{
-					Host:        rule.Host,
-					Path:        p.Path,
-					PathType:    p.PathType,
-					Annotations: annotationConds,
-				},
-				ConditionType: conditionType,
+			// generate rule and add to cache
+			ruleRecord := recordRule(ingress, rule, cond, conditionType, balance, annotationConds, p)
+			if conflictRule, ok := cacheHostRule.DisposableSet(product, cond, ruleRecord); !ok {
+				conflictIngress := conflictRule.ingress
+				return fmt.Errorf("route cond conflict, ingress[%s/%s] ingored cause other ingress[%s/%s]",
+					ingress.Namespace, ingress.Name, conflictIngress.Namespace, conflictIngress.Name)
 			}
-			product := DefaultProduct
-			if rule.Host != "" {
-				product = rule.Host
-			}
-			ruleRecord := &ingressRecordRule{
-				rule:    &routeRuleFileVal,
-				ingress: ingress,
-			}
-			if _, ok := c.rules[product]; !ok {
-				c.rules[product] = make(Rule)
-			}
-			if _, ok := c.rules[product][cond]; ok {
-				conflictIngress := c.rules[product][cond].ingress
-				msg := fmt.Sprintf("route cond conflict, ingress[%s/%s] ingored cause other ingress[%s/%s]", ingress.Namespace, ingress.Name,
-					conflictIngress.Namespace, conflictIngress.Name)
-				return fmt.Errorf(msg)
-			}
-			if _, ok := cacheHostRule[product]; !ok {
-				cacheHostRule[product] = make(Rule)
-			}
-			if _, ok := cacheHostRule[product][cond]; ok {
-				conflictIngress := cacheHostRule[product][cond].ingress
-				msg := fmt.Sprintf("route cond conflict, ingress[%s/%s] ingored cause other ingress[%s/%s]", ingress.Namespace, ingress.Name,
-					conflictIngress.Namespace, conflictIngress.Name)
-				return fmt.Errorf(msg)
-			}
-			cacheHostRule[product][cond] = ruleRecord
 		}
 	}
+
+	// save rules from cache to ConfigBuilder
 	for product, productRule := range cacheHostRule {
-		if _, ok := c.rules[product]; !ok {
-			c.rules[product] = make(Rule)
-		}
 		for cond, rule := range productRule {
-			c.rules[product][cond] = rule
+			c.rules.DisposableSet(product, cond, rule)
 		}
 	}
 
 	return nil
 }
 
-func (c *BfeRouteConfigBuilder) Rollback(ingress *networking.Ingress) error {
+func recordRule(ingress *networking.Ingress, rule networking.IngressRule, cond string, conditionType int,
+	balance LoadBalance, annotations []BfeAnnotation, p networking.HTTPIngressPath) *ingressRecordRule {
+	clusterName := ClusterName(ingress, balance, p)
+	ruleFile := ingressRouteRuleFile{
+		RouteRuleFile: route_rule_conf.AdvancedRouteRuleFile{
+			Cond:        &cond,
+			ClusterName: &clusterName,
+		},
+		RawRuleInfo: ingressRawRuleInfo{
+			Host:        rule.Host,
+			Path:        p.Path,
+			PathType:    p.PathType,
+			Annotations: annotations,
+		},
+		ConditionType: conditionType,
+	}
+	ingressRecordRule := &ingressRecordRule{
+		rule:    &ruleFile,
+		ingress: ingress,
+	}
+	return ingressRecordRule
+}
 
+func (c *BfeRouteConfigBuilder) Rollback(ingress *networking.Ingress) error {
 	annotationConds := BuildBfeAnnotations(ingress.Annotations)
 
 	for _, rule := range ingress.Spec.Rules {
@@ -246,7 +275,6 @@ func (c *BfeRouteConfigBuilder) Build() error {
 }
 
 func (c *BfeRouteConfigBuilder) buildBfeClusterConf() (cluster_conf.BfeClusterConf, error) {
-
 	clusterToConf := make(cluster_conf.ClusterToConf)
 
 	clusterConfs := cluster_conf.BfeClusterConf{
@@ -273,12 +301,10 @@ func (c *BfeRouteConfigBuilder) buildBfeClusterConf() (cluster_conf.BfeClusterCo
 func (c *BfeRouteConfigBuilder) buildHostTableConf() host_rule_conf.HostTableConf {
 	hostTagToHost := make(host_rule_conf.HostTagToHost)
 	productToHostTag := make(host_rule_conf.ProductToHostTag)
-	product := DefaultProduct
 	defaultProduct := DefaultProduct
 	for host := range c.rules {
-		product = host
-		var hostnameList host_rule_conf.HostnameList
-		hostnameList = append(hostnameList, host)
+		product := host
+		hostnameList := host_rule_conf.HostnameList{host}
 		hostTagToHost[product] = &hostnameList
 
 		list := host_rule_conf.HostTagList{product}
@@ -298,69 +324,103 @@ func (c *BfeRouteConfigBuilder) buildHostTableConf() host_rule_conf.HostTableCon
 	}
 }
 
-// buildRouteTableConfFile build route table for all product by ingress rules
+// buildRouteTableConfFile builds route table for all product from ingress rules
 func (c *BfeRouteConfigBuilder) buildRouteTableConfFile() (route_rule_conf.RouteTableFile, error) {
 	var routeTable route_rule_conf.RouteTableFile
-	productAdvancedRouteRule := make(route_rule_conf.ProductAdvancedRouteRuleFile)
 	productBasicRouteRule := make(route_rule_conf.ProductBasicRouteRuleFile)
-	routeTable.ProductRule = &productAdvancedRouteRule
 	routeTable.BasicRule = &productBasicRouteRule
+	productAdvancedRouteRule := make(route_rule_conf.ProductAdvancedRouteRuleFile)
+	routeTable.ProductRule = &productAdvancedRouteRule
 
-	coverage := newAdvancedRuleCoverage()
+	cov := newAdvancedRuleCoverage()
 	for host, rules := range c.rules {
+		// collect rules
 		var routeRuleFiles []ingressRouteRuleFile
 		for _, rule := range rules {
 			routeRuleFiles = append(routeRuleFiles, *rule.rule)
 		}
+
+		// sort rules
 		sortRules(routeRuleFiles)
 
+		// build rules and save to routeTable
 		for _, routeRuleFile := range routeRuleFiles {
-			if len(routeRuleFile.RawRuleInfo.Annotations) <= 0 {
-
-				// build basic route rules
-				basicRule := newBasicRouteRuleFile(routeRuleFile)
-				if coverage.IsCovered(routeRuleFile.RawRuleInfo) {
-					// convert to advanced rule if covered by any advanced rule
-					basicRule.ClusterName = pointer.StringPtr(ClusterNameAdvancedMode)
-					advancedRule := route_rule_conf.AdvancedRouteRuleFile{
-						Cond:        routeRuleFile.RouteRuleFile.Cond,
-						ClusterName: routeRuleFile.RouteRuleFile.ClusterName,
-					}
-					(*routeTable.ProductRule)[host] = append((*routeTable.ProductRule)[host], advancedRule)
-				}
-				(*routeTable.BasicRule)[host] = append((*routeTable.BasicRule)[host], basicRule)
-			} else {
-				coverage.Cover(routeRuleFile.RawRuleInfo)
-
-				// build advanced route rules
-				advancedRule := route_rule_conf.AdvancedRouteRuleFile{
-					Cond:        routeRuleFile.RouteRuleFile.Cond,
-					ClusterName: routeRuleFile.RouteRuleFile.ClusterName,
-				}
-				(*routeTable.ProductRule)[host] = append((*routeTable.ProductRule)[host], advancedRule)
-			}
-
+			buildRouteRule(host, routeRuleFile, cov, routeTable)
 		}
 	}
 	routeTable.Version = &c.version
 	return routeTable, nil
+}
 
+/*
+buildRouteRule builds route rules, it's stateful.
+
+Route rule is built according to current host, rule file and coverage,
+and append built rule to result RouteTableFile
+*/
+func buildRouteRule(host string, ruleFile ingressRouteRuleFile, cov *advancedRuleCoverage,
+	result route_rule_conf.RouteTableFile) {
+	// basic route rule can't satisfied ingress with advanced BFE annotation
+	if len(ruleFile.RawRuleInfo.Annotations) <= 0 {
+		buildBasicRouteRule(host, ruleFile, cov, result)
+	} else {
+		// update advanced rule coverage
+		cov.Cover(ruleFile.RawRuleInfo)
+
+		buildProductRouteRule(host, ruleFile, result)
+	}
+}
+
+/*
+buildBasicRouteRule builds basic route rules, it's stateful.
+
+Basic route rule is built according to current host, rule file and coverage,
+and append built rule to result RouteTableFile.
+
+If current basic route rule is covered by previous product route rule,
+it will convert to advanced mode, and corresponding new product route rule is appended.
+*/
+func buildBasicRouteRule(host string, ruleFile ingressRouteRuleFile, cov *advancedRuleCoverage,
+	result route_rule_conf.RouteTableFile) {
+	basicRule := newBasicRouteRuleFile(ruleFile)
+
+	if cov.IsCovered(ruleFile.RawRuleInfo) {
+		// convert to advanced mode if covered by any advanced rule
+		basicRule.ClusterName = pointer.StringPtr(ClusterNameAdvancedMode)
+		buildProductRouteRule(host, ruleFile, result)
+	}
+
+	(*result.BasicRule)[host] = append((*result.BasicRule)[host], basicRule)
+}
+
+/*
+buildProductRouteRule builds advanced route rules, it's stateful.
+
+Product route rule is built according to current host and rule file,
+and append built rule to result RouteTableFile
+*/
+func buildProductRouteRule(host string, ruleFile ingressRouteRuleFile, result route_rule_conf.RouteTableFile) {
+	advancedRule := route_rule_conf.AdvancedRouteRuleFile{
+		Cond:        ruleFile.RouteRuleFile.Cond,
+		ClusterName: ruleFile.RouteRuleFile.ClusterName,
+	}
+	(*result.ProductRule)[host] = append((*result.ProductRule)[host], advancedRule)
 }
 
 func (c *BfeRouteConfigBuilder) Dump() error {
-	err := bfe_util.DumpJson(c.routeConf.hostTableConf, utils.ConfigPath+HostRuleData, utils.FilePerm)
+	err := c.dumper.DumpJson(c.routeConf.hostTableConf, HostRuleData)
 	if err != nil {
-		return fmt.Errorf("dump host_rule.data error: %v", err)
+		return fmt.Errorf("dump %s error: %v", HostRuleData, err)
 	}
 
-	err = bfe_util.DumpJson(c.routeConf.routeTableFile, utils.ConfigPath+RouteRuleData, utils.FilePerm)
+	err = c.dumper.DumpJson(c.routeConf.routeTableFile, RouteRuleData)
 	if err != nil {
-		return fmt.Errorf("dump route_rule.data error: %v", err)
+		return fmt.Errorf("dump %s error: %v", RouteRuleData, err)
 	}
 
-	err = bfe_util.DumpJson(c.routeConf.bfeClusterConf, utils.ConfigPath+ClusterConfData, utils.FilePerm)
+	err = c.dumper.DumpJson(c.routeConf.bfeClusterConf, ClusterConfData)
 	if err != nil {
-		return fmt.Errorf("dump cluster_conf.data error: %v", err)
+		return fmt.Errorf("dump %s error: %v", ClusterConfData, err)
 	}
 
 	return nil
@@ -478,19 +538,16 @@ func sortRules(routeRuleFiles []ingressRouteRuleFile) {
 
 func InitClusterGslb() *cluster_conf.GslbBasicConf {
 	gslbConf := &cluster_conf.GslbBasicConf{}
-	defaultCrossRetry := 0
-	gslbConf.CrossRetry = &defaultCrossRetry
 
 	defaultRetryMax := 2
 	gslbConf.RetryMax = &defaultRetryMax
+	defaultCrossRetry := 0
+	gslbConf.CrossRetry = &defaultCrossRetry
 
-	defaultHashStrategy := cluster_conf.ClientIdOnly
-	defaultHashHeader := "Cookie: bfe_userid"
-	defaultSessionSticky := true
-
+	defaultHashStrategy := cluster_conf.ClientIpOnly
+	defaultSessionSticky := false
 	gslbConf.HashConf = &cluster_conf.HashConf{
 		HashStrategy:  &defaultHashStrategy,
-		HashHeader:    &defaultHashHeader,
 		SessionSticky: &defaultSessionSticky,
 	}
 

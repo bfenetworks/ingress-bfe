@@ -41,6 +41,7 @@ func (w *IngressStatusWriter) SetError(namespace, name, msg string) error {
 	w.client.UpdateIngressAnnotation(namespace, name, StatusAnnotationKey, errMsg)
 	return nil
 }
+
 func (w *IngressStatusWriter) SetSuccess(namespace, name string) error {
 	msg := w.getSuccessMsg("")
 	w.client.UpdateIngressAnnotation(namespace, name, StatusAnnotationKey, msg)

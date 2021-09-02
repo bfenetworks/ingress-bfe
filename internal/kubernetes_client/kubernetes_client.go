@@ -17,6 +17,7 @@ package kubernetes_client
 import (
 	"context"
 	"fmt"
+	v1 "k8s.io/client-go/informers/core/v1"
 	"reflect"
 	"strings"
 	"time"
@@ -141,11 +142,9 @@ func (c *KubernetesClient) Watch(namespaces []string, labels []string, ingressCl
 		c.watchLabel = true
 		c.labels = labels
 	}
-
 	c.watchedIngressClass = ingressClass
 
 	eventHandler := newResourceEventHandler(c.eventCh)
-
 	for _, ns := range c.namespaces {
 		factory := informers.NewSharedInformerFactoryWithOptions(c.clientset, ResyncPeriod, informers.WithNamespace(ns))
 		if c.cluster.SupportNetworking {
@@ -153,7 +152,6 @@ func (c *KubernetesClient) Watch(namespaces []string, labels []string, ingressCl
 		} else {
 			factory.Extensions().V1beta1().Ingresses().Informer().AddEventHandler(eventHandler)
 		}
-
 		if c.cluster.SupportIngressClass {
 			factory.Networking().V1beta1().IngressClasses().Informer().AddEventHandler(eventHandler)
 		}
@@ -176,13 +174,17 @@ func (c *KubernetesClient) Close() {
 	close(c.stopCh)
 }
 
+func (c *KubernetesClient) GetResources(namespace string) v1.Interface {
+	return c.factories[c.lookupNamespace(namespace)].Core().V1()
+}
+
 func (c *KubernetesClient) GetEndpoints(namespace, name string) (*core.Endpoints, error) {
-	endpoint, err := c.factories[c.lookupNamespace(namespace)].Core().V1().Endpoints().Lister().Endpoints(namespace).Get(name)
+	endpoint, err := c.GetResources(namespace).Endpoints().Lister().Endpoints(namespace).Get(name)
 	return endpoint, err
 }
 
 func (c *KubernetesClient) GetService(namespace, name string) (*core.Service, error) {
-	service, err := c.factories[c.lookupNamespace(namespace)].Core().V1().Services().Lister().Services(namespace).Get(name)
+	service, err := c.GetResources(namespace).Services().Lister().Services(namespace).Get(name)
 	return service, err
 }
 
@@ -206,11 +208,10 @@ func (c *KubernetesClient) GetNamespaceByLabel() []*core.Namespace {
 		return nil
 	}
 	return namespaces
-
 }
 
 func (c *KubernetesClient) GetSecretsByName(namespace, name string) (*core.Secret, error) {
-	secret, err := c.factories[c.lookupNamespace(namespace)].Core().V1().Secrets().Lister().Secrets(namespace).Get(name)
+	secret, err := c.GetResources(namespace).Secrets().Lister().Secrets(namespace).Get(name)
 	return secret, err
 }
 
@@ -218,26 +219,12 @@ func (c *KubernetesClient) GetIngresses() []*networking.Ingress {
 	var result []*networking.Ingress
 
 	for ns, factory := range c.factories {
-		ings := make([]*networking.Ingress, 0)
-		var err error
-		if !c.cluster.SupportNetworking {
-			extendsIngs, err := factory.Extensions().V1beta1().Ingresses().Lister().List(labels.Everything())
-			if err != nil {
-				log.Logger.Info("Failed to list ingresses in namespace %s: %s", ns, err)
-			}
-			for _, ing := range extendsIngs {
-				netIng, err := c.convertFromExtensions(ing)
-				if err != nil {
-					continue
-				}
-				ings = append(ings, netIng)
-			}
-		} else {
-			ings, err = factory.Networking().V1beta1().Ingresses().Lister().List(labels.Everything())
-			if err != nil {
-				log.Logger.Info("Failed to list ingresses in namespace %s: %s", ns, err)
-			}
+		ings, err := c.getAllIngresses(factory)
+		if err != nil {
+			log.Logger.Info("Failed to list ingresses in namespace %s: %s", ns, err)
+			continue
 		}
+
 		if c.watchLabel {
 			targetNamespaces := c.GetNamespaceByLabel()
 			filterFunc := func(ing *networking.Ingress) bool {
@@ -250,13 +237,32 @@ func (c *KubernetesClient) GetIngresses() []*networking.Ingress {
 				return false
 			}
 			ings = c.filterIngress(ings, filterFunc)
-			result = append(result, ings...)
-		} else {
-			result = append(result, ings...)
 		}
+		result = append(result, ings...)
 	}
-	result = c.filterIngress(result, c.filterIngressByClass)
-	return result
+	return c.filterIngress(result, c.filterIngressByClass)
+}
+
+// getAllIngresses gets all ingresses from certain informer factory
+func (c *KubernetesClient) getAllIngresses(factory informers.SharedInformerFactory) ([]*networking.Ingress, error) {
+	if !c.cluster.SupportNetworking {
+		extendsIngs, err := factory.Extensions().V1beta1().Ingresses().Lister().List(labels.Everything())
+		if err != nil {
+			return nil, err
+		}
+
+		ings := make([]*networking.Ingress, 0)
+		for _, ing := range extendsIngs {
+			netIng, err := c.convertFromExtensions(ing)
+			if err != nil {
+				continue
+			}
+			ings = append(ings, netIng)
+		}
+		return ings, nil
+	}
+
+	return factory.Networking().V1beta1().Ingresses().Lister().List(labels.Everything())
 }
 
 func (c *KubernetesClient) convertFromExtensions(old *extensions.Ingress) (*networking.Ingress, error) {

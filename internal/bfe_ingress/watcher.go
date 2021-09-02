@@ -16,9 +16,11 @@ package bfe_ingress
 
 import (
 	"fmt"
+	"github.com/bfenetworks/ingress-bfe/internal/utils"
 	"reflect"
 	"sort"
 	"sync"
+	"time"
 )
 
 import (
@@ -30,7 +32,6 @@ import (
 
 import (
 	"github.com/bfenetworks/ingress-bfe/internal/kubernetes_client"
-	"github.com/bfenetworks/ingress-bfe/internal/utils"
 )
 
 type IngressWatcher struct {
@@ -38,9 +39,10 @@ type IngressWatcher struct {
 	labels       []string
 	ingressClass string
 
-	client    *kubernetes_client.KubernetesClient
-	ingressCh chan ingressList
-	stopCh    chan struct{}
+	client     *kubernetes_client.KubernetesClient
+	syncPeriod time.Duration // period for ingress watcher to re-sync
+	ingressCh  chan ingressList
+	stopCh     chan struct{}
 }
 
 var IngressService map[string]bool // ingress services watched
@@ -60,9 +62,10 @@ func NewWatcher(namespaces []string, labels []string, ingressClass string,
 		labels:       labels,
 		ingressClass: ingressClass,
 
-		client:    client,
-		ingressCh: ingressCh,
-		stopCh:    stopCh,
+		client:     client,
+		syncPeriod: utils.DefaultSyncPeriod,
+		ingressCh:  ingressCh,
+		stopCh:     stopCh,
 	}, nil
 }
 
@@ -90,7 +93,7 @@ func (iw *IngressWatcher) Start(wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	IngressService = make(map[string]bool)
-	eventCh := iw.client.Watch(iw.namespace, iw.labels, iw.ingressClass, utils.ReSyncPeriod)
+	eventCh := iw.client.Watch(iw.namespace, iw.labels, iw.ingressClass, iw.syncPeriod)
 	for {
 		select {
 		case msg := <-eventCh:

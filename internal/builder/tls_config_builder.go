@@ -15,21 +15,17 @@ package builder
 
 import (
 	"fmt"
-	"io/ioutil"
 	"reflect"
 )
 
 import (
-	"github.com/baidu/go-lib/log"
 	"github.com/bfenetworks/bfe/bfe_config/bfe_tls_conf/server_cert_conf"
 	"github.com/bfenetworks/bfe/bfe_config/bfe_tls_conf/tls_rule_conf"
-	"github.com/bfenetworks/bfe/bfe_util"
 	networking "k8s.io/api/networking/v1beta1"
 )
 
 import (
 	"github.com/bfenetworks/ingress-bfe/internal/kubernetes_client"
-	"github.com/bfenetworks/ingress-bfe/internal/utils"
 )
 
 const (
@@ -60,9 +56,12 @@ var (
 )
 
 type BfeTLSConfigBuilder struct {
-	client   *kubernetes_client.KubernetesClient
+	client *kubernetes_client.KubernetesClient
+
+	dumper   *Dumper
 	reloader *Reloader
-	version  string
+
+	version string
 
 	serverCertConf server_cert_conf.BfeServerCertConf
 
@@ -72,14 +71,15 @@ type BfeTLSConfigBuilder struct {
 	tc *BfeTLSConf
 }
 
-func NewBfeTLSConfigBuilder(client *kubernetes_client.KubernetesClient, version string, r *Reloader) *BfeTLSConfigBuilder {
-	tlsConfig := &BfeTLSConfigBuilder{}
-	tlsConfig.client = client
-	tlsConfig.version = version
-	tlsConfig.reloader = r
-	tlsConfig.certKeyConf = make(map[string]certKeyConf)
-	tlsConfig.hostRefCount = make(map[string]int)
-	return tlsConfig
+func NewBfeTLSConfigBuilder(client *kubernetes_client.KubernetesClient, version string, dumper *Dumper, r *Reloader) *BfeTLSConfigBuilder {
+	c := &BfeTLSConfigBuilder{}
+	c.client = client
+	c.version = version
+	c.dumper = dumper
+	c.reloader = r
+	c.certKeyConf = make(map[string]certKeyConf)
+	c.hostRefCount = make(map[string]int)
+	return c
 }
 
 func (c *BfeTLSConfigBuilder) CheckTLS(crt, pkey []byte, host string) bool {
@@ -115,6 +115,7 @@ func (c *BfeTLSConfigBuilder) submitCertKeyMap(certKeyMap map[string]certKeyConf
 	}
 	return nil
 }
+
 func (c *BfeTLSConfigBuilder) getCertKeyMap(ingress *networking.Ingress) (map[string]certKeyConf, error) {
 	certKeyMap := make(map[string]certKeyConf)
 	namespace := ingress.Namespace
@@ -179,28 +180,32 @@ func (c *BfeTLSConfigBuilder) Build() error {
 }
 
 func (c *BfeTLSConfigBuilder) buildDefault() error {
-	c.tc = new(BfeTLSConf)
-	var sc server_cert_conf.BfeServerCertConf
-	sc.Version = c.version
-	sc.Config.Default = DefaultCNName
-	sc.Config.CertConf = make(map[string]server_cert_conf.ServerCertConf)
-	sc.Config.CertConf[DefaultCNName] = server_cert_conf.ServerCertConf{
-		ServerCertFile: DefaultCrtPath,
-		ServerKeyFile:  DefaultCrtKey,
+	c.tc = &BfeTLSConf{
+		serverCertConf: server_cert_conf.BfeServerCertConf{
+			Version: c.version,
+			Config: server_cert_conf.ServerCertConfMap{
+				Default: DefaultCNName,
+				CertConf: map[string]server_cert_conf.ServerCertConf{
+					DefaultCNName: {
+						ServerCertFile: DefaultCrtPath,
+						ServerKeyFile:  DefaultCrtKey,
+					},
+				},
+			},
+		},
 	}
-	c.tc.serverCertConf = sc
 	c.buildTLSConfig()
 	return nil
 }
 
 func (c *BfeTLSConfigBuilder) buildTLSConfig() error {
-	var tr tls_rule_conf.BfeTlsRuleConf
-	tr.Version = c.version
-	tr.Config = make(map[string]*tls_rule_conf.TlsRuleConf)
-	tr.DefaultChacha20 = false
-	tr.DefaultDynamicRecord = false
-	tr.DefaultNextProtos = []string{"http/1.1"}
-	c.tc.tlsRuleConf = tr
+	c.tc.tlsRuleConf = tls_rule_conf.BfeTlsRuleConf{
+		Version:              c.version,
+		Config:               map[string]*tls_rule_conf.TlsRuleConf{},
+		DefaultChacha20:      false,
+		DefaultDynamicRecord: false,
+		DefaultNextProtos:    []string{"http/1.1"},
+	}
 	return nil
 }
 
@@ -232,27 +237,30 @@ func (c *BfeTLSConfigBuilder) buildCustom() error {
 }
 
 func (c *BfeTLSConfigBuilder) Dump() error {
+	// dump key and cert for hosts
 	for host, ck := range c.tc.certKeyConf {
 		certFile := c.getCertFilePath(host)
 		keyFile := c.getKeyFilePath(host)
-		err := ioutil.WriteFile(certFile, ck.cert, utils.FilePerm)
+
+		err := c.dumper.DumpBytes(ck.cert, certFile)
 		if err != nil {
-			log.Logger.Info("write cert file fail, err: %s", err)
+			return fmt.Errorf("write [%s] cert file fail, err: %s", host, err)
 		}
 
-		err = ioutil.WriteFile(keyFile, ck.key, utils.FilePerm)
+		err = c.dumper.DumpBytes(ck.key, keyFile)
 		if err != nil {
-			log.Logger.Info("write cert file fail, err: %s", err)
+			return fmt.Errorf("write [%s] key file fail, err: %s", host, err)
 		}
 	}
-	certConfFile := c.getcertConfFilePath()
-	err := bfe_util.DumpJson(c.tc.serverCertConf, certConfFile, utils.FilePerm)
+
+	// dump server cert config
+	err := c.dumper.DumpJson(c.tc.serverCertConf, ServerCertData)
 	if err != nil {
 		return fmt.Errorf("dump server_cert_conf: %v", err)
 	}
 
-	tlsRuleConfFile := c.gettlsRuleConfFilePath()
-	err = bfe_util.DumpJson(c.tc.tlsRuleConf, tlsRuleConfFile, utils.FilePerm)
+	// dump TLS rule config
+	err = c.dumper.DumpJson(c.tc.tlsRuleConf, TLSRuleData)
 	if err != nil {
 		return fmt.Errorf("dump tls_rule_conf: %v", err)
 	}
@@ -265,17 +273,9 @@ func (c *BfeTLSConfigBuilder) Reload() error {
 }
 
 func (c *BfeTLSConfigBuilder) getCertFilePath(host string) string {
-	return utils.ConfigPath + CertKeyFilePath + host + ".cer"
+	return c.dumper.Join(CertKeyFilePath, host+".cer")
 }
 
 func (c *BfeTLSConfigBuilder) getKeyFilePath(host string) string {
-	return utils.ConfigPath + CertKeyFilePath + host + ".key"
-}
-
-func (c *BfeTLSConfigBuilder) getcertConfFilePath() string {
-	return utils.ConfigPath + ServerCertData
-}
-
-func (c *BfeTLSConfigBuilder) gettlsRuleConfFilePath() string {
-	return utils.ConfigPath + TLSRuleData
+	return c.dumper.Join(CertKeyFilePath, host+".key")
 }
