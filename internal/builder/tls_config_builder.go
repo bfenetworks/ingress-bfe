@@ -201,9 +201,17 @@ func (c *BfeTLSConfigBuilder) buildDefault() error {
 }
 
 func (c *BfeTLSConfigBuilder) buildTLSConfig() error {
+	conf := make(map[string]*tls_rule_conf.TlsRuleConf)
+	for host := range c.certKeyConf {
+		conf[host] = &tls_rule_conf.TlsRuleConf{
+			SniConf:  []string{host},
+			CertName: host,
+		}
+	}
+
 	c.tc.tlsRuleConf = tls_rule_conf.BfeTlsRuleConf{
 		Version:              c.version,
-		Config:               map[string]*tls_rule_conf.TlsRuleConf{},
+		Config:               conf,
 		DefaultChacha20:      false,
 		DefaultDynamicRecord: false,
 		DefaultNextProtos:    []string{"http/1.1"},
@@ -212,28 +220,27 @@ func (c *BfeTLSConfigBuilder) buildTLSConfig() error {
 }
 
 func (c *BfeTLSConfigBuilder) buildCustom() error {
-	c.tc = new(BfeTLSConf)
-	var sc server_cert_conf.BfeServerCertConf
-
-	sc.Version = c.version
-	sc.Config.CertConf = make(map[string]server_cert_conf.ServerCertConf)
-
-	c.tc.certKeyConf = c.certKeyConf
-	c.tc.serverCertConf = sc
-	defaultHost := ""
+	serverCertConfig := server_cert_conf.ServerCertConfMap{
+		CertConf: make(map[string]server_cert_conf.ServerCertConf),
+		Default:  "",
+	}
 	for host := range c.certKeyConf {
-		if defaultHost == "" {
-			defaultHost = host
+		if serverCertConfig.Default == "" || serverCertConfig.Default > host {
+			serverCertConfig.Default = host
 		}
-		if defaultHost > host {
-			defaultHost = host
-		}
-		sc.Config.CertConf[host] = server_cert_conf.ServerCertConf{
+		serverCertConfig.CertConf[host] = server_cert_conf.ServerCertConf{
 			ServerCertFile: c.getCertFilePath(host),
 			ServerKeyFile:  c.getKeyFilePath(host),
 		}
 	}
-	c.tc.serverCertConf.Config.Default = defaultHost
+
+	c.tc = &BfeTLSConf{
+		certKeyConf: c.certKeyConf,
+		serverCertConf: server_cert_conf.BfeServerCertConf{
+			Version: c.version,
+			Config:  serverCertConfig,
+		},
+	}
 	c.buildTLSConfig()
 	return nil
 }
