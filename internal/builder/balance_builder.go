@@ -17,7 +17,6 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
-	"strings"
 )
 
 import (
@@ -214,28 +213,27 @@ func (c *BfeBalanceConfigBuilder) Rollback(ingress *networking.Ingress) error {
 }
 
 func (c *BfeBalanceConfigBuilder) Build() error {
-	c.balanceConf = BfeBalanceConf{
-		clusterTableConf: new(cluster_table_conf.ClusterTableConf),
-		gslbConf:         new(gslb_conf.GslbConf),
-	}
-
-	// build clusterTableConf
-	allCluster, err := c.buildAllClusterBackend()
+	clusterBackend, err := c.buildAllClusterBackend()
 	if err != nil {
 		return err
 	}
-	c.balanceConf.clusterTableConf.Config = &allCluster
-	c.balanceConf.clusterTableConf.Version = &c.version
 
-	// build gslbConf
 	gslbCluster, err := c.buildGslbConf()
 	if err != nil {
 		return err
 	}
-	c.balanceConf.gslbConf.Clusters = &gslbCluster
-	c.balanceConf.gslbConf.Ts = &c.version
-	c.balanceConf.gslbConf.Hostname = &c.hostName
 
+	c.balanceConf = BfeBalanceConf{
+		clusterTableConf: &cluster_table_conf.ClusterTableConf{
+			Config:  &clusterBackend,
+			Version: &c.version,
+		},
+		gslbConf: &gslb_conf.GslbConf{
+			Clusters: &gslbCluster,
+			Ts:       &c.version,
+			Hostname: &c.hostName,
+		},
+	}
 	return nil
 }
 
@@ -297,18 +295,18 @@ func (c *BfeBalanceConfigBuilder) buildClusterBackend(namespace, serviceName str
 }
 
 func buildSubClusterBackend(eps *core.Endpoints, port string) cluster_table_conf.SubClusterBackend {
-	var subClusterBackends cluster_table_conf.SubClusterBackend
+	var subClusterBackend cluster_table_conf.SubClusterBackend
 	defaultWeight := 1
 	for _, subsets := range eps.Subsets {
-		backends := buildBackends(subsets, port, defaultWeight)
-		subClusterBackends = append(subClusterBackends, backends...)
+		backend := buildBackend(subsets, port, defaultWeight)
+		subClusterBackend = append(subClusterBackend, backend...)
 	}
-	return subClusterBackends
+	return subClusterBackend
 }
 
-// buildBackends builds backends for given subsets with port and weight
-func buildBackends(subsets core.EndpointSubset, port string, weight int) cluster_table_conf.SubClusterBackend {
-	var subClusterBackends cluster_table_conf.SubClusterBackend
+// buildBackend builds backend for given subsets with port and weight
+func buildBackend(subsets core.EndpointSubset, port string, weight int) cluster_table_conf.SubClusterBackend {
+	var subClusterBackend cluster_table_conf.SubClusterBackend
 	for _, addr := range subsets.Addresses {
 		if port != "" {
 			name := fmt.Sprintf("%s:%s", addr.IP, port)
@@ -320,7 +318,7 @@ func buildBackends(subsets core.EndpointSubset, port string, weight int) cluster
 				Port:   &portVal,
 				Weight: &weight,
 			}
-			subClusterBackends = append(subClusterBackends, &backendConf)
+			subClusterBackend = append(subClusterBackend, &backendConf)
 		} else {
 			for _, setPort := range subsets.Ports {
 				name := fmt.Sprintf("%s:%d", addr.IP, setPort.Port)
@@ -332,11 +330,11 @@ func buildBackends(subsets core.EndpointSubset, port string, weight int) cluster
 					Port:   &portVal,
 					Weight: &weight,
 				}
-				subClusterBackends = append(subClusterBackends, &backendConf)
+				subClusterBackend = append(subClusterBackend, &backendConf)
 			}
 		}
 	}
-	return subClusterBackends
+	return subClusterBackend
 }
 
 func (c *BfeBalanceConfigBuilder) Dump() error {
@@ -355,29 +353,4 @@ func (c *BfeBalanceConfigBuilder) Dump() error {
 
 func (c *BfeBalanceConfigBuilder) Reload() error {
 	return c.reloader.DoReload(c.balanceConf, ConfigNameBalanceConf)
-}
-
-func ClusterName(ingress *networking.Ingress, balance LoadBalance, p networking.HTTPIngressPath) string {
-	if !balance.ContainService(p.Backend.ServiceName) {
-		return SingleClusterName(ingress.Namespace, p.Backend.ServiceName)
-	}
-
-	return MultiClusterName(ingress.Namespace, ingress.Name, p.Backend.ServiceName)
-}
-
-// SingleClusterName return cluster name for single k8s service
-// e.g. "default_whoAmI"
-func SingleClusterName(namespace, serviceName string) string {
-	return fmt.Sprintf("%s_%s", namespace, serviceName)
-}
-
-// MultiClusterName return cluster name for multi k8s service
-// e.g. "default_ingressTest_whoAmI"
-func MultiClusterName(namespace, ingressName, serviceKey string) string {
-	return fmt.Sprintf("%s_%s_%s", namespace, ingressName, serviceKey)
-}
-
-// Namespace return namespace which parsed from cluster name
-func Namespace(clusterName string) string {
-	return strings.Split(clusterName, "_")[0]
 }

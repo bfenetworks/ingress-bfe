@@ -156,11 +156,12 @@ func (c *KubernetesClient) Watch(namespaces []string, labels []string, ingressCl
 			factory.Networking().V1beta1().IngressClasses().Informer().AddEventHandler(eventHandler)
 		}
 
-		factory.Core().V1().Services().Informer().AddEventHandler(eventHandler)
-		factory.Core().V1().Endpoints().Informer().AddEventHandler(eventHandler)
-		factory.Core().V1().Secrets().Informer().AddEventHandler(eventHandler)
+		resources := factory.Core().V1()
+		resources.Services().Informer().AddEventHandler(eventHandler)
+		resources.Endpoints().Informer().AddEventHandler(eventHandler)
+		resources.Secrets().Informer().AddEventHandler(eventHandler)
 		if ns == meta.NamespaceAll {
-			factory.Core().V1().Namespaces().Informer().AddEventHandler(eventHandler)
+			resources.Namespaces().Informer().AddEventHandler(eventHandler)
 		}
 
 		go factory.Start(c.stopCh)

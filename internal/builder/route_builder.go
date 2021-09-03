@@ -301,20 +301,22 @@ func (c *BfeRouteConfigBuilder) buildBfeClusterConf() (cluster_conf.BfeClusterCo
 func (c *BfeRouteConfigBuilder) buildHostTableConf() host_rule_conf.HostTableConf {
 	hostTagToHost := make(host_rule_conf.HostTagToHost)
 	productToHostTag := make(host_rule_conf.ProductToHostTag)
+
+	// build for default product
 	defaultProduct := DefaultProduct
+	defaultHostList := host_rule_conf.HostnameList{defaultProduct}
+	hostTagToHost[defaultProduct] = &defaultHostList
+	defaultProductList := host_rule_conf.HostTagList{defaultProduct}
+	productToHostTag[defaultProduct] = &defaultProductList
+
+	// build for custom product
 	for host := range c.rules {
 		product := host
 		hostnameList := host_rule_conf.HostnameList{host}
 		hostTagToHost[product] = &hostnameList
-
 		list := host_rule_conf.HostTagList{product}
 		productToHostTag[product] = &list
 	}
-
-	defaultHostList := host_rule_conf.HostnameList{defaultProduct}
-	defaultProductList := host_rule_conf.HostTagList{defaultProduct}
-	hostTagToHost[defaultProduct] = &defaultHostList
-	productToHostTag[defaultProduct] = &defaultProductList
 
 	return host_rule_conf.HostTableConf{
 		Version:        &c.version,
