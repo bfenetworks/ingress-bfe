@@ -1,0 +1,14 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: implementation-specific-path-demo
+spec:
+  rules:
+    - host: example.host.com
+      http:
+        paths:
+          - path: /foo
+            pathType: ImplementationSpecific
+            backend:
+              serviceName: service1
+              servicePort: 80
