@@ -337,46 +337,7 @@ func Test_sortRules(t *testing.T) {
 }
 
 func TestBfeRouteConfigBuilder_Build(t *testing.T) {
-	testCases := map[string]interface{}{
-		"single": map[string]interface{}{
-			"annotation": map[string]interface{}{
-				"cookie":       BfeRouteConfigBuilderBuildCaseDefinedAnnotation,
-				"header":       BfeRouteConfigBuilderBuildCaseDefinedAnnotation,
-				"load_balance": TestBfeRouteConfigBuilder_Build_CaseLoadBalance,
-				"other":        TestBfeRouteConfigBuilder_Build_CaseOtherAnnotation,
-			},
-			"host": map[string]map[string]func(t *testing.T){
-				"basic": {
-					"wildcard": TestBfeRouteConfigBuilder_Build_CaseBasicRuleWildcardHost,
-					"exact":    TestBfeRouteConfigBuilder_Build_CaseBasicRuleExactHost,
-				},
-				"advanced": {
-					"wildcard": TestBfeRouteConfigBuilder_Build_CaseAdvancedRuleWildcardHost,
-					"exact":    TestBfeRouteConfigBuilder_Build_CaseAdvancedRuleExactHost,
-				},
-			},
-			"path": map[string]func(t *testing.T, name string){
-				"prefix":                  RouteConfigBuilderBuildCasePrefixPath,
-				"implementation_specific": RouteConfigBuilderBuildCasePrefixPath,
-				"non_path_type":           RouteConfigBuilderBuildCasePrefixPath,
-				"exact":                   RouteConfigBuilderBuildCaseExactPath,
-			},
-		},
-		"multi": map[string]interface{}{
-			"priority": map[string]map[string]func(t *testing.T){
-				"path": {
-					"exact_path_basic_exact_path_advanced":   TestBfeRouteConfigBuilder_Build_CasePriorityPath1,
-					"exact_path_basic_path_advanced":         TestBfeRouteConfigBuilder_Build_CasePriorityPath2,
-					"exact_path_basic_prefix_path_advanced":  TestBfeRouteConfigBuilder_Build_CasePriorityPath3,
-					"prefix_path_basic_exact_path_advanced":  TestBfeRouteConfigBuilder_Build_CasePriorityPath4,
-					"prefix_path_basic_prefix_path_advanced": TestBfeRouteConfigBuilder_Build_CasePriorityPath5,
-				},
-			},
-			"conflict": TestBfeRouteConfigBuilder_Build_CaseConflict,
-		},
-	}
-
-	traverseTestCases(t, testCases)
+	traverseTestCases(t, getTestCasesForBuild())
 }
 
 func TestBfeRouteConfigBuilder_Build2(t *testing.T) {
@@ -892,6 +853,13 @@ func TestBfeRouteConfigBuilder_Build_CasePriorityHost5(t *testing.T) {
 	assert.Contains(t, *advancedRules["*.host.com"][0].ClusterName, "service3")
 }
 
+// test stability of priority
+func TestBfeRouteConfigBuilder_Build_CasePriorityStability(t *testing.T) {
+	for i := 0; i < 5; i++ {
+		traverseTestCases(t, getPriorityTestCasesForBuild())
+	}
+}
+
 // routeConfigBuilderGenerator generate route config builder from file
 // Params:
 //		name: file name prefix
@@ -977,5 +945,57 @@ func traverseNamedTestCases(t *testing.T, name string, testCases interface{}) {
 
 	default:
 		t.Errorf("unexpect kind: %+v \n", v.Kind())
+	}
+}
+
+func getPriorityTestCasesForBuild() map[string]interface{} {
+	return map[string]interface{}{
+		"host": map[string]interface{}{
+			"exact_host_basic_exact_host_advanced":       TestBfeRouteConfigBuilder_Build_CasePriorityHost1,
+			"exact_host_basic_wildcard_host_advanced":    TestBfeRouteConfigBuilder_Build_CasePriorityHost2,
+			"exact_host_basic_host_advanced":             TestBfeRouteConfigBuilder_Build_CasePriorityHost3,
+			"wildcard_host_basic_exact_host_advanced":    TestBfeRouteConfigBuilder_Build_CasePriorityHost4,
+			"wildcard_host_basic_wildcard_host_advanced": TestBfeRouteConfigBuilder_Build_CasePriorityHost5,
+		},
+		"path": map[string]interface{}{
+			"exact_path_basic_exact_path_advanced":   TestBfeRouteConfigBuilder_Build_CasePriorityPath1,
+			"exact_path_basic_path_advanced":         TestBfeRouteConfigBuilder_Build_CasePriorityPath2,
+			"exact_path_basic_prefix_path_advanced":  TestBfeRouteConfigBuilder_Build_CasePriorityPath3,
+			"prefix_path_basic_exact_path_advanced":  TestBfeRouteConfigBuilder_Build_CasePriorityPath4,
+			"prefix_path_basic_prefix_path_advanced": TestBfeRouteConfigBuilder_Build_CasePriorityPath5,
+		},
+	}
+}
+
+func getTestCasesForBuild() map[string]interface{} {
+	return map[string]interface{}{
+		"single": map[string]interface{}{
+			"annotation": map[string]interface{}{
+				"cookie":       BfeRouteConfigBuilderBuildCaseDefinedAnnotation,
+				"header":       BfeRouteConfigBuilderBuildCaseDefinedAnnotation,
+				"load_balance": TestBfeRouteConfigBuilder_Build_CaseLoadBalance,
+				"other":        TestBfeRouteConfigBuilder_Build_CaseOtherAnnotation,
+			},
+			"host": map[string]map[string]func(t *testing.T){
+				"basic": {
+					"wildcard": TestBfeRouteConfigBuilder_Build_CaseBasicRuleWildcardHost,
+					"exact":    TestBfeRouteConfigBuilder_Build_CaseBasicRuleExactHost,
+				},
+				"advanced": {
+					"wildcard": TestBfeRouteConfigBuilder_Build_CaseAdvancedRuleWildcardHost,
+					"exact":    TestBfeRouteConfigBuilder_Build_CaseAdvancedRuleExactHost,
+				},
+			},
+			"path": map[string]func(t *testing.T, name string){
+				"prefix":                  RouteConfigBuilderBuildCasePrefixPath,
+				"implementation_specific": RouteConfigBuilderBuildCasePrefixPath,
+				"non_path_type":           RouteConfigBuilderBuildCasePrefixPath,
+				"exact":                   RouteConfigBuilderBuildCaseExactPath,
+			},
+		},
+		"multi": map[string]interface{}{
+			"priority": getPriorityTestCasesForBuild(),
+			"conflict": TestBfeRouteConfigBuilder_Build_CaseConflict,
+		},
 	}
 }

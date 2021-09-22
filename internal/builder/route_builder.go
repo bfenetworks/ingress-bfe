@@ -335,21 +335,23 @@ func (c *BfeRouteConfigBuilder) buildRouteTableConfFile() (route_rule_conf.Route
 	routeTable.ProductRule = &productAdvancedRouteRule
 
 	cov := newAdvancedRuleCoverage()
-	for host, rules := range c.rules {
-		// collect rules
-		var routeRuleFiles []ingressRouteRuleFile
+
+	// collect rules
+	var routeRuleFiles []ingressRouteRuleFile
+	for _, rules := range c.rules {
 		for _, rule := range rules {
 			routeRuleFiles = append(routeRuleFiles, *rule.rule)
 		}
-
-		// sort rules
-		sortRules(routeRuleFiles)
-
-		// build rules and save to routeTable
-		for _, routeRuleFile := range routeRuleFiles {
-			buildRouteRule(host, routeRuleFile, cov, routeTable)
-		}
 	}
+
+	// sort rules
+	sortRules(routeRuleFiles)
+
+	// build rules and save to routeTable
+	for _, routeRuleFile := range routeRuleFiles {
+		buildRouteRule(routeRuleFile, cov, routeTable)
+	}
+
 	routeTable.Version = &c.version
 	return routeTable, nil
 }
@@ -357,39 +359,40 @@ func (c *BfeRouteConfigBuilder) buildRouteTableConfFile() (route_rule_conf.Route
 /*
 buildRouteRule builds route rules, it's stateful.
 
-Route rule is built according to current host, rule file and coverage,
+Route rule is built according to current rule file and coverage,
 and append built rule to result RouteTableFile
 */
-func buildRouteRule(host string, ruleFile ingressRouteRuleFile, cov *advancedRuleCoverage,
+func buildRouteRule(ruleFile ingressRouteRuleFile, cov *advancedRuleCoverage,
 	result route_rule_conf.RouteTableFile) {
 	// basic route rule can't satisfied ingress with advanced BFE annotation
 	if len(ruleFile.RawRuleInfo.Annotations) <= 0 {
-		buildBasicRouteRule(host, ruleFile, cov, result)
+		buildBasicRouteRule(ruleFile, cov, result)
 	} else {
 		// update advanced rule coverage
 		cov.Cover(ruleFile.RawRuleInfo)
 
-		buildProductRouteRule(host, ruleFile, result)
+		buildProductRouteRule(ruleFile, result)
 	}
 }
 
 /*
 buildBasicRouteRule builds basic route rules, it's stateful.
 
-Basic route rule is built according to current host, rule file and coverage,
+Basic route rule is built according to current rule file and coverage,
 and append built rule to result RouteTableFile.
 
 If current basic route rule is covered by previous product route rule,
 it will convert to advanced mode, and corresponding new product route rule is appended.
 */
-func buildBasicRouteRule(host string, ruleFile ingressRouteRuleFile, cov *advancedRuleCoverage,
+func buildBasicRouteRule(ruleFile ingressRouteRuleFile, cov *advancedRuleCoverage,
 	result route_rule_conf.RouteTableFile) {
 	basicRule := newBasicRouteRuleFile(ruleFile)
 
+	host := ruleFile.RawRuleInfo.Host
 	if cov.IsCovered(ruleFile.RawRuleInfo) {
 		// convert to advanced mode if covered by any advanced rule
 		basicRule.ClusterName = pointer.StringPtr(ClusterNameAdvancedMode)
-		buildProductRouteRule(host, ruleFile, result)
+		buildProductRouteRule(ruleFile, result)
 	}
 
 	(*result.BasicRule)[host] = append((*result.BasicRule)[host], basicRule)
@@ -398,10 +401,11 @@ func buildBasicRouteRule(host string, ruleFile ingressRouteRuleFile, cov *advanc
 /*
 buildProductRouteRule builds advanced route rules, it's stateful.
 
-Product route rule is built according to current host and rule file,
+Product route rule is built according to current rule file,
 and append built rule to result RouteTableFile
 */
-func buildProductRouteRule(host string, ruleFile ingressRouteRuleFile, result route_rule_conf.RouteTableFile) {
+func buildProductRouteRule(ruleFile ingressRouteRuleFile, result route_rule_conf.RouteTableFile) {
+	host := ruleFile.RawRuleInfo.Host
 	advancedRule := route_rule_conf.AdvancedRouteRuleFile{
 		Cond:        ruleFile.RouteRuleFile.Cond,
 		ClusterName: ruleFile.RouteRuleFile.ClusterName,
