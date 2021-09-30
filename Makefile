@@ -42,16 +42,16 @@ INGRESS_VERSION ?= $(shell cat VERSION)
 # init git commit id
 GIT_COMMIT ?= $(shell git rev-parse HEAD)
 
-# init bfe ingress packages
+# init bfe ingress
 INGRESS_PACKAGES := $(shell go list ./...)
 
 # make, make all
-all: compile package
+all: compile 
 
 # make compile, go build
 compile: test build
 build:
-	cd $(WORKROOT)/cmd/bfe_ingress_controller && GOOS=linux GOARCH=amd64 $(GOBUILD) -ldflags "-X main.version=$(INGRESS_VERSION) -X main.commit=$(GIT_COMMIT)" -o bfe_ingress_controller
+	$(WORKROOT)/build/build.sh
 
 # make test, test your code
 test: test-case vet-case
@@ -65,15 +65,6 @@ coverage:
 	echo -n > coverage.txt
 	for pkg in $(INGRESS_PACKAGES) ; do $(GOTEST) -coverprofile=profile.out -covermode=atomic $${pkg} && cat profile.out >> coverage.txt; done
 
-# make package
-package:
-	mkdir -p $(OUTDIR)
-	mv $(WORKROOT)/cmd/bfe_ingress_controller  $(OUTDIR)/
-	cp -r $(WORKROOT)/dist/ $(OUTDIR)/
-	cp $(WORKROOT)/build/adapt_bfe_docker.sh $(OUTDIR)/
-	chmod a+x $(OUTDIR)/*
-	echo "$(GIT_COMMIT)" > $(OUTDIR)/ingress.commit
-
 # make check
 check:
 	$(GO) get honnef.co/go/tools/cmd/staticcheck
@@ -82,7 +73,7 @@ check:
 # make docker
 docker:
 	docker build \
-		-t bfe_ingress_controller:$(INGRESS_VERSION) \
+		-t bfenetworks/bfe-ingress-controller:$(INGRESS_VERSION) \
 		-f Dockerfile \
 		.
 
@@ -90,7 +81,6 @@ docker:
 clean:
 	$(GOCLEAN)
 	rm -rf $(OUTDIR)
-	rm -rf $(GOPATH)/pkg/linux_amd64
 
 # avoid filename conflict and speed up build
-.PHONY: all compile test package clean build
+.PHONY: all compile test clean build
