@@ -18,11 +18,11 @@
 
 ### 创建 ServiceAccount
 
-在此 [示例](../../deploy/deployment.yaml) 中，创建了一个 ServiceAccount ，即`bfe-ingres-controller`。
+在此 [示例](../../examples/deployment.yaml) 中，创建了一个 ServiceAccount ，即`bfe-ingres-controller`。
 
 ### 创建权限集
 
-在此 [示例](../../deploy/rbac.yaml) 中定义了 1 组权限:
+在此 [示例](../../examples/rbac.yaml) 中定义了 1 组权限:
 - 由名为`bfe-ingres-controller`的`ClusterRole`定义的集群范围权限，
 
 #### 集群权限
@@ -37,8 +37,8 @@
 
 ### 权限绑定
 
-在此 [示例](../../deploy/rbac.yaml) 中，ServiceAccount `bfe-ingres-controller` 绑定到 ClusterRole `bfe-ingres-controller`。
+在此 [示例](../../examples/rbac.yaml) 中，ServiceAccount `bfe-ingres-controller` 绑定到 ClusterRole `bfe-ingres-controller`。
 
-!!! 注意：[deployment](../../deploy/deployment.yaml) 中
+!!! 注意：[deployment](../../examples/deployment.yaml) 中
 - 容器关联的 serviceAccountName 必须与 serviceAccount 匹配。
 - metadata，容器参数 和 POD_NAMESPACE 中的 namespace 应位于对应 ingress namespace 中
