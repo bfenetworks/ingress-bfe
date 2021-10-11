@@ -3,6 +3,9 @@ apiVersion: networking.k8s.io/v1beta1
 metadata:
   name: ingress2
   namespace: default
+  annotations:
+    kubernetes.io/ingress.class: bfe
+
 spec:
   rules:
     - host: "foo.com"
