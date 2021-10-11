@@ -6,7 +6,7 @@
     kubectl apply -f controller.yaml
     ```
     - 配置文件示例[controller.yaml](../../examples/controller.yaml)
-        - 配置文件中使用了Docker Hub 上的[BFE Ingress Controller]:latest镜像。如需使用指定版本的镜像，修改配置文件，指定镜像版本。
+        - 配置文件中使用了Docker Hub 上的[BFE Ingress Controller]:latest镜像。如需使用指定版本的镜像，修改配置文件中的镜像tag。
         - 也可在项目根目录下执行`make docker`，创建自己的本地镜像。
 
 * 配置所需权限
