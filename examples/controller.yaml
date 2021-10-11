@@ -28,8 +28,7 @@ spec:
         - name: bfe
       containers:
         - name: bfe-ingress-controller
-          image: bfenetworks:latest
-          args: ["-n", "default"]
+          image: bfenetworks/bfe-ingress-controller:latest
           ports:
             - name: http
               containerPort: 8080

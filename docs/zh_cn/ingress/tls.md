@@ -1,5 +1,10 @@
 # TLS 配置
-原生Ingress的TLS中，证书和密钥是通过Secrets进行保存，例子如下：
+BFE Ingress Controller按照Kubernetes原生定义的方式来管理TLS的证书和密钥。
+
+TLS的证书和密钥通过Secrets进行保存，示例如下：
+
+**Secret配置**
+
 ```yaml
 apiVersion: v1
 kind: Secret
@@ -11,12 +16,14 @@ data:
   tls.key: base64 encoded key
 type: kubernetes.io/tls
 ```
-Ingress配置
+**Ingress配置**
 ```yaml
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   name: tls-example-ingress
+  annotations:
+    kubernetes.io/ingress.class: bfe  
 spec:
   tls:
   - hosts:
@@ -32,4 +39,3 @@ spec:
           serviceName: service1
           servicePort: 80
 ```
-BFE-Ingress按照同样的方式来管理TLS的证书和密钥，其余更高级的TLS功能，包括一些TLS的配置，密钥加密等功能，需要参考BFE-Ingress CRD来实现；
