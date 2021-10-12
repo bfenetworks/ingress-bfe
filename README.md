@@ -6,7 +6,7 @@ BFE Ingress Controller 为基于 [BFE][] 实现的[Kubernetes Ingress Controller
 详见[部署指南](docs/zh_cn/deployment.md)
 
 ## 说明文档
-详见[文档列表](docs/zh_cn/summary.md)
+详见[文档列表](docs/zh_cn/SUMMARY.md)
 
 ## 参与贡献
 - 请首先在 issue 列表中创建一个 issue
