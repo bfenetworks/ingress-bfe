@@ -28,6 +28,7 @@ var (
 	namespaces     string
 	ingressClass   string
 	configPath     string
+	reloadAddr     string
 	metricsAddr    string
 	probeAddr      string
 	defaultBackend string
@@ -46,6 +47,7 @@ func initFlags() {
 	flag.StringVar(&configPath, "bfe-config-path", option.ConfigPath, "Root directory of bfe configuration files.")
 	flag.StringVar(&configPath, "c", option.ConfigPath, "Root directory of bfe configuration files.")
 
+	flag.StringVar(&reloadAddr, "bfe-reload-address", option.ReloadAddr, "Address of bfe config reloading.")
 	flag.StringVar(&ingressClass, "ingress-class", option.IngressClassName, "Class name of bfe ingress controller.")
 	flag.StringVar(&metricsAddr, "metrics-bind-address", option.MetricsBindAddress, "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", option.HealthProbeBindAddress, "The address the probe endpoint binds to.")
