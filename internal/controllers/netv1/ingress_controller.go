@@ -230,7 +230,7 @@ func getService(ctx context.Context, r client.Reader, namespace, name string, po
 
 	// check port exist
 	for _, p := range svc.Spec.Ports {
-		if p.Name == port.Name || p.Port == port.Number {
+		if (port.Number > 0 && p.Port == port.Number) || (len(port.Name) > 0 && p.Name == port.Name) {
 			return svc, nil
 		}
 	}
