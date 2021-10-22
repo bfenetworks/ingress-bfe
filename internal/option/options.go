@@ -25,8 +25,9 @@ import (
 
 const (
 	ConfigPath      = "/bfe/conf/"
-	reloadUrlPrefix = "http://localhost:8421/reload/"
+	ReloadAddr      = "localhost:8421"
 	reloadInterval  = 3 * time.Second
+	reloadUrlPrefix = "http://%s/reload/"
 
 	FilePerm os.FileMode = 0744
 
@@ -59,9 +60,7 @@ var (
 	Opts *Options
 )
 
-func SetOptions(namespaces, class, configPath, metricsAddr, probeAddr, defaultBackend string) error {
-	ns := strings.Split(namespaces, ",")
-
+func SetOptions(namespaces, class, configPath, reloadAddr, metricsAddr, probeAddr, defaultBackend string) error {
 	if len(defaultBackend) > 0 {
 		names := strings.Split(defaultBackend, string(types.Separator))
 		if len(names) != 2 {
@@ -69,11 +68,15 @@ func SetOptions(namespaces, class, configPath, metricsAddr, probeAddr, defaultBa
 		}
 	}
 
+	if !strings.HasSuffix(configPath, "/") {
+		configPath = configPath + "/"
+	}
+
 	Opts = &Options{
-		Namespaces:      ns,
+		Namespaces:      strings.Split(namespaces, ","),
 		IngressClass:    class,
 		ControllerName:  ControllerName,
-		ReloadUrl:       reloadUrlPrefix,
+		ReloadUrl:       fmt.Sprintf(reloadUrlPrefix, reloadAddr),
 		ConfigPath:      configPath,
 		MetricsAddr:     metricsAddr,
 		HealthProbeAddr: probeAddr,
@@ -81,8 +84,5 @@ func SetOptions(namespaces, class, configPath, metricsAddr, probeAddr, defaultBa
 		DefaultBackend:  defaultBackend,
 	}
 
-	if !strings.HasSuffix(configPath, "/") {
-		Opts.ConfigPath = Opts.ConfigPath + "/"
-	}
 	return nil
 }
