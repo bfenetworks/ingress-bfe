@@ -9,7 +9,7 @@ For those Ingress resources with route rule conflict, BFE Ingress Controller wil
 
 Route rule conflicts within a namespace or among different namespaces will both follow this principle.
 
-For those Ingress resources that not taken as valid by BFE Ingress Controller due to route rule conflict, related error messages will be writen to [validate state writeback](validate-state.md) `annotations`.
+For those Ingress resources that not taken as valid by BFE Ingress Controller due to route rule conflict, related error messages will be writen to its annotation, see [Validate State](validate-state.md) `annotations`.
 
 ## Example
 

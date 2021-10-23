@@ -102,7 +102,7 @@ $ git push origin my-cool-stuff
 
 [BFE Ingress Github]: https://github.com/bfenetworks/ingress-bfe
 [Git Branching Model]: http://nvie.com/posts/a-successful-git-branching-model/
-[Release Regulation]: https://github.com/bfenetworks/bfe/blob/develop/docs/zh_cn/development/release_regulation.md
+[Release Regulation]: https://github.com/bfenetworks/bfe/blob/develop/docs/en_us/development/release_regulation.md
 [pre-commit]: http://pre-commit.com/
 [git remote]: https://git-scm.com/docs/git-remote
 [submit PR guide]: https://www.bfe-networks.net/en_us/development/submit_pr_guide/

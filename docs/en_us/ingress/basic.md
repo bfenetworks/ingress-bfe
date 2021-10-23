@@ -3,7 +3,7 @@
 ## Introduction
 Configure Ingress resources to define route of accessing Services in Kubernetes cluster from outside the cluster. For more information about Ingress, refer to [Ingress][] .
 
-Refer to [ingress.yaml](../../deploy/ingress.yaml) when configuring Ingress resources in yaml files.
+Refer to [ingress.yaml](../../examples/ingress.yaml) when configuring Ingress resources in yaml files.
 
 ## Example
 ### Simple example
@@ -92,7 +92,7 @@ Above Ingress resource defines 2 advanced route rule, and configure TLS certific
 
 Specified by `host` in a rule
 
-BFE Ingress Controller support [Kubernetes defined hostname conditions][hostname-wildcards].                
+BFE Ingress Controller support [hostname conditions][hostname-wildcards] defined by Kubernetes.                
 
 ### Path condition(path)
 Specified by `path` and `pathType` in a rule
