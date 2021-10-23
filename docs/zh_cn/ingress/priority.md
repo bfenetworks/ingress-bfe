@@ -15,7 +15,8 @@ apiVersion: networking.k8s.io/v1beta1
 metadata:
   name: "host_priority1"
   namespace: production
-
+  annotations:
+    kubernetes.io/ingress.class: bfe 
 spec:
   rules:
     - host: example.net
@@ -31,7 +32,8 @@ apiVersion: networking.k8s.io/v1beta1
 metadata:
   name: "host_priority2"
   namespace: production
-
+  annotations:
+    kubernetes.io/ingress.class: bfe 
 spec:
   rules:
     - host: *.net
@@ -51,7 +53,8 @@ apiVersion: networking.k8s.io/v1beta1
 metadata:
   name: "path_priority1"
   namespace: production
-
+  annotations:
+    kubernetes.io/ingress.class: bfe 
 spec:
   rules:
     - host: example.net
@@ -67,7 +70,9 @@ apiVersion: networking.k8s.io/v1beta1
 metadata:
   name: "path_priority2"
   namespace: production
-  bfe.ingress.kubernetes.io/router.header: "key: value"
+  annotations:
+    kubernetes.io/ingress.class: bfe 
+    bfe.ingress.kubernetes.io/router.header: "key: value"
 spec:
   rules:
     - host: example.net
@@ -87,7 +92,9 @@ apiVersion: networking.k8s.io/v1beta1
 metadata:
   name: "cond_priority1"
   namespace: production
-  bfe.ingress.kubernetes.io/router.header: "key: value"
+  annotations:
+    kubernetes.io/ingress.class: bfe 
+    bfe.ingress.kubernetes.io/router.header: "key: value"
 spec:
   rules:
     - host: example.net
@@ -103,6 +110,8 @@ apiVersion: networking.k8s.io/v1beta1
 metadata:
   name: "cond_priority1"
   namespace: production
+  annotations:
+    kubernetes.io/ingress.class: bfe 
 spec:
   rules:
     - host: example.net
@@ -122,7 +131,9 @@ apiVersion: networking.k8s.io/v1beta1
 metadata:
   name: "multi_cond_priority1"
   namespace: production
-  bfe.ingress.kubernetes.io/router.header: "header-key: value"
+  annotations:
+    kubernetes.io/ingress.class: bfe 
+    bfe.ingress.kubernetes.io/router.header: "header-key: value"
 spec:
   rules:
     - host: example.net
@@ -138,7 +149,9 @@ apiVersion: networking.k8s.io/v1beta1
 metadata:
   name: "multi_cond_priority2"
   namespace: production
-  bfe.ingress.kubernetes.io/router.cookie: "cookie-key: value"
+  annotations:
+    kubernetes.io/ingress.class: bfe 
+    bfe.ingress.kubernetes.io/router.cookie: "cookie-key: value"
 spec:
   rules:
     - host: example.net

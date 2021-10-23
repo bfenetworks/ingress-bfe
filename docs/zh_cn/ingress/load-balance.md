@@ -31,6 +31,7 @@ kind: Ingress
 metadata:
   name: tls-example-ingress
   annotations:
+    kubernetes.io/ingress.class: bfe    
     bfe.ingress.kubernetes.io/balance.weight: '{"service": {"service1":80, "service2":20}}'
 spec:
   tls:

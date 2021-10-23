@@ -19,6 +19,8 @@ kind: Ingress
 metadata:
   name: ingress-A
   namespace: production
+  annotations:
+    kubernetes.io/ingress.class: bfe  
 spec:
   rules:
   - host: example.foo.com
@@ -35,6 +37,8 @@ kind: Ingress
 metadata:
   name: ingress-B
   namespace: production
+  annotations:
+    kubernetes.io/ingress.class: bfe  
 spec:
   rules:
   - host: example.foo.com

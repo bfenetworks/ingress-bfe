@@ -25,6 +25,8 @@ apiVersion: networking.k8s.io/v1beta1
 metadata:
   name: "ingress1"
   namespace: production
+  annotations:
+    kubernetes.io/ingress.class: bfe 
 spec:
   rules:
     - host: example.net
@@ -40,12 +42,14 @@ apiVersion: networking.k8s.io/v1beta1
 metadata:
   name: "ingress2"
   namespace: production
+  annotations:
+    kubernetes.io/ingress.class: bfe 
 spec:
   rules:
     - host: example.net
       http:
         paths:
-          - path: /foo
+          - path: /bar
             backend:
               serviceName: service2
               servicePort: 80
@@ -58,7 +62,8 @@ metadata:
   name: "ingress1"
   namespace: production
   annotations:
-    bfe.ingress.kubernetes.io/bfe-ingress-status: {"status": "success", "message": ""}
+    kubernetes.io/ingress.class: bfe   
+    bfe.ingress.kubernetes.io/bfe-ingress-status: {"status": "success"}
 spec:
   rules:
     - host: example.net
@@ -75,6 +80,7 @@ metadata:
   name: "ingress2"
   namespace: production
   annotations:
+    kubernetes.io/ingress.class: bfe   
     bfe.ingress.kubernetes.io/bfe-ingress-status: |
     	{"status": "fail", "message": "conflict with production/ingress1"}
 spec:
@@ -82,7 +88,7 @@ spec:
     - host: example.net
       http:
         paths:
-          - path: /foo
+          - path: /bar
             backend:
               serviceName: service2
               servicePort: 80
