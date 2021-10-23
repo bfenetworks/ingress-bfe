@@ -10,7 +10,7 @@
 | --default-backend| 空 | 指定default-backend服务的名字，格式为`namespace/name`。<br>如指定default-backend，没有命中任何Ingress规则的请求，将被转发到default-backend。 |
 
 设置方式：
-在BFE Ingress Controller的部署文件controller.yaml中指定。例如：
+在BFE Ingress Controller的部署文件[controller.yaml](../../../examples/controller.yaml)中指定。例如：
 ```yaml
 ...
       containers:

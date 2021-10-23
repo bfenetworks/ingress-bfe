@@ -10,7 +10,8 @@
 | --default-backend| Null | Specify name of default backend service, in the format of `namespace/name`.<br>If specified, requests that match no Ingress rule will be forwarded to the service specified. |
 
 How to define：
-Define in config file of BFE Ingress Controller, like controller.yaml. Example：
+Define in config file of BFE Ingress Controller, like [controller.yaml](../../../examples/controller.yaml). Example：
+
 ```yaml
 ...
       containers:

@@ -21,5 +21,5 @@
 * [How to contribute](contribute/how-to-contribute.md)
     * [Contribute codes](contribute/contribute-codes.md)
     * [Contribute documents](contribute/contribute-documents.md)
-    * [Release Regulation](https://www.bfe-networks.net/zh_cn/development/release_regulation/)
+    * [Release Regulation](https://www.bfe-networks.net/en_us/development/release_regulation/)
 
