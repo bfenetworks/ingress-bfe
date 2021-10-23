@@ -1,4 +1,6 @@
-# 路由优先级
+# Priority of route rules
+If a request matches multiple ingress rules, BFE Ingress Controller will decide 
+
 当请求能匹配到多条Ingress规则时，BFE Ingress Controller会按照以下优先级策略来选择规则：
 
 -  根据主机名，优先选择主机名匹配更精确的规则；
