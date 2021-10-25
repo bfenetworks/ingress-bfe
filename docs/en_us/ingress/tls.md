@@ -1,5 +1,5 @@
 # TLS Configuration
-BFE Ingress Controller manage TLS certificates and secretes in the way defined by Kubernetes.
+BFE Ingress Controller manages TLS certificates and secretes in the way defined by Kubernetes.
 
 TLS certificates and secretes are stored in `Secret`. See examples below:
 
