@@ -53,7 +53,7 @@ spec:
               serviceName: service2
               servicePort: 80
 ```
-根据[路由冲突](conflict.md)时的配置规则，`Ingress1`将生效，而`Ingress2`将被忽略。状态回写反馈后，`Ingress1`的状态为success，而`Ingress2`的状态为fail。
+根据[路由冲突处理原则](conflict.md)，`Ingress1`将生效，而`Ingress2`将被忽略。状态回写反馈后，`Ingress1`的状态为success，而`Ingress2`的状态为fail。
 ```yaml
 kind: Ingress
 apiVersion: networking.k8s.io/v1beta1
