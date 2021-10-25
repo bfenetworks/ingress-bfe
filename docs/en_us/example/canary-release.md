@@ -1,10 +1,10 @@
 # Canary Release
 
 ## Introduction
-BFE Ingress Controller support `Header/Cookie` based "canary release" by configuring`Annotation`.
+BFE Ingress Controller supports `Header/Cookie` based "canary release" by configuring`Annotation`.
 
 ## Config Example
-* Original ingress config as follows, which will forward matched requests to `service`：
+* Original ingress configuration is shown as follows. Ingress will forward matched requests to `service`：
 ```yaml
 kind: Ingress
 apiVersion: networking.k8s.io/v1beta1
@@ -24,8 +24,8 @@ spec:
               servicePort: 80
 ```
 
-* Canary release is required and interested requests should be forwarded to a new service `service2`.
-* To implement this, create a new ingress, with header or cookie information of  interested requests included in annotations.
+* Canary release is applied and interested requests should be forwarded to a new service `service2`.
+* To achieve this, create a new ingress, with header or cookie information of interested requests included in annotations.
 ```yaml
 kind: Ingress
 apiVersion: networking.k8s.io/v1beta1
@@ -48,8 +48,8 @@ spec:
               servicePort: 80
 
 ```
-* Based on above config, BFE Ingress Controller will
-1. requests with `host == example.net && path == /bar && cookie[key] == value && Header[Key] == Value`,
-   forwarded to service `service-new`
-1. other request with `host == example.net && path == /bar`，
-   forwarded to service `service`
+* Based on above configuration, BFE Ingress Controller will
+1. forward requests with `host == example.net && path == /bar && cookie[key] == value && Header[Key] == Value`
+   to service `service-new`
+1. forward other requests with `host == example.net && path == /bar`
+   to service `service`
