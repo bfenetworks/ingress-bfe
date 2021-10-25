@@ -1,29 +1,27 @@
-# 多Service之间的负载均衡
-## 说明
+# Load banlancing between Services
+## Introduction
 
-BFE Ingress Controller支持在提供相同服务的多个Service（为便于理解，在BFE Ingress文档中称其为子服务，Sub-Service）之间按权重进行负载均衡。
+For `Service`s that providing the same service (called Sub-Services),  BFE Ingress Controller support load balancing between them, based on weight configured for each `Service`.
 
-配置方式
+## Configuration
 
-BFE Ingress Controller通过`注解`（`Annotation`）的方式支持多个Sub-Service之间的负载均衡。配置方式为：
+BFE Ingress Controller use `Annotation` to support load-balancing between multiple Sub-Services：
 
-- 在`annotations`中
+- in `annotations`
 
-  - 为多个Sub-Service分别指定流量分配权重
+  - config weight for each Sub-Service.
 
-  - 为它们提供的服务设置一个Service名称
-
-  - 格式如下：
+  - define a `Service` name for the service they provided together：
 
     ``` yaml
     bfe.ingress.kubernetes.io/balance.weight: '{"service": {"sub-service1":80, "sub-service2":20}}'
     ```
 
-- 在`rules`中
+- in `rules`
 
-  - 将backend的serviceName设置为注解中设置的Service名称，并指定servicePort
+  - config the `serviceName` of `backend` as the `Service` name in `Annotation`, and config the `servicePort`.
 
-## 示例
+## Example
 
 ```yaml
 apiVersion: networking.k8s.io/v1beta1

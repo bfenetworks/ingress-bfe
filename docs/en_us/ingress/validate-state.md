@@ -1,22 +1,23 @@
-# 生效状态
+# Validate State
 
-## 生效状态反馈
-Ingress配置的合法性检查是一个异步过程，检查结果在配置生效的过程中才能返回。
+## Validate state response
+Validating the Ingress config is an async process and the result can only be returned after resources applied.
 
-为了能给用户反馈当前Ingress是否生效，BFE Ingress Controller会将Ingress的实际生效状态回写到Ingress的一个Annotation当中。
-**BFE Ingress Controller的状态Annotation定义如下：**
+In order to response the result of whether the Ingress takes effect, BFE Ingress Controller will write the validate state of the Ingress back to its annotations. 
+
+**BFE Ingress Controller defines the annotation for validate state as follow:**
 
 ```yaml
-#bfe.ingress.kubernetes.io/bfe-ingress-status为BFE-Ingress预留的Annotation key，
-#用于BFE-Ingress反馈生效状态
-# status; 表示当前ingress是否合法， 取值为：success -> ingress合法， error -> ingress不合法
-# message; 当ingress不合法的情况下，message记录错误详细原因。
+#bfe.ingress.kubernetes.io/bfe-ingress-status is the reserved Annotation key of BFE Ingress Controller，
+#used for validate state response
+# status; indicate if this ingress is valid, value can be: success -> ingress is valid and takes effect， error -> ingress is not valid
+# message; if ingress is not valid, error messages will be recoreded
 bfe.ingress.kubernetes.io/bfe-ingress-status: {"status": "", "message": ""}
 ```
-## 示例
+## Example
 
-下面是BFE-Ingress生效状态反馈的一个示例，展示发生路由冲突的两个Ingress资源的生效状态反馈。
-`Ingress1`和`Ingress2`的路由规则完全一样(`Host:example.net, Path:/bar`)。
+Below example shows the validate state response of two ingress with route rules conflict
+`Ingress1` and `Ingress2` have one identical route rule (`Host:example.net, Path:/bar`)
 
 ```yaml
 kind: Ingress
@@ -53,7 +54,7 @@ spec:
               serviceName: service2
               servicePort: 80
 ```
-根据[路由冲突](conflict.md)时的配置规则，`Ingress1`将生效，而`Ingress2`将被忽略。状态回写反馈后，`Ingress1`的状态为success，而`Ingress2`的状态为fail。
+According to conflict handling principle for [route rule conflict](conflict.md), `Ingress1` will take effect and `Ingress2` will be ignored. After validate state responsed, `status` of `Ingress1` will be "success" and for `Ingress2` it will be "fail".
 ```yaml
 kind: Ingress
 apiVersion: networking.k8s.io/v1beta1
@@ -79,7 +80,7 @@ metadata:
   name: "ingress2"
   namespace: production
   annotations:
-    kubernetes.io/ingress.class: bfe 
+    kubernetes.io/ingress.class: bfe   
     bfe.ingress.kubernetes.io/bfe-ingress-status: |
     	{"status": "fail", "message": "conflict with production/ingress1"}
 spec:

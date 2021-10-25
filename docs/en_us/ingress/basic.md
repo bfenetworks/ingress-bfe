@@ -1,0 +1,195 @@
+# Configuration Guide
+
+## Introduction
+Configure Ingress resources to define route of accessing Services in Kubernetes cluster from outside the cluster. For more information about Ingress, refer to [Ingress][] .
+
+Refer to [ingress.yaml](../../examples/ingress.yaml) when configuring Ingress resources in yaml files.
+
+## Example
+### Simple example
+```yaml
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: simple-ingress
+spec:
+  rules:
+  - host: whoami.com
+    http:
+      paths:
+      - path: /testpath
+        pathType: Prefix
+        backend:
+          service:
+            name: whoami
+            port:
+              number: 80
+```
+Above example defined a Ingress resource, and
+
+- set `kubernetes.io/ingress.class` to `bfe`, means this Ingress will be handled by BFE Ingress Controller
+
+-  defines a simple route rule：
+  A requests will be forwarded to port 80 of Service `whoami`, if it matches both below conditions:
+  - hostname is `whoami.com` 
+
+  - path has prefix `/testpath`
+
+### Complicated example
+```yaml
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: complex-ingress
+  namespace: my-namespace
+  annotations:
+    bfe.ingress.kubernetes.io/loadbalance: '{"foo": {"sub-foo1":80, "sub-foo2":20}}'
+    bfe.ingress.kubernetes.io/router.cookie: "Session: 123"
+    bfe.ingress.kubernetes.io/router.header: "Content-Language: zh-cn"
+spec:
+  tls:
+  - hosts:
+      - foo.com
+    secretName: secret-foo-com
+  rules:
+  - host: foo.com
+    http:
+      paths:
+      - path: /foo
+        pathType: Prefix
+        backend:
+          service:
+            name: foo
+            port:
+              number: 80
+      - path: /bar
+        pathType: Exact
+        backend:
+          service:
+            name: bar
+            port:
+              number: 80
+```
+Above Ingress resource defines 2 advanced route rule, and configure TLS certificate for `foo.com`. Rules in annotations are BFE defined rule options.
+
+- Route rule 1：a request will be forwarded to port 80 of service`foo` , if it matches all below conditions. And Service `foo` is composed of two Services: `sub-foo1` and `sub-foo2`, serving 80% and 20% of requests to `foo`. See [Load balancing between Services](load-balance.md).
+
+    - hostname is `foo.com`
+    - path has prefix `/foo`
+    - value of a Cookie named `Session` is `123`
+    - value of a Header named `Content-Language` is `zh-cn`
+  
+- Route rule 2：a request will be forwarded to port 80 of service`bar` , if it matches all below conditions. 
+    - hostname is `foo.com`
+    - path has prefix `/bar`
+    - value of a cookie named `Session` is `123`
+  - value of a header named `Content-Language` is `zh-cn`
+  
+
+## Condition of route rules
+
+### Hostname condition(host)
+
+Specified by `host` in a rule
+
+BFE Ingress Controller support [hostname conditions][hostname-wildcards] defined by Kubernetes.                
+
+### Path condition(path)
+Specified by `path` and `pathType` in a rule
+
+BFE Ingress Controller support below pathType：
+
+- Prefix: prefix match.
+- Exact: exact match
+- ImplementationSpecific: __default__，implemented by BFE Ingress Controller as prefix match
+
+### Advanced match condition
+
+#### Introduction
+
+BFE Ingress Controller supports advanced conditions by configuring `annotation`.
+
+Advanced conditions is shared in a Ingress resource. So all the rules in the same Ingress resource will be restrained by advanced conditions, if configured.
+
+Currently BFE Ingress Controller support two advanced conditions types: cookie and header.
+
+#### Cookie
+
+Format：
+``` yaml
+bfe.ingress.kubernetes.io/router.cookie: "key: value"
+```
+
+Explanation：
+
+Requests containing a cookie with name=`key` and value=`value` are considered match this condition.
+
+#### Header      
+
+Format：
+
+``` yaml
+bfe.ingress.kubernetes.io/router.header: "key: value"
+```
+
+Explanation：
+
+Requests containing a header with name=`key` and value=`value` are considered match this condition.
+
+#### Restriction
+
+- In a Ingress resource, for each advanced condition type, no more than one `Annotation` can be configured.
+  
+- If more than one `Annotation` of the same advanced condition type are configured in the same Ingress resource, the bottom one takes effect.
+  
+    ```yaml
+    # example
+    annotation:
+      bfe.ingress.kubernetes.io/router.header: "key1: value1" # not take effect
+      bfe.ingress.kubernetes.io/router.header: "key2: value2" # takes effect
+    ```
+
+## Ingress class
+
+BFE Ingress Controller support user to configure ingress class in two ways:
+
+### Set in annotations
+
+Set `kubernetes.io/ingress.class` in annotations of Ingress. Default value is `bfe`
+
+```yaml
+  annotations:
+    kubernetes.io/ingress.class: bfe  
+```
+
+### Set in IngressClass
+
+For k8s vesions from 1.18, set  controller to`bfe-networks.com/ingress-controller` in IngressClass of K8S Cluster. Example:
+
+```yaml
+apiVersion: networking.k8s.io/v1beta1
+kind: IngressClass
+metadata:
+  name: external-lb
+  controller: bfe-networks.com/ingress-controller
+```
+
+Then set `ingressClassName` to `external-lb` in Ingress:
+
+```yaml
+apiVersion: "networking.k8s.io/v1beta1"
+kind: "Ingress"
+metadata:
+  name: "example-ingress"
+spec:
+  ingressClassName: "external-lb"
+...
+```
+
+For information about  IngressClass, refer to [IngressClass]。
+
+
+[Ingress]: https://kubernetes.io/docs/concepts/services-networking/ingress/#what-is-ingress
+[pathType]: https://kubernetes.io/docs/concepts/services-networking/ingress/#path-types
+[hostname-wildcards]: https://kubernetes.io/docs/concepts/services-networking/ingress/#hostname-wildcards
+
