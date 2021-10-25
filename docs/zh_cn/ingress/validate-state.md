@@ -9,8 +9,8 @@ Ingress配置的合法性检查是一个异步过程，检查结果在配置生�
 ```yaml
 #bfe.ingress.kubernetes.io/bfe-ingress-status为BFE-Ingress预留的Annotation key，
 #用于BFE-Ingress反馈生效状态
-# status; 表示当前ingress是否合法， 取值为：success -> ingress合法， error -> ingress不合法
-# message; 当ingress不合法的情况下，message记录错误详细原因。
+# status: 表示当前ingress是否合法， 取值为：success -> ingress合法， error -> ingress不合法
+# message: 当ingress不合法的情况下，message记录错误详细原因。
 bfe.ingress.kubernetes.io/bfe-ingress-status: {"status": "", "message": ""}
 ```
 ## 示例
