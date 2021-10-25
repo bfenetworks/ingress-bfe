@@ -27,6 +27,6 @@ See [Document Summary](docs/en_us/SUMMARY.md)
 
 BFE is under the Apache 2.0 license. See the [LICENSE](https://github.com/bfenetworks/ingress-bfe/blob/master/LICENSE) file for details
 
-[Kubernetes Ingress Controller]: https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/ "Kubernetes"
+[Ingress Controller]: https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/ "Kubernetes"
 [Ingress]: https://kubernetes.io/docs/concepts/services-networking/ingress/ "Kubernetes"
 [BFE]: https://github.com/bfenetworks/bfe "Github"
