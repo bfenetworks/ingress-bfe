@@ -1,15 +1,15 @@
 # Route Rule Conflict
 
 ## Definition
-If Ingress configuration will create Ingress resources containing a same Ingress rule (host, path and advanced conditions are all the same), a route rule conflict happens. 
+If Ingress configuration is created with Ingress resources containing the same Ingress rule (host, path and advanced conditions are all the same), a route rule conflict happens. 
 
 ## Conflict handling: first-created-resource-win principle
 
 For those Ingress resources with route rule conflict, BFE Ingress Controller will follow first-created-resource-win principle and only takes the first created Ingress resource as valid.  
 
-Route rule conflicts within a namespace or among different namespaces will both follow this principle.
+This principle will be followed when route rule conflict happens within a namespace or among different namespaces.
 
-For those Ingress resources that not taken as valid by BFE Ingress Controller due to route rule conflict, related error messages will be writen to its annotation, see [Validate State](validate-state.md) `annotations`.
+For those Ingress resources invalid due to route rule conflict, error messages will be written to its annotation, see [Ingress Status](validate-state.md).
 
 ## Example
 
@@ -51,12 +51,12 @@ spec:
           servicePort: 80
 
 ```
-In above config, ingress-A and ingress-B have conflict, and ingress-A is created before ingress-B. So only ingress-A will been created and take effect.
+In above configuration, there is conflict between ingress-A and ingress-B, and ingress-A is created before ingress-B. So only ingress-A will been created and take effect.
 
-## Validate state writeback
-If a Ingress resource is ignored (not take effect) due to route rule conflict, after validate state writeback, the `status` of validate state `annotation` will be set as “fail”, and `message` will tell which Ingres resource it conflict with.
+## Ingress status feedback
+If a Ingress resource is ignored (not take effect) due to route rule conflict, after the ingress status is written back, the `status` in `annotation` will be set as “fail”, and `message` will tell which Ingress resource it has conflict with.
 
-In previous example, validate state `annotation` will be like:
+In previous example, `annotation` for ingress status will be like:
 
 
 ```yaml
@@ -66,5 +66,5 @@ metadata:
     	{"status": "fail", "message": "conflict with production/ingress-A"}
 ```
 
-For more information about validate state, refer to [Validate state](validate-state.md)。
+For more information about ingress status, refer to [ingress status](validate-state.md)。
 

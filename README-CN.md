@@ -13,9 +13,9 @@ BFE Ingress Controller 为基于 [BFE][] 实现的[Kubernetes Ingress Controller
 详见[文档列表](docs/zh_cn/SUMMARY.md)
 
 ## 参与贡献
-- 请首先在 issue 列表中创建一个 issue
+- 请首先在 [issue 列表](https://github.com/bfenetworks/ingress-bfe/issues) 中创建一个 issue
 - 如有必要，请联系项目维护者/负责人进行进一步讨论
-- 请遵循 Golang 编程规范
+- 请遵循 [Golang 编程规范](https://github.com/golang/go/wiki/Style)
 
 ## 社区交流
 

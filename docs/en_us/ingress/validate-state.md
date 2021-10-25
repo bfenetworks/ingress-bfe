@@ -1,22 +1,22 @@
-# Validate State
+# Ingress status
 
-## Validate state response
-Validating the Ingress config is an async process and the result can only be returned after resources applied.
+## Feedback for ingress status
+The validation of the Ingress configuration is an asynchronous process. The status can only be returned after the configuation has taken effect.
 
-In order to response the result of whether the Ingress takes effect, BFE Ingress Controller will write the validate state of the Ingress back to its annotations. 
+In order to provide feedback for ingress status, BFE Ingress Controller will write status back to its annotations. 
 
-**BFE Ingress Controller defines the annotation for validate state as follow:**
+**BFE Ingress Controller defines the annotation for status as follow:**
 
 ```yaml
-#bfe.ingress.kubernetes.io/bfe-ingress-status is the reserved Annotation key of BFE Ingress Controller，
-#used for validate state response
-# status; indicate if this ingress is valid, value can be: success -> ingress is valid and takes effect， error -> ingress is not valid
-# message; if ingress is not valid, error messages will be recoreded
+#bfe.ingress.kubernetes.io/bfe-ingress-status is the reserved Annotation key of BFE Ingress Controller
+#used for status feedback. 
+# status: success -> ingress is valid, error -> ingress is invalid.
+# message: if ingress is invalid, error messages will be recorded
 bfe.ingress.kubernetes.io/bfe-ingress-status: {"status": "", "message": ""}
 ```
 ## Example
 
-Below example shows the validate state response of two ingress with route rules conflict
+The following example shows the status of two ingresses with route rules conflict.
 `Ingress1` and `Ingress2` have one identical route rule (`Host:example.net, Path:/bar`)
 
 ```yaml
@@ -54,7 +54,7 @@ spec:
               serviceName: service2
               servicePort: 80
 ```
-According to conflict handling principle for [route rule conflict](conflict.md), `Ingress1` will take effect and `Ingress2` will be ignored. After validate state responsed, `status` of `Ingress1` will be "success" and for `Ingress2` it will be "fail".
+According to [principles of handling route rule conflict](conflict.md), `Ingress1` will take effect and `Ingress2` will be ignored. After the status is returned, `status` of `Ingress1` will be "success" and status of `Ingress2` it will be "fail".
 ```yaml
 kind: Ingress
 apiVersion: networking.k8s.io/v1beta1

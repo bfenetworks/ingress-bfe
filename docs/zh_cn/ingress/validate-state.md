@@ -9,8 +9,8 @@ Ingress配置的合法性检查是一个异步过程，检查结果在配置生�
 ```yaml
 #bfe.ingress.kubernetes.io/bfe-ingress-status为BFE-Ingress预留的Annotation key，
 #用于BFE-Ingress反馈生效状态
-# status; 表示当前ingress是否合法， 取值为：success -> ingress合法， error -> ingress不合法
-# message; 当ingress不合法的情况下，message记录错误详细原因。
+# status: 表示当前ingress是否合法， 取值为：success -> ingress合法， error -> ingress不合法
+# message: 当ingress不合法的情况下，message记录错误详细原因。
 bfe.ingress.kubernetes.io/bfe-ingress-status: {"status": "", "message": ""}
 ```
 ## 示例
@@ -53,7 +53,7 @@ spec:
               serviceName: service2
               servicePort: 80
 ```
-根据[路由冲突](conflict.md)时的配置规则，`Ingress1`将生效，而`Ingress2`将被忽略。状态回写反馈后，`Ingress1`的状态为success，而`Ingress2`的状态为fail。
+根据[路由冲突处理原则](conflict.md)，`Ingress1`将生效，而`Ingress2`将被忽略。状态回写反馈后，`Ingress1`的状态为success，而`Ingress2`的状态为fail。
 ```yaml
 kind: Ingress
 apiVersion: networking.k8s.io/v1beta1

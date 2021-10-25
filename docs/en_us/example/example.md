@@ -1,9 +1,9 @@
-# Config File Example
+# Examples of Config File 
 
 ## deployment
 | Program | File | Description |
 | ---- | ---- | ---- |
-| bfe-ingress-controller  | [controller.yaml](../../../examples/controller.yaml)| to deploy Bfe Ingress Controller |
+| bfe-ingress-controller  | [controller.yaml](../../../examples/controller.yaml)| to deploy BFE Ingress Controller |
 | example backend service: whoami | [whoami.yaml](../../../examples/whoami.yaml) | to deploy example service `whoami` |
 
 ## ingress
@@ -14,5 +14,5 @@
 ## rbac
 | File | Description |
 | ---- | ---- |
-| [rbac.yaml](../../../examples/rbac.yaml) | to config access control for Bfe Ingress Controller |
+| [rbac.yaml](../../../examples/rbac.yaml) | to config access control for BFE Ingress Controller |
 
