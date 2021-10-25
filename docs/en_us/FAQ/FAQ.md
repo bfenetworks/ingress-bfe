@@ -5,8 +5,8 @@
 
 |Argument | Default value | Description|
 | --- | --- | --- |
-| --namespace <br> -n | Null | Specifies in which namespaces the BFE Ingress Controller will monitor Ingress, seperate multiple namespaces by `,`. <br>Default value means monitor all namespaces  |
-| --ingress-class| bfe | Specifies the `kubernetes.io/ingress.class` value of Ingress it monitors. <br>If not specified, BFE Ingress Controller monitors the Ingress with ingress class set as bfe. Usually you don't need to specify it. |
+| --namespace <br> -n | Null | Specify in which namespaces BFE Ingress Controller will monitor Ingress. Multiple namespaces are seperated by `,`. <br>Default value means to monitor all namespaces.  |
+| --ingress-class| bfe | Specify the `kubernetes.io/ingress.class` value of Ingress it monitors. <br>If not specified, BFE Ingress Controller monitors the Ingress with ingress class set as "bfe". Usually you don't need to specify it. |
 | --default-backend| Null | Specify name of default backend service, in the format of `namespace/name`.<br>If specified, requests that match no Ingress rule will be forwarded to the service specified. |
 
 How to define：
