@@ -19,7 +19,7 @@ BFE Ingress Controller use `Annotation` to support load-balancing between multip
 
 - in `rules`
 
-  - config the `serviceName` of `backend` as the `Service` name in `Annotation`, and config the `servicePort`.
+  - set the `serviceName` of `backend` as the `Service` name in `Annotation`, and set the `servicePort`.
 
 ## Example
 
