@@ -6,7 +6,7 @@
     kubectl apply -f controller.yaml
     ```
     - 配置文件示例[controller.yaml](../../examples/controller.yaml)
-        - 配置文件中使用了Docker Hub 上的[BFE Ingress Controller]:latest镜像。如需使用指定版本的镜像，修改配置文件，指定镜像版本。
+        - 配置文件中使用了[Docker Hub 上的BFE Ingress Controller的最新镜像](https://hub.docker.com/r/bfenetworks/bfe-ingress-controller)。如需使用指定版本的镜像，修改配置文件，指定镜像版本。
         - 也可在项目根目录下执行`make docker`，创建自己的本地镜像。
 
 * 配置所需权限
@@ -32,4 +32,4 @@
    - 基本的Ingess配置可参考 [ingress.yaml](../../examples/ingress.yaml)。
    - 更多的BFE Ingress Controller所支持的Ingress配置，可参考配置[相关文档](SUMMARY.md)。
 
-[BFE Ingress Controller]: https://hub.docker.com/r/bfenetworks/bfe-ingress-controller
+
