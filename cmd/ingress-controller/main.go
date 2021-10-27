@@ -65,7 +65,7 @@ func main() {
 	}
 
 	err := option.SetOptions(
-		namespaces, ingressClass, configPath,
+		namespaces, ingressClass, configPath, reloadAddr,
 		metricsAddr, probeAddr, defaultBackend)
 	if err != nil {
 		setupLog.Error(err, "fail to start controllers")

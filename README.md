@@ -1,21 +1,32 @@
 # BFE Ingress Controller
 
-BFE Ingress Controller 为基于 [BFE][] 实现的[Kubernetes Ingress Controller][]，用于支持在 Kubernetes 中使用 [Ingress][]。 
+English | [中文](README-CN.md)
 
-## 开始使用
-详见[部署指南](docs/zh_cn/deployment.md)
+## Overview
 
-## 说明文档
-详见[文档列表](docs/zh_cn/SUMMARY.md)
+BFE Ingress Controller is an implementation of Kubernetes [Ingress Controller][] based on  [BFE][] , to fulfill  [Ingress][] in Kubernetes。 
 
-## 参与贡献
-- 请首先在 issue 列表中创建一个 issue
-- 如有必要，请联系项目维护者/负责人进行进一步讨论
-- 请遵循 Golang 编程规范
+## Quick start
+See [Deployment](docs/en_us/deployment.md) for quick start of using BFE Ingress Controller
 
-## 许可
-基于 Apache 2.0 许可证，详见 [LICENSE](https://github.com/bfenetworks/ingress-bfe/blob/master/LICENSE) 文件说明
+## Documentation
+See [Document Summary](docs/en_us/SUMMARY.md)
 
-[Kubernetes Ingress Controller]: https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/ "Kubernetes"
+## Contribute
+- Create and issue in [Issue List](https://github.com/bfenetworks/ingress-bfe/issues)
+- If necessary, contact and discuss with maintainer
+- Follow the [Golang style guide](https://github.com/golang/go/wiki/Style)
+
+## Communication
+
+- [Forum](https://github.com/bfenetworks/ingress-bfe/discussions)
+- BFE community on Slack: [Sign up](https://slack.cncf.io/) CNCF Slack and join bfe channel.
+- BFE developer group on WeChat: [Send a request mail](mailto:iyangsj@gmail.com) with your WeChat ID and a contribution you've made to BFE(such as a PR/Issue). We will invite you right away.
+
+## License
+
+BFE is under the Apache 2.0 license. See the [LICENSE](https://github.com/bfenetworks/ingress-bfe/blob/master/LICENSE) file for details
+
+[Ingress Controller]: https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/ "Kubernetes"
 [Ingress]: https://kubernetes.io/docs/concepts/services-networking/ingress/ "Kubernetes"
 [BFE]: https://github.com/bfenetworks/bfe "Github"

@@ -1,7 +1,9 @@
 # 配置指南
 
 ## 概述
-通过配置K8S Ingress资源，可以定义K8S集群中的服务对外暴露的规则。更多Ingress相关信息，可参考[Ingress介绍]。
+通过配置K8S Ingress资源，可以定义K8S集群中的服务对外暴露时的流量路由规则。更多Ingress相关信息，可参考[Ingress介绍]。
+
+我们提供了配置文件示例 [ingress.yaml](../../deploy/ingress.yaml)，可供配置时参考。
 
 ## Ingress示例
 ### 示例1
@@ -25,10 +27,10 @@ spec:
             port:
               number: 80
 ```
-上述示例设置`kubernetes.io/ingress.class`为`bfe`，标识该Ingress由BFE Ingress Controller处理。
+上述示例中定义了一个 Ingress 资源
 
-设置请求的域名为 `whoami.com`，路径前缀为 `/testpath`。
-符合条件的流量将被转发给服务`whoami`的80端口处理。
+- 设置`kubernetes.io/ingress.class`为`bfe`，标识该Ingress由BFE Ingress Controller处理。
+- 定义了一条简单的路由规则：若请求流量的域名为 `whoami.com`，路径前缀为 `/testpath`，则将流量转发给`whoami` Service 的80端口处理
 
 ### 示例2
 ```yaml
@@ -83,14 +85,14 @@ spec:
 
 ## Ingress中路由的匹配条件
 
-### host条件
+### 主机名条件(host)
 
 由规则(rules)中的`host`字段指定
 
 BFE Ingress Controller支持[Kubernetes原生定义的host匹配][hostname-wildcards]
                 
 
-### path条件
+### 路径条件(path)
 由规则(rules)中的`path`和`pathType`字段指定
 
 BFE Ingress Controller支持如下三种pathType：
@@ -103,7 +105,7 @@ BFE Ingress Controller支持如下三种pathType：
 
 BFE Ingress Controller支持以annotation的方式设置高级匹配条件。目前支持cookie和header两种高级匹配条件。
 
-一个Ingress的所有路由规则，都会受该Ingress的annotaiton中定义的高级匹配条件的约束。
+高级匹配条件在Ingress资源内共享，即同一个Ingress资源内的所有规则，都会受高级匹配条件的约束。
 
 #### cookie
 
