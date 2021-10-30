@@ -1,15 +1,15 @@
 # Route Rule Conflict
 
 ## Definition
-If Ingress configuration is created with Ingress resources containing the same Ingress rule (host, path and advanced conditions are all the same), a route rule conflict happens. 
+If Ingress configurations will created Ingress resources containing at least one identical Ingress rule (host, path and advanced conditions are all the same), a route rule conflict happens. 
 
 ## Conflict handling: first-created-resource-win principle
 
 For those Ingress resources with route rule conflict, BFE Ingress Controller will follow first-created-resource-win principle and only takes the first created Ingress resource as valid.  
 
-This principle will be followed when route rule conflict happens within a namespace or among different namespaces.
+This principle will be followed when route rule conflict happens within a namespace or across different namespaces.
 
-For those Ingress resources invalid due to route rule conflict, error messages will be written to its annotation, see [Ingress Status](validate-state.md).
+For those invalid Ingress resources due to route rule conflict, error messages will be written to its annotation, see [Ingress Status](validate-state.md).
 
 ## Example
 
@@ -54,7 +54,7 @@ spec:
 In above configuration, there is conflict between ingress-A and ingress-B, and ingress-A is created before ingress-B. So only ingress-A will been created and take effect.
 
 ## Ingress status feedback
-If a Ingress resource is ignored (not take effect) due to route rule conflict, after the ingress status is written back, the `status` in `annotation` will be set as “fail”, and `message` will tell which Ingress resource it has conflict with.
+If an Ingress resource is invalid due to route rule conflict, after the ingress status is written back, the `status` in `annotation` will be set as “fail”, and `message` will tell which Ingress resource it has conflict with.
 
 In previous example, `annotation` for ingress status will be like:
 
