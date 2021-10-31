@@ -1,10 +1,10 @@
 # Priority of route rules
 If a request matches multiple ingress rules, BFE Ingress Controller will decide which rule will be hit according to below strategies:
 
--  Compare the hostname and select the rule with more precise hostname;
--  If more than one rule selected in the above step, select the rule with more precise path;
--  If more than one rule selected in the above step, select the rule with more advanced conditions;
--  If more than one rule selected in the above step, select the rule which matches an advanced condition of higher priority
+-  Compare the hostname and select the rule with most precise hostname;
+-  If more than one rule is selected in the above step, select the rule with most precise path;
+-  If more than one rule is selected in the above step, select the rule with most advanced conditions;
+-  If more than one rule is selected in the above step, select the rule which matches an advanced condition of higher priority
    - in advanced condition, Cookie condition has higher priority than Header condition；
 
 ## Examples
