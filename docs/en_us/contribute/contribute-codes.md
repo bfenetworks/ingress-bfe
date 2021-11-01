@@ -71,14 +71,15 @@ Below tutorial will guide you to submit code
     $ git commit -m "test=release/1.1"
     ```
     
-1. Keep local repository up-to-date
+8. Keep local repository up-to-date
 
-1. An experienced Git user pulls from the official repo often -- daily or even hourly, so they notice conflicts with others work early, and it's easier to resolve smaller conflicts.
+    An experienced Git user pulls from the official repo often -- daily or even hourly, so they notice conflicts with others work early, and it's easier to resolve smaller conflicts.
 
-   ```bash
-   git remote add upstream https://github.com/bfenetworks/bfe
-   git pull upstream develop
-   ```
+    ```bash
+    git remote add upstream https://github.com/bfenetworks/ingress-bfe
+    git fetch upstream
+    git pull upstream develop
+    ```
 
 10. Push to remote repository
 

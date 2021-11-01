@@ -3,7 +3,7 @@ BFE Ingress Controller manages TLS certificates and secretes in the way defined 
 
 TLS certificates and secretes are stored in `Secret`. See examples below:
 
-**Configurate Secret**
+**Configure Secret**
 
 ```yaml
 apiVersion: v1
@@ -16,7 +16,7 @@ data:
   tls.key: base64 encoded key
 type: kubernetes.io/tls
 ```
-**Configurate Ingress**
+**Configure Ingress**
 
 ```yaml
 apiVersion: networking.k8s.io/v1beta1
