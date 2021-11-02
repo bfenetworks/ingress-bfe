@@ -1,0 +1,104 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: bfe-ingress-controller
+  namespace: default
+
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: bfe-ingress-controller
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - services
+  - endpoints
+  - secrets
+  - namespaces
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  - ingressclasses
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - patch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  - ingressclasses
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - patch
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: bfe-ingress-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: bfe-ingress-controller
+subjects:
+  - kind: ServiceAccount
+    name: bfe-ingress-controller
+    namespace: default
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: bfe-ingress-controller
+  namespace: default
+  labels:
+    app: bfe
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bfe
+  template:
+    metadata:
+      labels:
+        app: bfe
+    spec:
+      serviceAccountName: bfe-ingress-controller
+      containers:
+        - name: bfe-ingress-controller
+          image: bfenetworks/bfe-ingress-controller:latest
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: https
+              containerPort: 8443
+            - name: monitor
+              containerPort: 8421
+              
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bfe-controller-service
+  namespace: default
+spec:
+  type: NodePort
+  selector:
+    app: bfe
+  ports:
+    - port: 8080
+      targetPort: 8080
