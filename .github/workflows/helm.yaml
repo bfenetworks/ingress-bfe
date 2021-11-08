@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - develop
 
 jobs:
 
@@ -13,7 +12,6 @@ jobs:
     if: |
       (github.repository == 'bfenetworks/ingress-bfe')
     outputs:
-      docs: ${{ steps.filter.outputs.docs }}
       charts: ${{ steps.filter.outputs.charts }}
 
     steps:
