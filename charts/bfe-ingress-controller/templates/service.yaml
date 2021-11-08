@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "bfe-ingress-controller.fullname" . }}
+  labels:
+    {{- include "bfe-ingress-controller.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+  {{- range $key, $value := .Values.containerPort }}
+    - name: {{ $key }}
+      port: {{ $value }}
+      targetPort: {{ $value }}
+  {{- end }}
+  selector:
+    {{- include "bfe-ingress-controller.selectorLabels" . | nindent 4 }}
