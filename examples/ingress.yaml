@@ -1,8 +1,8 @@
 kind: Ingress
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 metadata:
-  name: ingress2
-  namespace: default
+  name: ingress-test
+  namespace: ingress-bfe
   annotations:
     kubernetes.io/ingress.class: bfe
 

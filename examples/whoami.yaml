@@ -2,22 +2,22 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: whoami
-  namespace: default
+  namespace: ingress-bfe
   labels:
-    app: containous
-    name: whoami
-
+  labels:
+    app.kubernetes.io/name: whoami
+    app.kubernetes.io/instance: whoami
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: containous
-      task: whoami
+      app.kubernetes.io/name: whoami
+      app.kubernetes.io/instance: whoami
   template:
     metadata:
       labels:
-        app: containous
-        task: whoami
+        app.kubernetes.io/name: whoami
+        app.kubernetes.io/instance: whoami
     spec:
       containers:
         - name: containouswhoami
@@ -30,12 +30,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: whoami
-  namespace: default
+  namespace: ingress-bfe
 
 spec:
   ports:
     - name: http
       port: 80
   selector:
-    app: containous
-    task: whoami
+    app.kubernetes.io/name: whoami
+    app.kubernetes.io/instance: whoami
