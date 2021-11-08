@@ -1,8 +1,11 @@
 ---
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: bfe-ingress-controller
+  labels:
+    app.kubernetes.io/name: bfe-ingress-controller
+    app.kubernetes.io/instance: bfe-ingress-controller
 rules:
 - apiGroups:
   - ""
@@ -40,9 +43,12 @@ rules:
 
 ---
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: bfe-ingress-controller
+  labels:
+    app.kubernetes.io/name: bfe-ingress-controller
+    app.kubernetes.io/instance: bfe-ingress-controller
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -50,4 +56,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: bfe-ingress-controller
-    namespace: default
+    namespace: ingress-bfe
