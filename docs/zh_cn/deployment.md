@@ -24,13 +24,13 @@ helm upgrade --install bfe-ingress-controller bfe-ingress-controller --repo http
 
 ## 测试
 * 创建测试服务whoami
-   ``` shell script
-   kubectl apply -f https://raw.githubusercontent.com/bfenetworks/ingress-bfe/develop/examples/whoami.yaml
-   ```
+``` shell script
+kubectl apply -f https://raw.githubusercontent.com/bfenetworks/ingress-bfe/develop/examples/whoami.yaml
+```
 
 * 创建k8s Ingress资源，验证消息路由
-   ``` shell script
-   kubectl apply -f https://raw.githubusercontent.com/bfenetworks/ingress-bfe/develop/examples/ingress.yaml  
-   ```
+``` shell script
+kubectl apply -f https://raw.githubusercontent.com/bfenetworks/ingress-bfe/develop/examples/ingress.yaml  
+```
 
 
