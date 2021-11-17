@@ -1,41 +1,39 @@
 # Deployment Guide
 
-## Install
+## Installation
+Install BFE Ingress Controller in either of two ways:
+* Apply a configure file
+* Install helm charts of controller
 
-* To deploy BFE Ingress Controller and configure related access control:
+### Configure file
 
-    ``` shell script
-    kubectl apply -f controller.yaml
-    ```
-    - Config file example: [controller.yaml](../../examples/controller.yaml)
-        - This config file uses [BFE Ingress Controller latest image on Docker Hub](https://hub.docker.com/r/bfenetworks/bfe-ingress-controller). If you want to use your customized version of the image, edit the config file to specify it.
-        - Or you can run `make docker` in root folder of this project to create your own local image and use it.
+``` shell script
+kubectl apply -f https://raw.githubusercontent.com/bfenetworks/ingress-bfe/develop/examples/controller-all.yaml
+```
 
-* To config role-based access control:
-    ``` shell script
-    kubectl apply -f rbac.yaml
-    ```
+- Above configure file uses latest version of [BFE Ingress Controller  image](https://hub.docker.com/r/bfenetworks/bfe-ingress-controller) in Docker Hub. You can edit configure file to specify other version of the image.
 
-   - Config file example: [rbac.yaml](../../examples/rbac.yaml)
-   - See detailed instructions in [Role-Based Access Control](rbac.md)
+- For details of permission configuration, please find more information in [Role-Based Access Control](rbac.md)
 
-## Test
+### Helm
 
-* Create a test service
+```
+helm upgrade --install bfe-ingress-controller bfe-ingress-controller --repo https://github.com/bfenetworks/ingress-bfe  --namespace ingress-bfe --create-namespace
+```
+
+- helm3 is required.
+
+## Testing
+
+* Create a testing service
 
   ``` shell script
-  kubectl apply -f whoami.yaml
+  kubectl apply -f https://raw.githubusercontent.com/bfenetworks/ingress-bfe/develop/examples/whoami.yaml
   ```
 
-
-   test service config file example：[whoami](../../examples/whoami.yaml)
-
-* Create ingress resource，configure route for the test service and verify
+* Create ingress resource for testing service to verify the installation
 
    ``` shell script
-   kubectl apply -f ingress.yaml  
+   kubectl apply -f https://raw.githubusercontent.com/bfenetworks/ingress-bfe/develop/examples/ingress.yaml  
    ```
-   
-   - Refer to [ingress.yaml](../../examples/ingress.yaml) for basic Ingress configuration.
-   
-   - Refer to [Summary](SUMMARY.md) for more Ingress configuration options that BFE Ingress Controller support.
+
