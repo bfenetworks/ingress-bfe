@@ -4,15 +4,15 @@ English | [中文](README-CN.md)
 
 ## Overview
 
-BFE Ingress Controller is an implementation of Kubernetes [Ingress Controller][] based on  [BFE][] , to fulfill  [Ingress][] in Kubernetes。 
+BFE Ingress Controller is an implementation of Kubernetes [Ingress Controller][] based on [BFE][], to fulfill  [Ingress][] in Kubernetes. 
 
 ## Quick start
-See [Deployment](docs/en_us/deployment.md) for quick start of using BFE Ingress Controller
+See [Deployment](docs/en_us/deployment.md) for quick start of using BFE Ingress Controller.
 
 ## Documentation
-See [Document Summary](docs/en_us/SUMMARY.md)
+See [Document Summary](docs/en_us/SUMMARY.md).
 
-## Contribute
+## Contributing
 - Create and issue in [Issue List](https://github.com/bfenetworks/ingress-bfe/issues)
 - If necessary, contact and discuss with maintainer
 - Follow the [Golang style guide](https://github.com/golang/go/wiki/Style)

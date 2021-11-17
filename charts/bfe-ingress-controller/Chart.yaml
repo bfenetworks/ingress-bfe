@@ -1,0 +1,11 @@
+apiVersion: v2
+name: bfe-ingress-controller
+description: Helm chart for BFE Ingress Controller
+type: application
+version: 0.1.0
+appVersion: "0.2.2"
+keywords:
+  - ingress
+  - bfe
+home: https://github.com/bfenetworks/ingress-bfe
+icon: https://landscape.cncf.io/logos/bfe.svg

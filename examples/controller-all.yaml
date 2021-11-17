@@ -17,6 +17,66 @@ metadata:
     app.kubernetes.io/instance: bfe-ingress-controller
 
 ---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: bfe-ingress-controller
+  labels:
+    app.kubernetes.io/name: bfe-ingress-controller
+    app.kubernetes.io/instance: bfe-ingress-controller
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - services
+  - endpoints
+  - secrets
+  - namespaces
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  - ingressclasses
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - patch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  - ingressclasses
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - patch
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: bfe-ingress-controller
+  labels:
+    app.kubernetes.io/name: bfe-ingress-controller
+    app.kubernetes.io/instance: bfe-ingress-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: bfe-ingress-controller
+subjects:
+  - kind: ServiceAccount
+    name: bfe-ingress-controller
+    namespace: ingress-bfe
+
+---
 kind: Deployment
 apiVersion: apps/v1
 metadata:
@@ -31,12 +91,10 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: bfe-ingress-controller
-      app.kubernetes.io/instance: bfe-ingress-controller
   template:
     metadata:
       labels:
         app.kubernetes.io/name: bfe-ingress-controller
-        app.kubernetes.io/instance: bfe-ingress-controller
     spec:
       serviceAccountName: bfe-ingress-controller
       containers:
@@ -65,7 +123,7 @@ spec:
     app.kubernetes.io/name: bfe-ingress-controller
     app.kubernetes.io/instance: bfe-ingress-controller
   ports:
-    - name: http
+    - name: http 
       port: 8080
       targetPort: 8080
     - name: https

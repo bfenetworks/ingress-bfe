@@ -1,22 +1,22 @@
 # Contribute Code
 This document explains how to contribute code
 
-## Coding Standard
+## Requirements of coding
 - For code and comment, follow the [Golang style guide](https://github.com/golang/go/wiki/Style).
 - Provide unit test for all code
 - Pass all unit test
-- Follow our [regulations of submmiting codes](https://www.bfe-networks.net/en_us/development/submit_pr_guide/)
+- Follow our [regulations of submitting codes](https://www.bfe-networks.net/en_us/development/submit_pr_guide/)
 
 ## Code Develop
 Below tutorial will guide you to submit code
 
 1. [Fork](https://help.github.com/articles/fork-a-repo/)
    
-    Go to [BFE Ingress Github][], click `Fork` button and generate a repository in your own github space.
+    Go to [BFE Ingress Github][], click `Fork` button to create a repository in your own GitHub space.
     
     >  `https://github.com/${USERNAME}/ingress-bfe`
     
-1. Clone
+2. Clone
    
     Clone the repository  in your own space to your local :
     ```bash
@@ -24,7 +24,7 @@ Below tutorial will guide you to submit code
     $ cd ingress-bfe
     ```
    
-1. Create local branch
+3. Create local branch
    
     We currently use [Git Branching Model][] to develop, test, release and maintenance, refer to [Release Regulation][]。
     * all development for feature and bug fix should be performed in a new branch
@@ -35,27 +35,28 @@ Below tutorial will guide you to submit code
     $ git checkout -b my-cool-stuff
     ```
     
-    > Before checkout, verify by `git status` command and keep current branch clean, otherwise untracked files will be bring to the new branch. 
+    > Before checkout, verify by `git status` command and keep current branch clean, 
+    > otherwise untracked files will be brought to the new branch. 
     
-1. Use pre-commit hook
+4. Use pre-commit hook
 
     We use [pre-commit][] tool to manage Git pre-commit hook. 
-    
-    
+
     1. run following command：
         ```bash
         $ pip install pre-commit
         $ pre-commit install
         ```
-    1. use  `gofmt` to adjust golang source code format.
-    
-1. Coding
+    2. use  `gofmt` to format code.
 
-1. Build and test
+5. Coding
 
-    Compile  BFE Ingress Controller docker from source code and test, see more instruction in [Deploy Guide](../deployment.md)
+6. Build and test
+
+    Compile source code, build BFE Ingress Controller docker and then test it.
+See more instruction in [Deploy Guide](../deployment.md)
     
-1. Commit
+7. Commit
 
     run `git commit` .
 
@@ -71,16 +72,17 @@ Below tutorial will guide you to submit code
     $ git commit -m "test=release/1.1"
     ```
     
-1. Keep local repository up-to-date
+8. Keep local repository up-to-date
 
-1. An experienced Git user pulls from the official repo often -- daily or even hourly, so they notice conflicts with others work early, and it's easier to resolve smaller conflicts.
+    An experienced Git user always pulls from the official repo before pushing. 
+They even pull daily or hourly, so they notice conflicts earlier, and it's easier to resolve smaller conflicts.
+    ```bash
+    git remote add upstream https://github.com/bfenetworks/ingress-bfe
+    git fetch upstream
+    git pull upstream develop
+    ```
 
-   ```bash
-   git remote add upstream https://github.com/bfenetworks/bfe
-   git pull upstream develop
-   ```
-
-10. Push to remote repository
+9. Push to remote repository
 
     Push local to your repository on GitHub `https://github.com/${USERNAME}/ingress-bfe`
 
@@ -93,10 +95,10 @@ $ git push origin my-cool-stuff
 
 ## Pull Request
 
-1. Create an Issue and initiate Pull Request
-1. Pass unit test
-1. Delete the branch used at your own repository
-1. Delete the branch used at your local repository
+1. Create an Issue and finish Pull Request
+2. Pass unit test
+3. Delete the branch used at your own repository
+4. Delete the branch used at your local repository
 
 > Refer to BFE [Submit PR Guide][submit PR guide]
 
