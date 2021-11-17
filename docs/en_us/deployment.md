@@ -18,7 +18,7 @@ kubectl apply -f https://raw.githubusercontent.com/bfenetworks/ingress-bfe/devel
 ### Helm
 
 ```
-helm upgrade --install bfe-ingress-controller bfe-ingress-controller --repo https://github.com/bfenetworks/ingress-bfe  --namespace ingress-bfe --create-namespace
+helm upgrade --install bfe-ingress-controller bfe-ingress-controller --repo https://bfenetworks.github.io/ingress-bfe  --namespace ingress-bfe --create-namespace
 ```
 
 - helm3 is required.
