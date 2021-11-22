@@ -39,7 +39,28 @@ kubectl apply -f https://raw.githubusercontent.com/bfenetworks/ingress-bfe/devel
 * Create ingress resource for testing service to verify the installation if your kubernetes version > 1.19
 
 ``` shell script
-kubectl apply -f https://raw.githubusercontent.com/bfenetworks/ingress-bfe/develop/examples/ingress-gt-1.19.yaml  
+kubectl apply -f ingress-gt-1.19.yaml  
 
+cat ingress-gt-1.19.yaml
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: ingress-test
+  namespace: ingress-bfe
+  annotations:
+    kubernetes.io/ingress.class: bfe
+
+spec:
+  rules:
+    - host: "foo.com"
+      http:
+        paths:
+          - path: /whoami
+            pathType: Prefix
+            backend:
+              service:
+                name: whoami
+                port:
+                  number: 80
 ```
 
