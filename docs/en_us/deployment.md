@@ -37,3 +37,8 @@ kubectl apply -f https://raw.githubusercontent.com/bfenetworks/ingress-bfe/devel
 kubectl apply -f https://raw.githubusercontent.com/bfenetworks/ingress-bfe/develop/examples/ingress.yaml  
 ```
 
+``` shell script
+kubectl apply -f https://raw.githubusercontent.com/bfenetworks/ingress-bfe/develop/examples/ingress-gt-1.19.yaml  
+
+```
+
