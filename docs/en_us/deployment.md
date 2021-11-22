@@ -36,6 +36,7 @@ kubectl apply -f https://raw.githubusercontent.com/bfenetworks/ingress-bfe/devel
 ``` shell script
 kubectl apply -f https://raw.githubusercontent.com/bfenetworks/ingress-bfe/develop/examples/ingress.yaml  
 ```
+* Create ingress resource for testing service to verify the installation if your kubernetes version > 1.19
 
 ``` shell script
 kubectl apply -f https://raw.githubusercontent.com/bfenetworks/ingress-bfe/develop/examples/ingress-gt-1.19.yaml  
