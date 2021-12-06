@@ -108,7 +108,7 @@ spec:
 kind: Ingress
 apiVersion: networking.k8s.io/v1beta1
 metadata:
-  name: "cond_priority1"
+  name: "cond_priority2"
   namespace: production  
   annotations:
     kubernetes.io/ingress.class: bfe 
