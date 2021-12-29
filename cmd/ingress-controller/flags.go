@@ -17,21 +17,14 @@ package main
 import (
 	"flag"
 
-	corev1 "k8s.io/api/core/v1"
-
 	"github.com/bfenetworks/ingress-bfe/internal/option"
 )
 
 var (
-	help           bool
-	showVersion    bool
-	namespaces     string
-	ingressClass   string
-	configPath     string
-	reloadAddr     string
-	metricsAddr    string
-	probeAddr      string
-	defaultBackend string
+	help        bool
+	showVersion bool
+
+	opts *option.Options = option.NewOptions()
 )
 
 func initFlags() {
@@ -41,15 +34,19 @@ func initFlags() {
 	flag.BoolVar(&showVersion, "version", false, "Show version of bfe-ingress-controller.")
 	flag.BoolVar(&showVersion, "v", false, "Show version of bfe-ingress-controller.")
 
-	flag.StringVar(&namespaces, "namespace", corev1.NamespaceAll, "Namespaces to watch, delimited by ','.")
-	flag.StringVar(&namespaces, "n", corev1.NamespaceAll, "Namespaces to watch, delimited by ','.")
+	flag.StringVar(&opts.Namespaces, "namespace", opts.Namespaces, "Namespaces to watch, delimited by ','.")
+	flag.StringVar(&opts.Namespaces, "n", opts.Namespaces, "Namespaces to watch, delimited by ','.")
 
-	flag.StringVar(&configPath, "bfe-config-path", option.ConfigPath, "Root directory of bfe configuration files.")
-	flag.StringVar(&configPath, "c", option.ConfigPath, "Root directory of bfe configuration files.")
+	flag.StringVar(&opts.MetricsAddr, "metrics-bind-address", opts.MetricsAddr, "The address the metric endpoint binds to.")
+	flag.StringVar(&opts.HealthProbeAddr, "health-probe-bind-address", opts.HealthProbeAddr, "The address the probe endpoint binds to.")
+	flag.StringVar(&opts.ClusterName, "k8s-cluster-name", opts.ClusterName, "k8s cluster name")
 
-	flag.StringVar(&reloadAddr, "bfe-reload-address", option.ReloadAddr, "Address of bfe config reloading.")
-	flag.StringVar(&ingressClass, "ingress-class", option.IngressClassName, "Class name of bfe ingress controller.")
-	flag.StringVar(&metricsAddr, "metrics-bind-address", option.MetricsBindAddress, "The address the metric endpoint binds to.")
-	flag.StringVar(&probeAddr, "health-probe-bind-address", option.HealthProbeBindAddress, "The address the probe endpoint binds to.")
-	flag.StringVar(&defaultBackend, "default-backend", option.DefaultBackend, "set default backend name, default backend is used if no any ingress rule matched, format namespace/name.")
+	flag.StringVar(&opts.Ingress.ConfigPath, "bfe-config-path", opts.Ingress.ConfigPath, "Root directory of bfe configuration files.")
+	flag.StringVar(&opts.Ingress.ConfigPath, "c", opts.Ingress.ConfigPath, "Root directory of bfe configuration files.")
+	flag.StringVar(&opts.Ingress.BfeBinary, "bfe-binary", opts.Ingress.BfeBinary, "Absolute path of BFE binary. If set, <bfe-config-path> is overwritten by <bfe-binary>/../conf")
+	flag.StringVar(&opts.Ingress.BfeBinary, "b", opts.Ingress.BfeBinary, "Absolute path of BFE binary. If set, <bfe-config-path> is overwritten by <bfe-binary>/../conf,")
+	flag.StringVar(&opts.Ingress.ReloadAddr, "bfe-reload-address", opts.Ingress.ReloadAddr, "Address of bfe config reloading.")
+	flag.StringVar(&opts.Ingress.IngressClass, "ingress-class", opts.Ingress.IngressClass, "Class name of bfe ingress controller.")
+	flag.StringVar(&opts.Ingress.DefaultBackend, "default-backend", opts.Ingress.DefaultBackend, "set default backend name, default backend is used if no any ingress rule matched, format namespace/name.")
+
 }

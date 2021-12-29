@@ -112,8 +112,8 @@ func (c *ClusterConfig) UpdateIngress(ingress *netv1.Ingress, services map[strin
 		}
 	}
 
-	if len(option.Opts.DefaultBackend) > 0 {
-		c.addDefautBackend(endpoints[option.Opts.DefaultBackend])
+	if len(option.Opts.Ingress.DefaultBackend) > 0 {
+		c.addDefautBackend(endpoints[option.Opts.Ingress.DefaultBackend])
 	}
 
 	if err := cluster_table_conf.ClusterTableConfCheck(c.clusterTableConf); err != nil {
@@ -140,7 +140,7 @@ func (c *ClusterConfig) addDefautBackend(ep *corev1.Endpoints) {
 		return
 	}
 
-	serviceName := option.Opts.DefaultBackend
+	serviceName := option.Opts.Ingress.DefaultBackend
 
 	subCluster := make(cluster_table_conf.ClusterBackend)
 	subCluster[serviceName] = instanceList
@@ -173,7 +173,7 @@ func (c *ClusterConfig) DeleteIngress(namespace, name string) {
 	c.ingress2Cluster.RemoveAll(ingressName)
 
 	// if no ingress exist, remove default backend config
-	if len(option.Opts.DefaultBackend) > 0 && c.ingress2Cluster.Empty() {
+	if len(option.Opts.Ingress.DefaultBackend) > 0 && c.ingress2Cluster.Empty() {
 		c.delDefautBackend()
 	}
 
@@ -181,7 +181,7 @@ func (c *ClusterConfig) DeleteIngress(namespace, name string) {
 }
 
 func (c *ClusterConfig) delDefautBackend() {
-	c.service2Cluster.Remove(option.Opts.DefaultBackend, util.DefaultClusterName())
+	c.service2Cluster.Remove(option.Opts.Ingress.DefaultBackend, util.DefaultClusterName())
 	delete(*c.clusterTableConf.Config, util.DefaultClusterName())
 	delete(*c.gslbConf.Clusters, util.DefaultClusterName())
 }
@@ -313,7 +313,7 @@ func (c *ClusterConfig) UpdateService(service *corev1.Service, endpoint *corev1.
 
 		targetPort := getTargetPort(util.ParsePort(name), service)
 		// targetPort not found, which is not allowed for normal backend beside default backend
-		if targetPort.IntVal == 0 && len(targetPort.StrVal) == 0 && serviceName != option.Opts.DefaultBackend {
+		if targetPort.IntVal == 0 && len(targetPort.StrVal) == 0 && serviceName != option.Opts.Ingress.DefaultBackend {
 			c.DeleteService(service.Namespace, service.Name)
 			log.V(0).Info("ingress backend port not found in service", "namespace", service.Namespace, "name", service.Name, "port", util.ParsePort(name))
 			return fmt.Errorf("cluster [%s] error, port can not found in service", name)

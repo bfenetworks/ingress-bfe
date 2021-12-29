@@ -15,26 +15,32 @@
 package controllers
 
 import (
+	"context"
 	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"syscall"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/discovery"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	"github.com/bfenetworks/ingress-bfe/internal/bfeConfig"
-	"github.com/bfenetworks/ingress-bfe/internal/controllers/corev1"
-	extensionsv1beta1 "github.com/bfenetworks/ingress-bfe/internal/controllers/extv1beta1"
-	"github.com/bfenetworks/ingress-bfe/internal/controllers/netv1"
-	"github.com/bfenetworks/ingress-bfe/internal/controllers/netv1beta1"
-	option "github.com/bfenetworks/ingress-bfe/internal/option"
+	"github.com/bfenetworks/ingress-bfe/internal/controllers/ingress"
+	extensionsv1beta1 "github.com/bfenetworks/ingress-bfe/internal/controllers/ingress/extv1beta1"
+	"github.com/bfenetworks/ingress-bfe/internal/controllers/ingress/netv1"
+	"github.com/bfenetworks/ingress-bfe/internal/controllers/ingress/netv1beta1"
+	"github.com/bfenetworks/ingress-bfe/internal/option"
 )
 
 var (
 	log = ctrl.Log.WithName("controllers")
 )
 
-func Start(scheme *runtime.Scheme, configBuilder *bfeConfig.ConfigBuilder) error {
+func Start(scheme *runtime.Scheme) error {
 	config, err := ctrl.GetConfig()
 	if err != nil {
 		return fmt.Errorf("unable to get client config: %s", err)
@@ -49,7 +55,40 @@ func Start(scheme *runtime.Scheme, configBuilder *bfeConfig.ConfigBuilder) error
 		return fmt.Errorf("unable to start controller manager: %s", err)
 	}
 
-	if err = (&corev1.EndpointsReconciler{
+	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
+		return fmt.Errorf("unable to set up health check: %s", err)
+	}
+	if err := mgr.AddReadyzCheck("readyz", healthz.Ping); err != nil {
+		return fmt.Errorf("unable to set up ready check: %s", err)
+	}
+
+	ctx := ctrl.SetupSignalHandler()
+
+	if err := addIngressController(ctx, mgr); err != nil {
+		return err
+	}
+
+	if err := startBFE(ctx); err != nil {
+		return err
+	}
+
+	log.Info("starting manager")
+
+	// start controller manager and blocking
+	if err := mgr.Start(ctx); err != nil {
+		return fmt.Errorf("fail to run manager: %s", err)
+	}
+
+	log.Info("exit manager")
+
+	return nil
+}
+
+func addIngressController(ctx context.Context, mgr manager.Manager) error {
+	configBuilder := bfeConfig.NewConfigBuilder()
+	configBuilder.InitReload(ctx)
+
+	if err := (&ingress.EndpointsReconciler{
 		BfeConfigBuilder: configBuilder,
 		Client:           mgr.GetClient(),
 		Scheme:           mgr.GetScheme(),
@@ -57,7 +96,7 @@ func Start(scheme *runtime.Scheme, configBuilder *bfeConfig.ConfigBuilder) error
 		return fmt.Errorf("unable to create controller Endpoints: %s", err)
 	}
 
-	if err = (&corev1.SecretReconciler{
+	if err := (&ingress.SecretReconciler{
 		BfeConfigBuilder: configBuilder,
 		Client:           mgr.GetClient(),
 		Scheme:           mgr.GetScheme(),
@@ -97,18 +136,38 @@ func Start(scheme *runtime.Scheme, configBuilder *bfeConfig.ConfigBuilder) error
 		}
 	}
 
-	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
-		return fmt.Errorf("unable to set up health check: %s", err)
-	}
-	if err := mgr.AddReadyzCheck("readyz", healthz.Ping); err != nil {
-		return fmt.Errorf("unable to set up ready check: %s", err)
-	}
-
-	log.Info("starting manager")
-	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-		return fmt.Errorf("fail to run manager: %s", err)
-	}
-	log.Info("existing manager")
-
 	return nil
+}
+
+func startBFE(ctx context.Context) error {
+	cmd := exec.Command(option.Opts.Ingress.BfeBinary, "-c", "../conf", "-l", "../log", "-s")
+	cmd.Dir = filepath.Dir(option.Opts.Ingress.BfeBinary)
+
+	log.Info("bfe is starting")
+
+	err := cmd.Start()
+	if err != nil {
+		return fmt.Errorf("fail to start bfe: %s", err.Error())
+	}
+
+	go func() {
+		if err := cmd.Wait(); err != nil {
+			log.Error(err, "bfe exit")
+		} else {
+			log.Info("bfe exit")
+		}
+
+		// bfe exit, signaling controller to exit
+		raise(syscall.SIGTERM)
+	}()
+
+	return err
+}
+
+func raise(sig os.Signal) error {
+	p, err := os.FindProcess(os.Getpid())
+	if err != nil {
+		return err
+	}
+	return p.Signal(sig)
 }

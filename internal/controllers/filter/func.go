@@ -30,10 +30,10 @@ import (
 
 func NamespaceFilter() predicate.Funcs {
 	funcs := predicate.NewPredicateFuncs(func(obj client.Object) bool {
-		if len(option.Opts.Namespaces) == 1 && option.Opts.Namespaces[0] == corev1.NamespaceAll {
+		if len(option.Opts.NamespaceList) == 1 && option.Opts.NamespaceList[0] == corev1.NamespaceAll {
 			return true
 		}
-		for _, ns := range option.Opts.Namespaces {
+		for _, ns := range option.Opts.NamespaceList {
 			if ns == obj.GetNamespace() {
 				return true
 			}
@@ -45,15 +45,15 @@ func NamespaceFilter() predicate.Funcs {
 }
 
 func MatchIngressClass(ctx context.Context, r client.Reader, annots map[string]string, ingressClassName *string) bool {
-	if annots[annotations.IngressClassKey] == option.Opts.IngressClass {
+	if annots[annotations.IngressClassKey] == option.Opts.Ingress.IngressClass {
 		return true
 	}
 
 	classListV1 := &netv1.IngressClassList{}
-	err := r.List(ctx, classListV1, client.MatchingLabels{".spec.controller": option.Opts.ControllerName})
+	err := r.List(ctx, classListV1, client.MatchingLabels{".spec.controller": option.Opts.Ingress.ControllerName})
 	if err == nil {
 		for _, class := range classListV1.Items {
-			if class.Spec.Controller != option.Opts.ControllerName {
+			if class.Spec.Controller != option.Opts.Ingress.ControllerName {
 				continue
 			}
 			if (ingressClassName != nil && *ingressClassName == class.Name) ||
@@ -69,7 +69,7 @@ func MatchIngressClass(ctx context.Context, r client.Reader, annots map[string]s
 		return false
 	}
 	for _, classV1Beta1 := range classListV1Beta1.Items {
-		if classV1Beta1.Spec.Controller != option.Opts.ControllerName {
+		if classV1Beta1.Spec.Controller != option.Opts.Ingress.ControllerName {
 			continue
 		}
 		if (ingressClassName != nil && *ingressClassName == classV1Beta1.Name) ||

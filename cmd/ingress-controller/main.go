@@ -25,7 +25,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	"github.com/bfenetworks/ingress-bfe/internal/bfeConfig"
 	"github.com/bfenetworks/ingress-bfe/internal/controllers"
 	"github.com/bfenetworks/ingress-bfe/internal/option"
 )
@@ -46,12 +45,12 @@ var (
 )
 
 func main() {
-	opts := zap.Options{
+	zapOpts := zap.Options{
 		Development: true,
 	}
-	opts.BindFlags(flag.CommandLine)
+	zapOpts.BindFlags(flag.CommandLine)
 	flag.Parse()
-	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
+	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&zapOpts)))
 
 	if help {
 		flag.PrintDefaults()
@@ -64,9 +63,7 @@ func main() {
 		return
 	}
 
-	err := option.SetOptions(
-		namespaces, ingressClass, configPath, reloadAddr,
-		metricsAddr, probeAddr, defaultBackend)
+	err := option.SetOptions(opts)
 	if err != nil {
 		setupLog.Error(err, "fail to start controllers")
 		return
@@ -74,10 +71,7 @@ func main() {
 
 	setupLog.Info("starting bfe-ingress-controller")
 
-	configBuilder := bfeConfig.NewConfigBuilder()
-	configBuilder.InitReload()
-
-	if err := controllers.Start(scheme, configBuilder); err != nil {
+	if err := controllers.Start(scheme); err != nil {
 		setupLog.Error(err, "fail to start controllers")
 	}
 

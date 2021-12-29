@@ -252,7 +252,7 @@ func (c *ServerDataConfig) updateRouteTable() error {
 		(*routeTableFile.ProductRule)[DefaultProduct] = append((*routeTableFile.ProductRule)[DefaultProduct], ruleFile)
 	}
 
-	if len(option.Opts.DefaultBackend) > 0 && (len(basicRules) > 0 || len(advancedRules) > 0) {
+	if len(option.Opts.Ingress.DefaultBackend) > 0 && (len(basicRules) > 0 || len(advancedRules) > 0) {
 		condition := "default_t()"
 		cluster := util.DefaultClusterName()
 		ruleFile := route_rule_conf.AdvancedRouteRuleFile{
@@ -293,7 +293,7 @@ func (c *ServerDataConfig) updateBfeClusterConf() {
 			GslbBasic: newGslbBasicConf(),
 		}
 	}
-	if len(option.Opts.DefaultBackend) > 0 && (len(basicRules) > 0 || len(advancedRules) > 0) {
+	if len(option.Opts.Ingress.DefaultBackend) > 0 && (len(basicRules) > 0 || len(advancedRules) > 0) {
 		(*clusterConf.Config)[util.DefaultClusterName()] = cluster_conf.ClusterConf{
 			CheckConf: newCheckConf(),
 			GslbBasic: newGslbBasicConf(),

@@ -15,74 +15,51 @@
 package option
 
 import (
-	"fmt"
-	"os"
 	"strings"
-	"time"
 
-	"k8s.io/apimachinery/pkg/types"
+	corev1 "k8s.io/api/core/v1"
+
+	"github.com/bfenetworks/ingress-bfe/internal/option/ingress"
 )
 
 const (
-	ConfigPath      = "/bfe/conf/"
-	ReloadAddr      = "localhost:8421"
-	reloadInterval  = 3 * time.Second
-	reloadUrlPrefix = "http://%s/reload/"
-
-	FilePerm os.FileMode = 0744
-
+	ClusterName            = "default"
 	MetricsBindAddress     = ":9080"
 	HealthProbeBindAddress = ":9081"
-
-	// used in ingress annotation as value of key kubernetes.io/ingress.class
-	IngressClassName = "bfe"
-
-	// used in IngressClass resource as value of controller
-	ControllerName = "bfe-networks.com/ingress-controller"
-
-	// default backend
-	DefaultBackend = ""
 )
 
 type Options struct {
-	Namespaces      []string
-	IngressClass    string
-	ControllerName  string
-	ReloadUrl       string
-	ConfigPath      string
+	ClusterName string
+
+	Namespaces      string
+	NamespaceList   []string
 	MetricsAddr     string
 	HealthProbeAddr string
-	ReloadInterval  time.Duration
-	DefaultBackend  string
+
+	Ingress *ingress.Options
 }
 
 var (
 	Opts *Options
 )
 
-func SetOptions(namespaces, class, configPath, reloadAddr, metricsAddr, probeAddr, defaultBackend string) error {
-	if len(defaultBackend) > 0 {
-		names := strings.Split(defaultBackend, string(types.Separator))
-		if len(names) != 2 {
-			return fmt.Errorf("invalid command line argument default-backend: %s", defaultBackend)
-		}
+func NewOptions() *Options {
+	return &Options{
+		ClusterName:     ClusterName,
+		Namespaces:      corev1.NamespaceAll,
+		MetricsAddr:     MetricsBindAddress,
+		HealthProbeAddr: HealthProbeBindAddress,
+		Ingress:         ingress.NewOptions(),
+	}
+}
+
+func SetOptions(option *Options) error {
+	if err := option.Ingress.Check(); err != nil {
+		return err
 	}
 
-	if !strings.HasSuffix(configPath, "/") {
-		configPath = configPath + "/"
-	}
-
-	Opts = &Options{
-		Namespaces:      strings.Split(namespaces, ","),
-		IngressClass:    class,
-		ControllerName:  ControllerName,
-		ReloadUrl:       fmt.Sprintf(reloadUrlPrefix, reloadAddr),
-		ConfigPath:      configPath,
-		MetricsAddr:     metricsAddr,
-		HealthProbeAddr: probeAddr,
-		ReloadInterval:  reloadInterval,
-		DefaultBackend:  defaultBackend,
-	}
+	Opts = option
+	Opts.NamespaceList = strings.Split(Opts.Namespaces, ",")
 
 	return nil
 }
