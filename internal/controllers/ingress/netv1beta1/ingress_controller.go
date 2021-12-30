@@ -27,7 +27,7 @@ import (
 	"github.com/bfenetworks/ingress-bfe/internal/bfeConfig"
 	"github.com/bfenetworks/ingress-bfe/internal/bfeConfig/annotations"
 	"github.com/bfenetworks/ingress-bfe/internal/controllers/filter"
-	controllerV1 "github.com/bfenetworks/ingress-bfe/internal/controllers/netv1"
+	controllerV1 "github.com/bfenetworks/ingress-bfe/internal/controllers/ingress/netv1"
 )
 
 // IngressReconciler reconciles a netv1beta1 Ingress object

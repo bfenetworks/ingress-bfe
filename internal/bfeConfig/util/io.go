@@ -34,23 +34,23 @@ func DumpBfeConf(configFile string, object interface{}) error {
 }
 
 func DumpFile(filename string, data []byte) error {
-	name := option.Opts.ConfigPath + filename
+	name := option.Opts.Ingress.ConfigPath + filename
 	filePath := filepath.Dir(name)
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		os.MkdirAll(filePath, option.FilePerm)
+		os.MkdirAll(filePath, option.Opts.Ingress.FilePerm)
 	}
 
-	return ioutil.WriteFile(name, data, option.FilePerm)
+	return ioutil.WriteFile(name, data, option.Opts.Ingress.FilePerm)
 }
 
 func DeleteFile(filename string) {
-	name := option.Opts.ConfigPath + filename
+	name := option.Opts.Ingress.ConfigPath + filename
 	os.Remove(name)
 }
 
 // ReloadBfe triggers bfe process to reload new config file through bfe monitor port
 func ReloadBfe(configName string) error {
-	url := option.Opts.ReloadUrl + configName
+	url := option.Opts.Ingress.ReloadUrl + configName
 	res, err := http.Get(url)
 	if err != nil {
 		return err

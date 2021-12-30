@@ -15,6 +15,7 @@
 package bfeConfig
 
 import (
+	"context"
 	"sync"
 	"time"
 
@@ -110,13 +111,20 @@ func (c *ConfigBuilder) DeleteSecret(namespace, name string) {
 	c.tlsConf.DeleteSecret(namespace, name)
 }
 
-func (c *ConfigBuilder) InitReload() {
-	tick := time.NewTicker(option.Opts.ReloadInterval)
+func (c *ConfigBuilder) InitReload(ctx context.Context) {
+	tick := time.NewTicker(option.Opts.Ingress.ReloadInterval)
 
 	go func() {
-		for range tick.C {
-			if err := c.reload(); err != nil {
-				log.Error(err, "fail to reload config")
+		defer tick.Stop()
+		for {
+			select {
+			case <-tick.C:
+				if err := c.reload(); err != nil {
+					log.Error(err, "fail to reload config")
+				}
+			case <-ctx.Done():
+				log.Info("exit bfe reload")
+				return
 			}
 		}
 	}()

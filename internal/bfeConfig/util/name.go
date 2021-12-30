@@ -34,7 +34,7 @@ func ClusterName(ingressName string, backend *netv1.IngressServiceBackend) strin
 // DefaultClusterName returns a default cluster for default backend
 func DefaultClusterName() string {
 	ingress := "__defaultCluster__"
-	return fmt.Sprintf("%s_%s_%d", ingress, option.Opts.DefaultBackend, 0)
+	return fmt.Sprintf("%s_%s_%d", ingress, option.Opts.Ingress.DefaultBackend, 0)
 }
 
 func ParsePort(clusterName string) netv1.ServiceBackendPort {

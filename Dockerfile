@@ -10,4 +10,4 @@ COPY --from=build /bfe-ingress-controller/output/* /
 
 EXPOSE 8080 8443 8421
 
-ENTRYPOINT ["/start.sh", "/bfe-ingress-controller", "/bfe/bin/bfe"]
+ENTRYPOINT ["/bfe-ingress-controller"]

@@ -96,9 +96,9 @@ func ReconcileV1Ingress(ctx context.Context, r client.Client, configBuilder *bfe
 		return err
 	}
 
-	if len(option.Opts.DefaultBackend) > 0 {
+	if len(option.Opts.Ingress.DefaultBackend) > 0 {
 		// use default backend from controller command line argument
-		setDefautBackend(ingress, service[option.Opts.DefaultBackend])
+		setDefautBackend(ingress, service[option.Opts.Ingress.DefaultBackend])
 	}
 
 	secrets, err := getIngressSecret(ctx, r, ingress)
@@ -117,10 +117,10 @@ func ReconcileV1Ingress(ctx context.Context, r client.Client, configBuilder *bfe
 
 func NamespaceFilter() predicate.Funcs {
 	funcs := predicate.NewPredicateFuncs(func(obj client.Object) bool {
-		if len(option.Opts.Namespaces) == 0 {
+		if len(option.Opts.NamespaceList) == 0 {
 			return true
 		}
-		for _, ns := range option.Opts.Namespaces {
+		for _, ns := range option.Opts.NamespaceList {
 			if ns == obj.GetNamespace() {
 				return true
 			}
@@ -135,10 +135,10 @@ func getIngressBackends(ctx context.Context, r client.Reader, ingress *netv1.Ing
 	services := make(map[string]*corev1.Service)
 	endpoints := make(map[string]*corev1.Endpoints)
 
-	if len(option.Opts.DefaultBackend) > 0 {
-		if svc, ep, err := getDefaultBackends(ctx, r, option.Opts.DefaultBackend); err == nil {
-			services[option.Opts.DefaultBackend] = svc
-			endpoints[option.Opts.DefaultBackend] = ep
+	if len(option.Opts.Ingress.DefaultBackend) > 0 {
+		if svc, ep, err := getDefaultBackends(ctx, r, option.Opts.Ingress.DefaultBackend); err == nil {
+			services[option.Opts.Ingress.DefaultBackend] = svc
+			endpoints[option.Opts.Ingress.DefaultBackend] = ep
 		}
 	}
 
@@ -266,11 +266,11 @@ func getSecret(ctx context.Context, r client.Reader, namespace, name string) (*c
 
 // set defaultBackend in ingress
 func setDefautBackend(ingress *netv1.Ingress, service *corev1.Service) {
-	if len(option.Opts.DefaultBackend) == 0 || service == nil || len(service.Spec.Ports) == 0 {
+	if len(option.Opts.Ingress.DefaultBackend) == 0 || service == nil || len(service.Spec.Ports) == 0 {
 		return
 	}
 
-	names := strings.Split(option.Opts.DefaultBackend, "/")
+	names := strings.Split(option.Opts.Ingress.DefaultBackend, "/")
 
 	backend := &netv1.IngressBackend{}
 	backend.Service = &netv1.IngressServiceBackend{
