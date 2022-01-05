@@ -33,7 +33,7 @@ BFE Ingress Controller 为基于 [BFE][] 实现的[Kubernetes Ingress Controller
 
   <table>
   <tr>
-  <td><img src="https://bfeopensource.bj.bcebos.com/wechatQRCode.png" width="100"></td>
+  <td><img src="https://raw.githubusercontent.com/clarinette9/bfe-external-resource/main/wechatQRCode.png" width="100"></td>
   </tr>
   </table>
 
