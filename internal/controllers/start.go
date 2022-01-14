@@ -30,7 +30,7 @@ import (
 
 	"github.com/bfenetworks/ingress-bfe/internal/bfeConfig"
 	"github.com/bfenetworks/ingress-bfe/internal/controllers/ingress"
-	extensionsv1beta1 "github.com/bfenetworks/ingress-bfe/internal/controllers/ingress/extv1beta1"
+	"github.com/bfenetworks/ingress-bfe/internal/controllers/ingress/extv1beta1"
 	"github.com/bfenetworks/ingress-bfe/internal/controllers/ingress/netv1"
 	"github.com/bfenetworks/ingress-bfe/internal/controllers/ingress/netv1beta1"
 	"github.com/bfenetworks/ingress-bfe/internal/option"
@@ -64,10 +64,16 @@ func Start(scheme *runtime.Scheme) error {
 
 	ctx := ctrl.SetupSignalHandler()
 
-	if err := addIngressController(ctx, mgr); err != nil {
+	// new bfe config builder
+	cb := bfeConfig.NewConfigBuilder()
+	cb.InitReload(ctx)
+
+	// add controller to watch ingress resource
+	if err := addController(cb, mgr); err != nil {
 		return err
 	}
 
+	// start bfe process
 	if err := startBFE(ctx); err != nil {
 		return err
 	}
@@ -84,26 +90,7 @@ func Start(scheme *runtime.Scheme) error {
 	return nil
 }
 
-func addIngressController(ctx context.Context, mgr manager.Manager) error {
-	configBuilder := bfeConfig.NewConfigBuilder()
-	configBuilder.InitReload(ctx)
-
-	if err := (&ingress.EndpointsReconciler{
-		BfeConfigBuilder: configBuilder,
-		Client:           mgr.GetClient(),
-		Scheme:           mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		return fmt.Errorf("unable to create controller Endpoints: %s", err)
-	}
-
-	if err := (&ingress.SecretReconciler{
-		BfeConfigBuilder: configBuilder,
-		Client:           mgr.GetClient(),
-		Scheme:           mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		return fmt.Errorf("unable to create controller secret: %s", err)
-	}
-
+func addController(cb *bfeConfig.ConfigBuilder, mgr manager.Manager) error {
 	client := discovery.NewDiscoveryClientForConfigOrDie(ctrl.GetConfigOrDie())
 	serverVersion, err := client.ServerVersion()
 	if err != nil {
@@ -111,29 +98,25 @@ func addIngressController(ctx context.Context, mgr manager.Manager) error {
 	}
 
 	if serverVersion.Major >= "1" && serverVersion.Minor >= "19" {
-		if err = (&netv1.IngressReconciler{
-			BfeConfigBuilder: configBuilder,
-			Client:           mgr.GetClient(),
-			Scheme:           mgr.GetScheme(),
-		}).SetupWithManager(mgr); err != nil {
+		if err = netv1.AddIngressController(mgr, cb); err != nil {
 			return fmt.Errorf("unable to create controller Ingress(netwokingv1): %s", err)
 		}
 	} else if serverVersion.Major >= "1" && serverVersion.Minor >= "14" {
-		if err = (&netv1beta1.IngressReconciler{
-			BfeConfigBuilder: configBuilder,
-			Client:           mgr.GetClient(),
-			Scheme:           mgr.GetScheme(),
-		}).SetupWithManager(mgr); err != nil {
+		if err = netv1beta1.AddIngressController(mgr, cb); err != nil {
 			return fmt.Errorf("unable to create controller Ingress(netwokingv1beta1): %s", err)
 		}
 	} else {
-		if err = (&extensionsv1beta1.IngressReconciler{
-			BfeConfigBuilder: configBuilder,
-			Client:           mgr.GetClient(),
-			Scheme:           mgr.GetScheme(),
-		}).SetupWithManager(mgr); err != nil {
+		if err = extv1beta1.AddIngressController(mgr, cb); err != nil {
 			return fmt.Errorf("unable to create controller Ingress(extensionsv1beta1): %s", err)
 		}
+	}
+
+	if err := ingress.AddServiceController(mgr, cb); err != nil {
+		return fmt.Errorf("unable to create controller Service: %s", err)
+	}
+
+	if err := ingress.AddSecretController(mgr, cb); err != nil {
+		return fmt.Errorf("unable to create controller secret: %s", err)
 	}
 
 	return nil

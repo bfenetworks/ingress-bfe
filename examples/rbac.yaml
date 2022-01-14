@@ -19,6 +19,13 @@ rules:
   - list
   - watch
 - apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch  
+- apiGroups:
   - extensions
   resources:
   - ingresses

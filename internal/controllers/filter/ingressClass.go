@@ -18,33 +18,15 @@ import (
 	"context"
 	"strings"
 
-	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	netv1beta1 "k8s.io/api/networking/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	"github.com/bfenetworks/ingress-bfe/internal/bfeConfig/annotations"
 	"github.com/bfenetworks/ingress-bfe/internal/option"
 )
 
-func NamespaceFilter() predicate.Funcs {
-	funcs := predicate.NewPredicateFuncs(func(obj client.Object) bool {
-		if len(option.Opts.NamespaceList) == 1 && option.Opts.NamespaceList[0] == corev1.NamespaceAll {
-			return true
-		}
-		for _, ns := range option.Opts.NamespaceList {
-			if ns == obj.GetNamespace() {
-				return true
-			}
-		}
-		return false
-	})
-
-	return funcs
-}
-
-func MatchIngressClass(ctx context.Context, r client.Reader, annots map[string]string, ingressClassName *string) bool {
+func IngressClassFilter(ctx context.Context, r client.Reader, annots map[string]string, ingressClassName *string) bool {
 	if annots[annotations.IngressClassKey] == option.Opts.Ingress.IngressClass {
 		return true
 	}

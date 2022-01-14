@@ -14,28 +14,52 @@ package netv1beta1
 
 import (
 	"context"
+	"fmt"
 
+	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	netv1beta1 "k8s.io/api/networking/v1beta1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/bfenetworks/ingress-bfe/internal/bfeConfig"
 	"github.com/bfenetworks/ingress-bfe/internal/bfeConfig/annotations"
+	"github.com/bfenetworks/ingress-bfe/internal/controllers/event"
 	"github.com/bfenetworks/ingress-bfe/internal/controllers/filter"
 	controllerV1 "github.com/bfenetworks/ingress-bfe/internal/controllers/ingress/netv1"
 )
+
+func AddIngressController(mgr manager.Manager, cb *bfeConfig.ConfigBuilder) error {
+	reconciler := newIngressReconciler(mgr, cb)
+	if err := reconciler.setupWithManager(mgr); err != nil {
+		return fmt.Errorf("unable to create ingress controller")
+	}
+
+	return nil
+}
 
 // IngressReconciler reconciles a netv1beta1 Ingress object
 type IngressReconciler struct {
 	BfeConfigBuilder *bfeConfig.ConfigBuilder
 
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme   *runtime.Scheme
+	recorder record.EventRecorder
+}
+
+func newIngressReconciler(mgr manager.Manager, cb *bfeConfig.ConfigBuilder) *IngressReconciler {
+	return &IngressReconciler{
+		BfeConfigBuilder: cb,
+		Client:           mgr.GetClient(),
+		Scheme:           mgr.GetScheme(),
+		recorder:         mgr.GetEventRecorderFor("bfe-ingress-controller"),
+	}
 }
 
 func (r *IngressReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -50,7 +74,7 @@ func (r *IngressReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		log.V(1).Info("reconcile: ingress delete")
 		return reconcile.Result{}, nil
 	}
-	if !filter.MatchIngressClass(ctx, r, ingressV1beta1.Annotations, ingressV1beta1.Spec.IngressClassName) {
+	if !filter.IngressClassFilter(ctx, r, ingressV1beta1.Annotations, ingressV1beta1.Spec.IngressClassName) {
 		return reconcile.Result{}, nil
 	}
 
@@ -61,11 +85,18 @@ func (r *IngressReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	err = controllerV1.ReconcileV1Ingress(ctx, r.Client, r.BfeConfigBuilder, ingressV1)
 	setStatus(ctx, r.Client, err, ingressV1beta1)
+
+	if err != nil {
+		r.recorder.Event(ingressV1beta1, corev1.EventTypeWarning, event.SyncFailed, err.Error())
+	} else {
+		r.recorder.Event(ingressV1beta1, corev1.EventTypeNormal, event.SyncSucceed, "Synced")
+	}
+
 	return reconcile.Result{}, err
 }
 
-// SetupWithManager sets up the controller with the Manager.
-func (r *IngressReconciler) SetupWithManager(mgr ctrl.Manager) error {
+// setupWithManager sets up the controller with the Manager.
+func (r *IngressReconciler) setupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&netv1beta1.Ingress{}, builder.WithPredicates(filter.NamespaceFilter())).
 		Complete(r)
