@@ -30,7 +30,6 @@ GOGEN        := $(GO) generate
 GOCLEAN      := $(GO) clean
 GOFLAGS      := -race
 STATICCHECK  := staticcheck
-LICENSEEYE   := license-eye
 
 # init arch
 ARCH := $(shell getconf LONG_BIT)
@@ -70,18 +69,6 @@ coverage:
 check:
 	$(GO) get honnef.co/go/tools/cmd/staticcheck
 	$(STATICCHECK) ./...
-
-# make license-eye-install
-license-eye-install:
-	$(GO) install github.com/apache/skywalking-eyes/cmd/license-eye@latest
-
-# make license-check, check code file's license declaration
-license-check: license-eye-install
-	$(LICENSEEYE) header check
-
-# make license-fix, fix code file's license declaration
-license-fix: license-eye-install
-	$(LICENSEEYE) header fix
 
 # make docker
 docker:
