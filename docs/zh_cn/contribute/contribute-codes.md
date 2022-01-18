@@ -50,8 +50,20 @@
         $ pip install pre-commit
         $ pre-commit install
         ```
-    1. 使用 `gofmt` 来调整 golang源代码格式。
-    
+    2. 使用 `gofmt` 来调整 golang源代码格式。
+
+1. 使用 `license-eye` 工具
+
+   [license-eye](http://github.com/apache/skywalking-eyes) 工具可以帮助我们检查和修复所有文件的证书声明，在提交 (commit) 前证书声明都应该先完成。
+
+   `license-eye` 检查是 Github-Action 中检测的一部分，检测不通过的 PR 不能被提交到代码库，安装使用它：
+
+   ```bash
+   $ make license-eye-install
+   $ make license-check
+   $ make license-fix
+   ```
+ 
 1. 编写代码
 
     在本例中，删除了 README.md 中的一行，并创建了一个新文件。

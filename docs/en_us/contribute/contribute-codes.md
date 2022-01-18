@@ -48,15 +48,28 @@ Below tutorial will guide you to submit code
         $ pre-commit install
         ```
     2. use  `gofmt` to format code.
+   
 
-5. Coding
+5. Use `license-eye` tool
 
-6. Build and test
+   [license-eye](http://github.com/apache/skywalking-eyes) helps us check and fix file's license header declaration. All files' license header should be done before committing.
+
+   The `license-eye` check is part of the Github-Action. A PR that check failed cannot be submitted to BFE. Install `license-eye` and do check or fix:
+
+   ```bash
+   $ make license-eye-install
+   $ make license-check
+   $ make license-fix
+   ```
+
+6. Coding
+
+7. Build and test
 
     Compile source code, build BFE Ingress Controller docker and then test it.
 See more instruction in [Deploy Guide](../deployment.md)
     
-7. Commit
+8. Commit
 
     run `git commit` .
 
@@ -72,7 +85,7 @@ See more instruction in [Deploy Guide](../deployment.md)
     $ git commit -m "test=release/1.1"
     ```
     
-8. Keep local repository up-to-date
+9. Keep local repository up-to-date
 
     An experienced Git user always pulls from the official repo before pushing. 
 They even pull daily or hourly, so they notice conflicts earlier, and it's easier to resolve smaller conflicts.
@@ -82,9 +95,9 @@ They even pull daily or hourly, so they notice conflicts earlier, and it's easie
     git pull upstream develop
     ```
 
-9. Push to remote repository
+10. Push to remote repository
 
-    Push local to your repository on GitHub `https://github.com/${USERNAME}/ingress-bfe`
+     Push local to your repository on GitHub `https://github.com/${USERNAME}/ingress-bfe`
 
 ```bash
 # Example: push to remote repository `origin` branch `my-cool-stuff`
