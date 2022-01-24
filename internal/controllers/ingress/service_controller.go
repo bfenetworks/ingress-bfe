@@ -20,18 +20,22 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	"github.com/bfenetworks/ingress-bfe/internal/bfeConfig"
 	"github.com/bfenetworks/ingress-bfe/internal/controllers/filter"
 )
 
-func AddSecretController(mgr manager.Manager, cb *bfeConfig.ConfigBuilder) error {
-	reconciler := newSecretReconciler(mgr, cb)
+func AddServiceController(mgr manager.Manager, cb *bfeConfig.ConfigBuilder) error {
+	reconciler := newServiceReconciler(mgr, cb)
 	if err := reconciler.setupWithManager(mgr); err != nil {
 		return fmt.Errorf("unable to create ingress controller")
 	}
@@ -39,43 +43,64 @@ func AddSecretController(mgr manager.Manager, cb *bfeConfig.ConfigBuilder) error
 	return nil
 }
 
-// SecretReconciler reconciles a Secret object
-type SecretReconciler struct {
+// ServiceReconciler reconciles a Service/Endpoints object
+type ServiceReconciler struct {
 	BfeConfigBuilder *bfeConfig.ConfigBuilder
 
 	client.Client
 	Scheme *runtime.Scheme
 }
 
-func newSecretReconciler(mgr manager.Manager, cb *bfeConfig.ConfigBuilder) *SecretReconciler {
-	return &SecretReconciler{
+func newServiceReconciler(mgr manager.Manager, cb *bfeConfig.ConfigBuilder) *ServiceReconciler {
+	return &ServiceReconciler{
 		BfeConfigBuilder: cb,
 		Client:           mgr.GetClient(),
 		Scheme:           mgr.GetScheme(),
 	}
 }
 
-func (r *SecretReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := log.FromContext(ctx)
-	log.V(1).Info("reconciling Secret", "api version", "corev1")
+	log.V(1).Info("reconciling service", "api version", "corev1")
 
-	secret := &corev1.Secret{}
+	svc := &corev1.Service{}
 	err := r.Get(ctx, client.ObjectKey{
 		Namespace: req.Namespace,
 		Name:      req.Name,
-	}, secret)
+	}, svc)
 	if err != nil {
 		return ctrl.Result{}, nil
 	}
 
-	r.BfeConfigBuilder.UpdateSecret(secret)
+	ep := &corev1.Endpoints{}
+	err = r.Get(ctx, client.ObjectKey{
+		Namespace: req.Namespace,
+		Name:      req.Name,
+	}, ep)
+	if err != nil {
+		return ctrl.Result{}, nil
+	}
+
+	r.BfeConfigBuilder.UpdateService(svc, ep)
 
 	return ctrl.Result{}, nil
 }
 
 // setupWithManager sets up the controller with the Manager.
-func (r *SecretReconciler) setupWithManager(mgr ctrl.Manager) error {
+func (r *ServiceReconciler) setupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&corev1.Secret{}, builder.WithPredicates(filter.NamespaceFilter())).
+		For(&corev1.Service{}, builder.WithPredicates(filter.NamespaceFilter())).
+		Watches(
+			&source.Kind{Type: &corev1.Endpoints{}},
+			handler.EnqueueRequestsFromMapFunc(func(a client.Object) []reconcile.Request {
+				return []reconcile.Request{
+					{NamespacedName: types.NamespacedName{
+						Name:      a.GetName(),
+						Namespace: a.GetNamespace(),
+					}},
+				}
+			}),
+			builder.WithPredicates(filter.NamespaceFilter()),
+		).
 		Complete(r)
 }
