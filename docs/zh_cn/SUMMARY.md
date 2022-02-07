@@ -3,7 +3,7 @@
 [comment]: <> "For user"
 * 部署
     * [部署指南](deployment.md)
-    * [基于角色的控制访问（RBAC）](rbac.md)
+    * [基于角色的访问控制（RBAC）](rbac.md)
 * 配置
     * [配置指南](ingress/basic.md)
     * [生效状态](ingress/validate-state.md)
