@@ -28,6 +28,7 @@ header:
     - 'examples/*'
     - 'LICENSE'
     - 'VERSION'
+    - 'test/e2e/*'
 
   comment: on-failure
 

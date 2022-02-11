@@ -1,0 +1,62 @@
+<div class="row">
+  <div class="col-sm-4 col-md-6 col-lg-4">
+    <canvas id="feature-chart"></canvas>
+  </div>
+  <div class="col-sm-8 col-md-6">
+    <h5>Features</h5>
+    <table class="table table-bordered table-striped thead-dark table-sm">
+      <thead class="thead-dark">
+        <tr>
+          <th>Status</th>
+          <th>Progress</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <p data-toggle="tooltip" data-placement="left" title="Features passed">Passed</p>
+          </td>
+          <td class="percentage"><%- suite.totalFeaturesCount.passed.percentage %>%</td>
+        </tr>
+        <tr>
+          <td>
+            <p data-toggle="tooltip" data-placement="left" title="Features failed">Failed</p>
+          </td>
+          <td class="percentage"><%- suite.totalFeaturesCount.failed.percentage %>%</td>
+        </tr>
+        <%if(suite.totalFeaturesCount.ambiguous.count > 0){ %>
+        <tr>
+          <td>
+            <p data-toggle="tooltip" data-placement="left" title="Features has double step implementation and failed because of that.">Ambiguous</p>
+          </td>
+          <td class="percentage"><%- suite.totalFeaturesCount.ambiguous.percentage %>%</td>
+        </tr>
+        <%} %>
+        <%if(suite.totalFeaturesCount.notDefined.count > 0){ %>
+        <tr>
+          <td>
+            <p data-toggle="tooltip" data-placement="left" title="Features with undefined step definitions.">Not Defined</p>
+          </td>
+          <td class="percentage"><%- suite.totalFeaturesCount.notDefined.percentage %>%</td>
+        </tr>
+        <%} %>
+        <%if(suite.totalFeaturesCount.pending.count > 0){ %>
+        <tr>
+          <td>
+            <p data-toggle="tooltip" data-placement="left" title="Features pending.">Pending</p>
+          </td>
+          <td class="percentage"><%- suite.totalFeaturesCount.pending.percentage %>%</td>
+        </tr>
+        <%} %>
+        <%if(suite.totalFeaturesCount.skipped.count > 0){ %>
+        <tr>
+          <td>
+            <p data-toggle="tooltip" data-placement="left" title="Features skipped">Skipped</p>
+          </td>
+          <td class="percentage"><%- suite.totalFeaturesCount.skipped.percentage %>%</td>
+        </tr>
+        <%} %>
+      </tbody>
+    </table>
+  </div>
+</div>

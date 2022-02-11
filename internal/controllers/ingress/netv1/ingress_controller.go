@@ -75,7 +75,7 @@ func (r *IngressReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	if err != nil {
 		r.BfeConfigBuilder.DeleteIngress(req.Namespace, req.Name)
 		log.V(1).Info("reconcile: ingress delete")
-		return reconcile.Result{}, err
+		return reconcile.Result{}, nil
 	}
 
 	if !filter.IngressClassFilter(ctx, r, ingress.Annotations, ingress.Spec.IngressClassName) {
@@ -112,6 +112,9 @@ func setStatus(ctx context.Context, r client.Client, err error, ingress *netv1.I
 	}
 
 	patch := client.MergeFrom(ingress.DeepCopy())
+	if ingress.Annotations == nil {
+		ingress.Annotations = make(map[string]string)
+	}
 	ingress.Annotations[annotations.StatusAnnotationKey] = annotations.GenErrorMsg(err)
 	if err := r.Patch(ctx, ingress, patch); err != nil {
 		log.Error(err, "fail to update annotation")

@@ -171,7 +171,7 @@ func (c *HttpRouteRuleCache) put(rule *httpRule) error {
 			} else if rule.createTime.Equal(r.createTime) {
 				return nil
 			} else {
-				return fmt.Errorf("conflict with %s, rule [host: %s, path: %s]", r.ingress, rule.host, rule.path)
+				return fmt.Errorf("ingress [%s] conflict with existing %s, rule [host: %s, path: %s]", rule.ingress, r.ingress, rule.host, rule.path)
 			}
 		}
 	}
