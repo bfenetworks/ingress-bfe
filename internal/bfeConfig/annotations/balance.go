@@ -23,7 +23,7 @@ const (
 	WeightAnnotation = BfeAnnotationPrefix + WeightKey
 )
 
-// Balance define struct of annotation "balance.weight"
+// ServicesWeight define struct of annotation "balance.weight"
 // example: {"service": {"service1":80, "service2":20}}
 type ServicesWeight map[string]int
 type Balance map[string]ServicesWeight
