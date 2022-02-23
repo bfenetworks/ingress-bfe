@@ -1,12 +1,13 @@
 # BFE Ingress Controller 工作原理
 
-## 核心工作原理
+## 核心处理逻辑
 
 > 前置知识
 > - 什么是 [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)
 > - 什么是 [Ingress Controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/)
 
-BFE Ingress Controller 的核心工作逻辑是：
+![arch](../../images/arch.jpg)
+BFE Ingress Controller 的核心处理逻辑是：
 1. 监听获取 k8s 集群中的 Ingress 资源
 2. 解析 Ingress 资源中定义的配置逻辑，生成对应的 BFE 配置
 3. 使新生成的 BFE 配置在 BFE进程中生效
