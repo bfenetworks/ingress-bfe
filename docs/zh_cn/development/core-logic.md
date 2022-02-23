@@ -15,7 +15,7 @@ BFE Ingress Controller 的核心工作逻辑是：
 
 通过 [Kubernetes controller-runtime][] 框架实现：
 1. 创建 Manager，Manager 内部维护了 Client、Cache 和 Schema 等
-2. 创建 Reconcile，并实现回调逻辑
+2. 创建 Reconciler，并实现回调逻辑
 3. 使用 Builder 模式创建 Controller，并指定监听 Ingress 资源和对应的 Reconcile
 4. 启动 Manager
 
@@ -25,24 +25,22 @@ BFE 的配置定义可以通过以下方式获得：
 1. 官网文档：[配置概述][]（主要关注动态配置）
 2. BFE 源码： bfe/[bfe_modules][]/mod_\*/\*_load.go 
 
-实际配置定义请以使用的 BFE 源码为准：
-- 官网文档对 BFE 基本动态配置的说明更为清晰易懂，不过可能存在和最新源码之间的更新延迟
-- 如果使用的 BFE 包含第三方开发的需要动态配置的模块，需要根据源码确认对应的动态配置定义
+官网更新可能存在延迟，以源代码为准。
 
 > 常见动态配置：
-> - 接入协议配置
->   - [TLS协议配置](https://www.bfe-networks.net/zh_cn/configuration/tls_conf/tls_rule_conf.data/)
 > - 流量路由配置
 >   - [域名规则配置](https://www.bfe-networks.net/zh_cn/configuration/server_data_conf/host_rule.data/)
 >   - [分流规则配置](https://www.bfe-networks.net/zh_cn/configuration/server_data_conf/route_rule.data/)
 > - 负载均衡配置
 >   - [子集群负载均衡配置](https://www.bfe-networks.net/zh_cn/configuration/cluster_conf/gslb.data/)
+> - 接入协议配置
+>   - [TLS协议配置](https://www.bfe-networks.net/zh_cn/configuration/tls_conf/tls_rule_conf.data/)
 > - 扩展模块配置
 >   - [mod_header 配置](https://www.bfe-networks.net/zh_cn/modules/mod_header/mod_header/)
 >   - [mod_redirect 配置](https://www.bfe-networks.net/zh_cn/modules/mod_header/mod_redirect/)
 >   - [mod_rewrite 配置](https://www.bfe-networks.net/zh_cn/modules/mod_header/mod_rewrite/)
 
-## BFE 配置如何生效
+## BFE配置如何生效
 
 通过 BFE [配置热加载][]，完成在 BFE 不停机的情况下更新动态配置。
 

@@ -2,20 +2,22 @@
 
 ## 概述
 
-在为 BFE Ingress Controller 开发 Annotation 时，需要考虑以下方面：
+在为 BFE Ingress Controller 中开发 Annotation 时，可参考本开发设计指南。
 
+核心关注以下方面：
 - Annotation 的定义
-- Ingress 资源中 Annotation 含义的解析
+- Annotation 的解析
 - BFE 配置的生成
 - BFE 配置的热加载
 
 下面的讲述中，将结合 `bfe.ingress.kubernetes.io/balance.weight` 的实现作为例子。
+该Annotation用于支持多个Service之间的[负载均衡][]。
 > [balance.go][]
 
 ## 1. Annotation 的定义
+根据需求不同，您可能需要定义并实现一个BFE Ingress Controller 的 Annotation，或者对 k8s Ingress 已定义的 Annotation 进行实现。
 
-### 格式
-
+### 命名规范
 - Key:
     - BFE Ingress Controller 的 Annotation
         - `bfe.ingress.kubernetes.io/{module}.{key}`
@@ -70,7 +72,7 @@
 ### 触发时机
 
 1. [Kubernetes controller-runtime][] 监听事件后，触发 Reconcile
-2. Reconcile 在[回调函数][ingress_controller.go]中，触发 configBuilder 的更新
+2. Reconciler 在[回调函数][ingress_controller.go]中，触发 configBuilder 的更新
 3. configBuilder 更新过程中，根据输入的 Ingress 资源 [解析][balance.go] 指定 Annotation，用于后续生成 BFE 配置
 
 ### 案例分析
@@ -153,21 +155,18 @@
     }
     ```
 
-### 注意事项
-
-- configBuilder 更新时，输入是当前 k8s 集群最新的 Ingress 资源
-
 ## 3. BFE 配置的生成
 
 ### 触发时机
 
 1. [Kubernetes controller-runtime][] 监听事件后，触发 Reconcile
-2. Reconcile 在[回调函数][ingress_controller.go]中，触发 configBuilder 的更新
+2. Reconciler 在[回调函数][ingress_controller.go]中，触发 configBuilder 的更新
 3. configBuilder 更新过程中，根据输入的 Ingress 资源 [生成][clusterConfig.go] 多种 BFE 配置对象
 
 ### 案例分析
 
-- 更新配置对象：`configBuilder.clusterConf`
+- 更新的配置对象：`configBuilder.clusterConf`
+- 生成的负载均衡配置： [字段与格式说明](https://www.bfe-networks.net/zh_cn/configuration/cluster_conf/gslb.data/)
 - 源码
     - /internal/controllers/ingress/netv1/[ingress_controller.go][]
 
@@ -246,7 +245,6 @@
 
 ### 注意事项
 
-- configBuilder 更新时，输入是当前 k8s 集群最新的 Ingress 资源
 - Ingress 资源的新增、更新、删除需分别适当处理
 - BFE 配置对象`configBuilder.*`可能存在缓存，注意对缓存内容的更新
 
@@ -265,6 +263,7 @@
 
 ### 案例分析
 
+- 负载均衡配置的热加载方式：[热加载接口说明](https://www.bfe-networks.net/zh_cn/operation/reload/#_5)
 - 源码
     - /internal/bfeConfig/[configBuilder.go][]
 
@@ -336,17 +335,17 @@
     }
     ```
 
-> [子集群负载均衡配置](https://www.bfe-networks.net/zh_cn/configuration/cluster_conf/gslb.data/)
+## FAQ
 
-### FAQ
-
-- [如何查询特定 BFE 配置的格式和文件路径？](core-logic.md#BFE配置如何定义)
+- [如何查询特定 BFE 配置的格式？](core-logic.md#BFE配置如何定义)
+- [如何查询指定 BFE 配置的文件路径和热加载方式？][配置热加载]
 
 [Issue]: https://github.com/bfenetworks/ingress-bfe/labels/enhancement
 
 [Kubernetes controller-runtime]: https://github.com/kubernetes-sigs/controller-runtime
 
 [负载均衡]: ../ingress/load-balance.md
+[配置热加载]: https://www.bfe-networks.net/zh_cn/operation/reload/
 
 [balance.go]: ../../../internal/bfeConfig/annotations/balance.go
 
