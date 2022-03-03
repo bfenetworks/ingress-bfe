@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>bfe-ingress-controller e2e test</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
+  <link rel="stylesheet" href="//fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;700&amp;display=swap">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/bootstrap-material-design@4.1.3/dist/css/bootstrap-material-design.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.css">
+  <style type="text/css">
+  /* colors */
+  .ambiguous-color {
+        color: #E74C3C !important;
+  }
+
+  .failed-color {
+        color: #E74C3C !important;
+  }
+
+  .not-defined-color {
+        color: #F39C12 !important;
+  }
+
+  .passed-color {
+        color: #1ABB9C !important;
+  }
+
+  .pending-color {
+        color: #FFD119 !important;
+  }
+
+  .skipped-color {
+        color: #3498DB !important;
+  }
+
+  /* backgrounds */
+  .ambiguous-background {
+        background: #b73122 !important;
+  }
+
+  .failed-background {
+        background: #E74C3C !important;
+  }
+
+  .not-defined-background {
+        background: #F39C12 !important;
+  }
+
+  .passed-background {
+        background: #1ABB9C !important;
+  }
+
+  .pending-background {
+        background: #FFD119 !important;
+  }
+
+  .skipped-background {
+        background: #3498DB !important;
+  }
+
+  ul.quick-list {
+        padding-left: 0;
+        display: inline-block;
+  }
+
+  ul.quick-list li,
+  table.quick-list tr {
+        padding-left: 10px;
+        list-style: none;
+        margin: 0;
+        padding-bottom: 6px;
+        padding-top: 4px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+  }
+
+  ul.quick-list li .meta-data-title,
+  table.quick-list td.meta-data-title {
+        display: inline-block;
+        min-width: 75px;
+        font-weight: bold;
+  }
+
+  ul.quick-list li span,
+  table.quick-list td {
+        line-height: 28px;
+  }
+
+  ul.quick-list li,
+  table.quick-list tr {
+        border-bottom: 1px solid #efefef;
+        padding: 0.5em 0;
+  }
+
+  ul.quick-list li:last-child,
+  table.quick-list tr:last-child {
+        border-bottom: none;
+  }
+
+  ul.quick-list li i {
+        padding-right: 10px;
+        color: #757679;
+  }
+
+  .screenshot {
+        max-height: 100%;
+        max-width: 100%;
+  }
+
+  /* Features / Scenarios */
+
+  .scenario-step-container {
+        margin-bottom: 10px;
+  }
+
+  .scenario-step-container .label {
+        display: inline-block;
+        text-align: center;
+        width: 30px;
+  }
+
+  .scenario-step-container .text {
+        display: inline;
+  }
+
+  .scenario-step-container .duration {
+        position: relative;
+        float: right;
+  }
+
+  .scenario-step-container .text .keyword.highlight {
+        font-size: 1.2em;
+        font-weight: 700;
+  }
+
+  .scenario-scroll-bar {
+        overflow-x: scroll;
+  }
+
+  .scenario-step-collapse,
+  .scenario-scroll-bar .arguments {
+        margin-left: 30px;
+        width: auto;
+  }
+
+  /* NUEVO */
+
+  td p {
+        padding: 0;
+        margin: 0
+  }
+
+  td.percentage {
+        text-align: right;
+  }
+
+  div.chart {
+        position: relative;
+  }
+
+  body {
+        background-color: #fff !important
+  }
+
+  h2 {
+        border-left: 3px solid orange;
+        padding-left: 4px;
+        font-size: 1.5rem
+  }
+
+  h5 {
+        border-left: 2px solid orange;
+        padding-left: 4px
+  }
+
+  th {
+        font-weight: bolder
+  }
+
+  .step {
+        color: #ffffff;
+        display: inline-block;
+        font-size: 14px;
+        height: 30px;
+        margin-right: 1px;
+        padding: 5px;
+        text-align: center;
+        width: 30px;
+  }
+
+  .step:first-of-type {
+        margin-left: 30px;
+  }
+
+  code {
+        padding: 20px;
+        background-color: #f8f8f8;
+        display: block;
+  }
+
+  .card {
+        border: 1px solid rgba(0, 0, 0, .12);
+  }
+
+  body {
+        min-height: 75rem;
+        padding-top: 4.5rem;
+  }
+
+  .scenario-step-collapse {
+        padding: 0;
+        margin: 0;
+  }
+
+  kbd {
+        background-color: lightgrey;
+        color: black;
+  }
+
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark text-white">
+    <div class="mx-auto">
+      <strong>BFE-ingress-controller</strong> <strong>version:</strong> <em class="pl-1 pr-3">0.2.3-dev</em> <strong>time:</strong> <em class="pl-1 pr-3">2022-03-03T14:12:11Z</em>
+    </div>
+  </nav>
+  <main role="main" class="container">
+    <div class="row mb-3 p-3">
+      <div class="col-lg-6">
+        <div class="row">
+          <div class="col-sm-4 col-md-6 col-lg-4">
+            <canvas id="feature-chart"></canvas>
+          </div>
+          <div class="col-sm-8 col-md-6">
+            <h5>Features</h5>
+            <table class="table table-bordered table-striped thead-dark table-sm">
+              <thead class="thead-dark">
+                <tr>
+                  <th>Status</th>
+                  <th>Progress</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <p data-toggle="tooltip" data-placement="left" title="Features passed">Passed</p>
+                  </td>
+                  <td class="percentage">100.00%</td>
+                </tr>
+                <tr>
+                  <td>
+                    <p data-toggle="tooltip" data-placement="left" title="Features failed">Failed</p>
+                  </td>
+                  <td class="percentage">0.00%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="row justify-content-end">
+          <div class="col-sm-4 col-md-6 col-lg-4">
+            <canvas id="scenario-chart"></canvas>
+          </div>
+          <div class="col-sm-8 col-md-6">
+            <h5>Scenarios</h5>
+            <table class="table table-bordered table-striped thead-dark table-sm">
+              <thead class="thead-dark">
+                <tr>
+                  <th>Status</th>
+                  <th>Progress</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <p data-toggle="tooltip" data-placement="left" title="Scenario passed">Passed</p>
+                  </td>
+                  <td class="percentage">100.00%</td>
+                </tr>
+                <tr>
+                  <td>
+                    <p data-toggle="tooltip" data-placement="left" title="Scenario failed">Failed</p>
+                  </td>
+                  <td class="percentage">0.00%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row mb-3 p-3">
+      <div class="col">
+        <h2 class="mb-3">Features overview</h2>
+        <table class="table table-striped table-bordered dt-responsive nowrap">
+          <thead class="thead-dark">
+            <tr>
+              <th scope="col">Feature name</th>
+              <th scope="col"></th>
+              <th scope="col">Status</th>
+              <th scope="col">Total</th>
+              <th scope="col">Passed</th>
+              <th scope="col">Failed</th>
+              <th scope="col">Duration</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <a href="features/cookie-rules.html">Cookie rules</a>
+              </td>
+              <td class="text-center"><i class="material-icons" data-toggle="tooltip" data-placement="top" title="@annotations @router.cookie @release-1.22">bookmarks</i></td>
+              <td class="text-center"><i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Passed">check_circle</i></td>
+              <td class="text-right">8</td>
+              <td class="text-right">8</td>
+              <td class="text-right none">0</td>
+              <td>1m28s</td>
+            </tr>
+            <tr>
+              <td>
+                <a href="features/header-rules.html">Header rules</a>
+              </td>
+              <td class="text-center"><i class="material-icons" data-toggle="tooltip" data-placement="top" title="@annotations @router.header @release-1.22">bookmarks</i></td>
+              <td class="text-center"><i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Passed">check_circle</i></td>
+              <td class="text-right">12</td>
+              <td class="text-right">12</td>
+              <td class="text-right none">0</td>
+              <td>2m3s</td>
+            </tr>
+            <tr>
+              <td>
+                <a href="features/host-rule-test.html">host rule test</a>
+              </td>
+              <td class="text-center"><i class="material-icons" data-toggle="tooltip" data-placement="top" title="@ingress.rule @release-1.22">bookmarks</i></td>
+              <td class="text-center"><i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Passed">check_circle</i></td>
+              <td class="text-right">6</td>
+              <td class="text-right">6</td>
+              <td class="text-right none">0</td>
+              <td>1m36s</td>
+            </tr>
+            <tr>
+              <td>
+                <a href="features/host-rule-test.html">host rule test</a>
+              </td>
+              <td class="text-center"><i class="material-icons" data-toggle="tooltip" data-placement="top" title="@ingress.rule @release-1.22">bookmarks</i></td>
+              <td class="text-center"><i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Passed">check_circle</i></td>
+              <td class="text-right">6</td>
+              <td class="text-right">6</td>
+              <td class="text-right none">0</td>
+              <td>1m36s</td>
+            </tr>
+            <tr>
+              <td>
+                <a href="features/host-rules.html">Host rules</a>
+              </td>
+              <td class="text-center"><i class="material-icons" data-toggle="tooltip" data-placement="top" title="@sig-network @conformance @release-1.22">bookmarks</i></td>
+              <td class="text-center"><i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Passed">check_circle</i></td>
+              <td class="text-right">6</td>
+              <td class="text-right">6</td>
+              <td class="text-right none">0</td>
+              <td>1m34s</td>
+            </tr>
+            <tr>
+              <td>
+                <a href="features/ingress-class.html">Ingress class</a>
+              </td>
+              <td class="text-center"><i class="material-icons" data-toggle="tooltip" data-placement="top" title="@sig-network @conformance @release-1.22">bookmarks</i></td>
+              <td class="text-center"><i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Passed">check_circle</i></td>
+              <td class="text-right">1</td>
+              <td class="text-right">1</td>
+              <td class="text-right none">0</td>
+              <td>5m5s</td>
+            </tr>
+            <tr>
+              <td>
+                <a href="features/load-balance-rules.html">Load balance rules</a>
+              </td>
+              <td class="text-center"><i class="material-icons" data-toggle="tooltip" data-placement="top" title="@annotations @balance.weight @release-1.22">bookmarks</i></td>
+              <td class="text-center"><i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Passed">check_circle</i></td>
+              <td class="text-right">9</td>
+              <td class="text-right">9</td>
+              <td class="text-right none">0</td>
+              <td>2m35s</td>
+            </tr>
+            <tr>
+              <td>
+                <a href="features/load-balancing.html">Load Balancing</a>
+              </td>
+              <td class="text-center"><i class="material-icons" data-toggle="tooltip" data-placement="top" title="@sig-network @conformance @release-1.22">bookmarks</i></td>
+              <td class="text-center"><i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Passed">check_circle</i></td>
+              <td class="text-right">1</td>
+              <td class="text-right">1</td>
+              <td class="text-right none">0</td>
+              <td>1m21s</td>
+            </tr>
+            <tr>
+              <td>
+                <a href="features/same-host-in-multiple-ingresses.html">Same host in multiple ingresses</a>
+              </td>
+              <td class="text-center"><i class="material-icons" data-toggle="tooltip" data-placement="top" title="@ingress.rule @release-1.22">bookmarks</i></td>
+              <td class="text-center"><i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Passed">check_circle</i></td>
+              <td class="text-right">7</td>
+              <td class="text-right">7</td>
+              <td class="text-right none">0</td>
+              <td>2m25s</td>
+            </tr>
+            <tr>
+              <td>
+                <a href="features/path-error-rules.html">Path error rules</a>
+              </td>
+              <td class="text-center"><i class="material-icons" data-toggle="tooltip" data-placement="top" title="@ingress.rule @release-1.22">bookmarks</i></td>
+              <td class="text-center"><i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Passed">check_circle</i></td>
+              <td class="text-right">2</td>
+              <td class="text-right">2</td>
+              <td class="text-right none">0</td>
+              <td>10s</td>
+            </tr>
+            <tr>
+              <td>
+                <a href="features/path-test.html">Path test</a>
+              </td>
+              <td class="text-center"><i class="material-icons" data-toggle="tooltip" data-placement="top" title="@ingress.rule @release-1.22">bookmarks</i></td>
+              <td class="text-center"><i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Passed">check_circle</i></td>
+              <td class="text-right">77</td>
+              <td class="text-right">77</td>
+              <td class="text-right none">0</td>
+              <td>3m46s</td>
+            </tr>
+            <tr>
+              <td>
+                <a href="features/path-test.html">Path test</a>
+              </td>
+              <td class="text-center"><i class="material-icons" data-toggle="tooltip" data-placement="top" title="@ingress.rule @release-1.22">bookmarks</i></td>
+              <td class="text-center"><i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Passed">check_circle</i></td>
+              <td class="text-right">38</td>
+              <td class="text-right">38</td>
+              <td class="text-right none">0</td>
+              <td>38m39s</td>
+            </tr>
+            <tr>
+              <td>
+                <a href="features/path-rules.html">Path rules</a>
+              </td>
+              <td class="text-center"><i class="material-icons" data-toggle="tooltip" data-placement="top" title="@sig-network @conformance @release-1.22">bookmarks</i></td>
+              <td class="text-center"><i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Passed">check_circle</i></td>
+              <td class="text-right">16</td>
+              <td class="text-right">16</td>
+              <td class="text-right none">0</td>
+              <td>9m36s</td>
+            </tr>
+            <tr>
+              <td>
+                <a href="features/priority-rules.html">Priority rules</a>
+              </td>
+              <td class="text-center"><i class="material-icons" data-toggle="tooltip" data-placement="top" title="@annotations @route.header @router.cookie @release-1.22">bookmarks</i></td>
+              <td class="text-center"><i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Passed">check_circle</i></td>
+              <td class="text-right">4</td>
+              <td class="text-right">4</td>
+              <td class="text-right none">0</td>
+              <td>1m4s</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12 text-center">
+        <p><a href="https://github.com/bfenetworks/ingress-bfe/test/e2e">BFE ingress controller e2e test</a></p>
+      </div>
+    </div>
+  </main>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script> 
+  <script src="//cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script> 
+  <script src="//cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script> 
+  <script src="//cdn.jsdelivr.net/npm/bootstrap-material-design@4.1.3/dist/js/bootstrap-material-design.min.js"></script> 
+  <script>
+
+  $(document).ready(function () {
+  $("body").bootstrapMaterialDesign();
+  var featureOptions = {
+  legend: false,
+  responsive: true,
+  maintainAspectRatio: false,
+  };
+  new Chart(document.getElementById("feature-chart"), {
+  type: "doughnut",
+  tooltipFillColor: "rgba(51, 51, 51, 0.55)",
+  data: {
+  labels: [
+  "Passed",
+  "Failed",
+  "Ambiguous",
+  "Not Defined",
+  "Pending",
+  "Skipped",
+  ],
+  datasets: [
+  {
+  data: [
+  14,
+  0,
+  0,
+  0,
+  0,
+  0
+  ],
+  backgroundColor: [
+  "#26B99A",
+  "#E74C3C",
+  "#b73122",
+  "#F39C12",
+  "#FFD119",
+  "#3498DB",
+  ],
+  },
+  ],
+  },
+  options: featureOptions,
+  });
+  var scenarioOptions = {
+  legend: false,
+  responsive: true,
+  maintainAspectRatio: false,
+  };
+  new Chart(document.getElementById("scenario-chart"), {
+  type: "doughnut",
+  tooltipFillColor: "rgba(51, 51, 51, 0.55)",
+  data: {
+  labels: [
+  "Passed",
+  "Failed",
+  "Ambiguous",
+  "Not Defined",
+  "Pending",
+  "Skipped",
+  ],
+  datasets: [
+  {
+  data: [
+  193,
+  0,
+  0,
+  0,
+  0,
+  0
+  ],
+  backgroundColor: [
+  "#26B99A",
+  "#E74C3C",
+  "#b73122",
+  "#F39C12",
+  "#FFD119",
+  "#3498DB",
+  ],
+  },
+  ],
+  },
+  options: scenarioOptions,
+  });
+  $('body').tooltip({
+  selector: '[data-toggle="tooltip"]'
+  });
+  });
+  </script>
+</body>
+</html>

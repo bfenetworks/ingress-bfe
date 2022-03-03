@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>bfe-ingress-controller e2e test</title>
+
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
+  <link rel="stylesheet" href="//fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;700&display=swap" />
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/bootstrap-material-design@4.1.3/dist/css/bootstrap-material-design.min.css" />
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.css" />
+
+  <style type="text/css">
+    /* colors */
+.ambiguous-color {
+	color: #E74C3C !important;
+}
+
+.failed-color {
+	color: #E74C3C !important;
+}
+
+.not-defined-color {
+	color: #F39C12 !important;
+}
+
+.passed-color {
+	color: #1ABB9C !important;
+}
+
+.pending-color {
+	color: #FFD119 !important;
+}
+
+.skipped-color {
+	color: #3498DB !important;
+}
+
+/* backgrounds */
+.ambiguous-background {
+	background: #b73122 !important;
+}
+
+.failed-background {
+	background: #E74C3C !important;
+}
+
+.not-defined-background {
+	background: #F39C12 !important;
+}
+
+.passed-background {
+	background: #1ABB9C !important;
+}
+
+.pending-background {
+	background: #FFD119 !important;
+}
+
+.skipped-background {
+	background: #3498DB !important;
+}
+
+ul.quick-list {
+	padding-left: 0;
+	display: inline-block;
+}
+
+ul.quick-list li,
+table.quick-list tr {
+	padding-left: 10px;
+	list-style: none;
+	margin: 0;
+	padding-bottom: 6px;
+	padding-top: 4px;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+
+ul.quick-list li .meta-data-title,
+table.quick-list td.meta-data-title {
+	display: inline-block;
+	min-width: 75px;
+	font-weight: bold;
+}
+
+ul.quick-list li span,
+table.quick-list td {
+	line-height: 28px;
+}
+
+ul.quick-list li,
+table.quick-list tr {
+	border-bottom: 1px solid #efefef;
+	padding: 0.5em 0;
+}
+
+ul.quick-list li:last-child,
+table.quick-list tr:last-child {
+	border-bottom: none;
+}
+
+ul.quick-list li i {
+	padding-right: 10px;
+	color: #757679;
+}
+
+.screenshot {
+	max-height: 100%;
+	max-width: 100%;
+}
+
+/* Features / Scenarios */
+
+.scenario-step-container {
+	margin-bottom: 10px;
+}
+
+.scenario-step-container .label {
+	display: inline-block;
+	text-align: center;
+	width: 30px;
+}
+
+.scenario-step-container .text {
+	display: inline;
+}
+
+.scenario-step-container .duration {
+	position: relative;
+	float: right;
+}
+
+.scenario-step-container .text .keyword.highlight {
+	font-size: 1.2em;
+	font-weight: 700;
+}
+
+.scenario-scroll-bar {
+	overflow-x: scroll;
+}
+
+.scenario-step-collapse,
+.scenario-scroll-bar .arguments {
+	margin-left: 30px;
+	width: auto;
+}
+
+/* NUEVO */
+
+td p {
+	padding: 0;
+	margin: 0
+}
+
+td.percentage {
+	text-align: right;
+}
+
+div.chart {
+	position: relative;
+}
+
+body {
+	background-color: #fff !important
+}
+
+h2 {
+	border-left: 3px solid orange;
+	padding-left: 4px;
+	font-size: 1.5rem
+}
+
+h5 {
+	border-left: 2px solid orange;
+	padding-left: 4px
+}
+
+th {
+	font-weight: bolder
+}
+
+.step {
+	color: #ffffff;
+	display: inline-block;
+	font-size: 14px;
+	height: 30px;
+	margin-right: 1px;
+	padding: 5px;
+	text-align: center;
+	width: 30px;
+}
+
+.step:first-of-type {
+	margin-left: 30px;
+}
+
+code {
+	padding: 20px;
+	background-color: #f8f8f8;
+	display: block;
+}
+
+.card {
+	border: 1px solid rgba(0, 0, 0, .12);
+}
+
+body {
+	min-height: 75rem;
+	padding-top: 4.5rem;
+}
+
+.scenario-step-collapse {
+	padding: 0;
+	margin: 0;
+}
+
+kbd {
+	background-color: lightgrey;
+	color: black;
+}
+
+  </style>
+</head>
+<body>
+   <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark text-white">
+     <a href="../index.html" class="btn btn-light active mr-4" role="button" aria-pressed="true">Home</a>
+     <div class="mx-auto">
+        <strong>BFE-ingress-controller</strong>
+        <strong>version:</strong> <em class="pl-1 pr-3">0.2.3-dev</em>
+        <strong>time:</strong> <em class="pl-1 pr-3">2022-03-03T14:12:11Z</em>
+      </div>
+   </nav>
+   <main role="main" class="container">
+    <div class="row mb-3 p-3">
+      <div class="col-sm-12 col-md-6 ">
+        
+        
+        
+        
+        <span class="tag">@sig-network</span>
+        
+        <span class="tag">@conformance</span>
+        
+        <span class="tag">@release-1.22</span>
+        
+        
+        
+        <h1>Feature: <small>Load Balancing</small></h1>
+        <p>  An Ingress exposing a backend service with multiple replicas should use all the pods available
+  The feature sessionAffinity is not configured in the backend service https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.19/#service-v1-core</p>
+      </div>
+      <div class="col-sm-12 col-md-6">
+        <div class="row justify-content-end">
+  <div class="col-sm-4 col-md-6 col-lg-4">
+    <canvas id="scenario-chart"></canvas>
+  </div>
+  <div class="col-sm-8 col-md-6">
+    <h5>Scenarios</h5>
+    <table class="table table-bordered table-striped thead-dark table-sm">
+      <thead class="thead-dark">
+        <tr>
+          <th>Status</th>
+          <th>Progress</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <p data-toggle="tooltip" data-placement="left" title="Scenario passed">Passed</p>
+          </td>
+          <td class="percentage">100.00%</td>
+        </tr>
+        <tr>
+          <td>
+            <p data-toggle="tooltip" data-placement="left" title="Scenario failed">Failed</p>
+          </td>
+          <td class="percentage">0.00%</td>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+      </div>
+    </div>
+
+    <div class="row mb-3 p-3">
+      
+<div class="col-sm-12 mb-3">
+  <div class="card m-1">
+    <div class="card-body">
+      <div class="card-title m-0">
+        <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario0" class="h5 text-success">
+          Scenario Outline: <span class="text-muted">An Ingress should send all requests to the backend</span>
+        </a>
+        <p></p>
+      </div>
+
+      <div id="scenario0" class="mt-3 collapse show">
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">Given </span>
+                    <span class="duration">5s</span>
+                              
+          an Ingress resource in a new random namespace          
+          <a class="btn text-primary" data-toggle="collapse" href="#load-balancing-an-ingress-should-send-all-requests-to-the-backend-an-Ingress-resource-in-a-new-random-namespace">+Show Parameter</a>
+          <div id="load-balancing-an-ingress-should-send-all-requests-to-the-backend-an-Ingress-resource-in-a-new-random-namespace" class="collapse ml-3 mr-3">
+            <code>
+              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: path-rules <br />spec:<br />  rules:<br />    - host: "load-balancing"<br />      http:<br />        paths:<br />          - path: /<br />            pathType: Prefix<br />            backend:<br />              service:<br />                name: echo-service<br />                port:<br />                  number: 8080<br /></pre>
+            </code>
+          </div>
+          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">Then </span>
+                    <span class="duration">6s</span>
+                              
+          The Ingress status shows the IP address or FQDN where it is exposed          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">Then </span>
+                    <span class="duration">1m10s</span>
+                              
+          The backend deployment <kbd>echo-service</kbd> for the ingress resource is scaled to <kbd>10</kbd>          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">When </span>
+                    <span class="duration">0s</span>
+                              
+          I send <kbd>100</kbd> requests to <kbd>http://load-balancing</kbd>          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">Then </span>
+                    <span class="duration">0s</span>
+                              
+          all the responses status-code must be <kbd>200</kbd> and the response body should contain the IP address of <kbd>10</kbd> different Kubernetes pods          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      </div>
+    </div>
+    <div class="card-footer p-1 border-success pl-3 pr-3">
+      Duration: 1m21s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      <div class="d-inline-block float-right">
+        
+        
+        
+        
+        
+        <span class="step passed-background" data-toggle="tooltip" title="Scenario passed">5</span>
+        
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+
+    </div>
+
+    
+      <div class="row mb-3 p-3">
+      <div class="col-12 text-center">
+        <p><a href="https://github.com/bfenetworks/ingress-bfe/test/e2e">BFE ingress controller e2e test</a></p>
+      </div>
+    </div>
+    
+  </main>
+
+  <script src="//cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/bootstrap-material-design@4.1.3/dist/js/bootstrap-material-design.min.js"></script>
+
+  <script>
+    $(document).ready(function () {
+      $("body").bootstrapMaterialDesign();
+
+      var scenarioOptions = {
+        legend: false,
+        responsive: true,
+        maintainAspectRatio: false,
+      };
+
+      new Chart(document.getElementById("scenario-chart"), {
+        type: "doughnut",
+        tooltipFillColor: "rgba(51, 51, 51, 0.55)",
+        data: {
+          labels: [
+            "Passed",
+            "Failed",
+            "Pending",
+            "Skipped",
+            "Ambiguous",
+            "Not defined",
+          ],
+          datasets: [
+            {
+              data: [
+                1,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              backgroundColor: [
+                "#26B99A",
+                "#E74C3C",
+                "#FFD119",
+                "#3498DB",
+                "#b73122",
+                "#F39C12",
+              ],
+            },
+          ],
+        },
+        options: scenarioOptions,
+      });
+
+      $('body').tooltip({
+    selector: '[data-toggle="tooltip"]'
+});
+    });
+  </script>
+</body>
+</html>
