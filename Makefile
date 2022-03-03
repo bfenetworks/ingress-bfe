@@ -95,5 +95,18 @@ clean:
 	$(GOCLEAN)
 	rm -rf $(OUTDIR)
 
+# e2e test
+
+kind-cluster:
+	test/script/kind-create-cluster.sh
+
+test-env: docker kind-cluster
+	test/script/kind-load-images.sh $(INGRESS_VERSION)
+	test/script/deploy-controller.sh $(INGRESS_VERSION)
+
+e2e-test: test-env
+	test/e2e/run.sh
+	test/script/kind-delete-cluster.sh
+
 # avoid filename conflict and speed up build
-.PHONY: all compile test clean build
+.PHONY: all compile test clean build docker e2e-test test-env kind-cluster

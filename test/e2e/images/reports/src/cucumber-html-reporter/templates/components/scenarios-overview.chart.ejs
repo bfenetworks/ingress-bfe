@@ -1,0 +1,54 @@
+<div class="row justify-content-end">
+  <div class="col-sm-4 col-md-6 col-lg-4">
+    <canvas id="scenario-chart"></canvas>
+  </div>
+  <div class="col-sm-8 col-md-6">
+    <h5>Scenarios</h5>
+    <table class="table table-bordered table-striped thead-dark table-sm">
+      <thead class="thead-dark">
+        <tr>
+          <th>Status</th>
+          <th>Progress</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <p data-toggle="tooltip" data-placement="left" title="Scenario passed">Passed</p>
+          </td>
+          <td class="percentage"><%- scenarios.passed.percentage %>%</td>
+        </tr>
+        <tr>
+          <td>
+            <p data-toggle="tooltip" data-placement="left" title="Scenario failed">Failed</p>
+          </td>
+          <td class="percentage"><%- scenarios.failed.percentage %>%</td><%if (scenarios.ambiguous.count > 0) { %>
+        </tr>
+        <tr>
+          <td>
+            <p data-toggle="tooltip" data-placement="left" title="Scenario has double step implementation and failed because of that.">Ambiguous</p>
+          </td>
+          <td class="percentage"><%- scenarios.ambiguous.percentage %>%</td>
+        </tr><%} %><%if (scenarios.notDefined.count > 0) { %>
+        <tr>
+          <td>
+            <p data-toggle="tooltip" data-placement="left" title="Scenario has no step implmentation.">Not defined</p>
+          </td>
+          <td class="percentage"><%- scenarios.notDefined.percentage %>%</td>
+        </tr><%} %><%if (scenarios.pending.count > 0) { %>
+        <tr>
+          <td>
+            <p data-toggle="tooltip" data-placement="left" title="Scenario is pending">Pending</p>
+          </td>
+          <td class="percentage"><%- scenarios.pending.percentage %>%</td>
+        </tr><%} %><%if (scenarios.skipped.count > 0) { %>
+        <tr>
+          <td>
+            <p data-toggle="tooltip" data-placement="left" title="Scenario is skipped">Skipped</p>
+          </td>
+          <td class="percentage"><%- scenarios.skipped.percentage %>%</td>
+        </tr><%} %>
+      </tbody>
+    </table>
+  </div>
+</div>

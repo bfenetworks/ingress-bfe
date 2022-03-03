@@ -32,7 +32,7 @@ func IngressClassFilter(ctx context.Context, r client.Reader, annots map[string]
 	}
 
 	classListV1 := &netv1.IngressClassList{}
-	err := r.List(ctx, classListV1, client.MatchingLabels{".spec.controller": option.Opts.Ingress.ControllerName})
+	err := r.List(ctx, classListV1)
 	if err == nil {
 		for _, class := range classListV1.Items {
 			if class.Spec.Controller != option.Opts.Ingress.ControllerName {

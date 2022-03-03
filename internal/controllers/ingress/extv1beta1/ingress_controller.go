@@ -73,7 +73,7 @@ func (r *IngressReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	if err != nil {
 		r.BfeConfigBuilder.DeleteIngress(req.Namespace, req.Name)
 		log.V(1).Info("reconcile: ingress delete")
-		return reconcile.Result{}, err
+		return reconcile.Result{}, nil
 	}
 
 	if !filter.IngressClassFilter(ctx, r, ingressExtV1beta1.Annotations, ingressExtV1beta1.Spec.IngressClassName) {
