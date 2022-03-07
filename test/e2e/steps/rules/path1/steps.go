@@ -14,14 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package path
+package path1
 
 import (
 	"net/url"
 	"time"
 
 	"github.com/cucumber/godog"
-	"github.com/cucumber/messages-go/v16"
 
 	"github.com/bfenetworks/ingress-bfe/test/e2e/pkg/kubernetes"
 	tstate "github.com/bfenetworks/ingress-bfe/test/e2e/pkg/state"
@@ -41,18 +40,25 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 	ctx.Step(`^I send a "([^"]*)" request to "([^"]*)"$`, iSendARequestTo)
 	ctx.Step(`^the response status-code must be (\d+)$`, theResponseStatuscodeMustBe)
 	ctx.Step(`^the response must be served by the "([^"]*)" service$`, theResponseMustBeServedByTheService)
+}
 
-	ctx.BeforeScenario(func(*godog.Scenario) {
+func InitializeSuite(ctx *godog.TestSuiteContext) {
+	ctx.BeforeSuite(func() {
 		state = tstate.New()
 	})
 
-	ctx.AfterScenario(func(*messages.Pickle, error) {
+	ctx.AfterSuite(func() {
 		// delete namespace an all the content
 		_ = kubernetes.DeleteNamespace(kubernetes.KubeClient, state.Namespace)
 	})
+
 }
 
 func anIngressResourceInANewRandomNamespace(arg1 *godog.DocString) error {
+	if state.Namespace != "" && state.IngressName != "" {
+		return nil
+	}
+
 	ns, err := kubernetes.NewNamespace(kubernetes.KubeClient)
 	if err != nil {
 		return err
@@ -81,6 +87,10 @@ func anIngressResourceInANewRandomNamespace(arg1 *godog.DocString) error {
 }
 
 func theIngressStatusShowsTheIPAddressOrFQDNWhereItIsExposed() error {
+	if state.IPOrFQDN != nil {
+		return nil
+	}
+
 	ingress, err := kubernetes.WaitForIngressAddress(kubernetes.KubeClient, state.Namespace, state.IngressName)
 	if err != nil {
 		return err

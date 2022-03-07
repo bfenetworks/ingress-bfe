@@ -1,17 +1,18 @@
 # BFE ingress controller e2e test
 
-The e2e test follows K8s project [ingress-controller-conformance](https://github.com/kubernetes-sigs/ingress-controller-conformance), and add more test cases for ingress-bfe special features.
+This test follows K8s project [ingress-controller-conformance](https://github.com/kubernetes-sigs/ingress-controller-conformance), and add more test cases for ingress-bfe special features.
 
-## Running
+## How to run
 
-In ingress-bfe project's top directory, execute:
+To run all e2e test cases, execute following command in ingress-bfe project's top directory:
+
 ``` 
 $ make e2e-test
 ```
 It would automatically start the whole testing with following procedures:
 
 - Build bfe-ingress-controller docker image
-- Prepare test environment, including setting up a local k8s cluster by [Kind](https://kind.sigs.k8s.io/), loading and applying the docker images, etc. The scripts used for preparing environment is located in [test/script](../script).
+- Prepare test environment, including spining up a local k8s cluster with [Kind](https://kind.sigs.k8s.io/), loading docker images, etc. All scripts used to prepare environment are located in [test/script](../script).
 - Execute test cases by running [run.sh](./run.sh), which actually build and execute program e2e_test.
 
 ## Contributing
@@ -26,40 +27,52 @@ Steps to add new test case as below:
 
 * Create feature file to describe your test case. 
 
-All existing feature files is under directory [test/e2e/features](./features). Please put your feature file into proper directory.
-  > Reuse existing steps from existing feature files.
+All feature files are under directory [test/e2e/features](./features). Please put your feature file into proper sub-directory. For example, features/<your-new-feature>/<your-new-feature>.feature
+  > Try to reuse steps from existing feature files if possible.
 
 ### Step2: Create steps definition
 
 * Generate steps.go for your case. Under directory test/e2e, run:
 
 ```bash
-$ go run hack/codegen.go -dest-path=steps/<dest-dir>  features/<xxx>.feature
+$ go run hack/codegen.go -dest-path=steps/<your-new-feature>  features/<your-new-feature>/<your-new-feature>.feature
 ```
   
 
-* Edit generated code, implement all generated functions. If you reuse step in other feature file, you also can reuse the logic from exist steps files.
+* Edit generated code, implement all generated functions. If you reuse step description from other feature file, you can also reuse corresponding function from that `step.go` file in this step.
 
-### Step3: Add step into e2e_test.go
+### Step3: Add Init function into e2e_test.go
 
 * In e2e_test.go, add generated feature file and InitializeScenario function into map `features`.
 
 ```go
 var (
-	features = map[string]func(*godog.ScenarioContext){
-		"features/conformance/host_rules.feature":           hostrules.InitializeScenario,
+	features = map[string]InitialFunc{
+		"features/conformance/host_rules.feature":           {hostrules.InitializeScenario, nil},
     ...
 	}
 )
 
 ```
 
-### Step4: Build and run case
+### Step4: Build and run
 
-* Build e2e_test
+
+
+* Build e2e_test:
+
 ```bash
 $ make build
-$ ./e2e_test --feature features/<xxx>.feature
 ```
 
-After your test case pass, commit and push the code.
+* Run your case, using `--feature` to specify the feature file.
+
+```bash
+$ ./e2e_test --feature features/<your-new-feature>/<your-new-feature>.feature
+```
+> Before running, your testing environment must be ready.
+
+* Run all cases
+```bash
+$ ./run.sh
+```

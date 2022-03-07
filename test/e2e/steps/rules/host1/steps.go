@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The BFE Authors.
+Copyright 2020 The BFE Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,20 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package pathrules
+package host1
 
 import (
 	"net/url"
 	"time"
 
 	"github.com/cucumber/godog"
+	"github.com/cucumber/messages-go/v16"
 
 	"github.com/bfenetworks/ingress-bfe/test/e2e/pkg/kubernetes"
 	tstate "github.com/bfenetworks/ingress-bfe/test/e2e/pkg/state"
 )
 
 var (
-	state *tstate.Scenario = tstate.New()
+	state *tstate.Scenario
 )
 
 // IMPORTANT: Steps definitions are generated and should not be modified
@@ -41,25 +42,17 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 	ctx.Step(`^the response status-code must be (\d+)$`, theResponseStatuscodeMustBe)
 	ctx.Step(`^the response must be served by the "([^"]*)" service$`, theResponseMustBeServedByTheService)
 
-}
-
-func InitializeSuite(ctx *godog.TestSuiteContext) {
-	ctx.BeforeSuite(func() {
+	ctx.BeforeScenario(func(*godog.Scenario) {
 		state = tstate.New()
 	})
 
-	ctx.AfterSuite(func() {
+	ctx.AfterScenario(func(*messages.Pickle, error) {
 		// delete namespace an all the content
 		_ = kubernetes.DeleteNamespace(kubernetes.KubeClient, state.Namespace)
 	})
-
 }
 
 func anIngressResourceInANewRandomNamespace(spec *godog.DocString) error {
-	if state.Namespace != "" && state.IngressName != "" {
-		return nil
-	}
-
 	ns, err := kubernetes.NewNamespace(kubernetes.KubeClient)
 	if err != nil {
 		return err
@@ -88,10 +81,6 @@ func anIngressResourceInANewRandomNamespace(spec *godog.DocString) error {
 }
 
 func theIngressStatusShowsTheIPAddressOrFQDNWhereItIsExposed() error {
-	if state.IPOrFQDN != nil {
-		return nil
-	}
-
 	ingress, err := kubernetes.WaitForIngressAddress(kubernetes.KubeClient, state.Namespace, state.IngressName)
 	if err != nil {
 		return err

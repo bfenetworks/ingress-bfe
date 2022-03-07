@@ -27,7 +27,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/bfenetworks/ingress-bfe/internal/bfeConfig"
@@ -145,22 +144,6 @@ func ReconcileV1Ingress(ctx context.Context, r client.Client, configBuilder *bfe
 	}
 
 	return nil
-}
-
-func NamespaceFilter() predicate.Funcs {
-	funcs := predicate.NewPredicateFuncs(func(obj client.Object) bool {
-		if len(option.Opts.NamespaceList) == 0 {
-			return true
-		}
-		for _, ns := range option.Opts.NamespaceList {
-			if ns == obj.GetNamespace() {
-				return true
-			}
-		}
-		return false
-	})
-
-	return funcs
 }
 
 func getIngressBackends(ctx context.Context, r client.Reader, ingress *netv1.Ingress) (map[string]*corev1.Service, map[string]*corev1.Endpoints, error) {
