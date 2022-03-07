@@ -55,6 +55,7 @@ jobs:
         id: run-e2e-test
         continue-on-error: true
         shell: bash
+        if: steps.filter.outputs.go == 'true'
         run: |
           export RESULTS_DIR=/tmp/bfe-ingress-reports
           export CUCUMBER_OUTPUT_FORMAT=cucumber
@@ -62,6 +63,7 @@ jobs:
 
       - name: Generate reports
         continue-on-error: true
+        if: steps.filter.outputs.go == 'true'
         run: |
           # clone the gh-pages repository branch
           export TEMP_WORKTREE=$(mktemp -d)
@@ -80,6 +82,6 @@ jobs:
           path: /tmp/bfe-ingress-reports/*
 
       - name: Check on failures
-        if: steps.run-e2e-test.outcome != 'success'
+        if: steps.filter.outputs.go == 'true' && steps.run-e2e-test.outcome != 'success'
         run: exit 1
 
