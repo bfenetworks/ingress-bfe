@@ -32,6 +32,7 @@ make build
 CUCUMBER_OUTPUT_FORMAT="${CUCUMBER_OUTPUT_FORMAT:-pretty}"
 WAIT_FOR_STATUS_TIMEOUT="${WAIT_FOR_STATUS_TIMEOUT:-5m}"
 TEST_TIMEOUT="${TEST_TIMEOUT:-0}"
+TEST_PARALLEL="${TEST_PARALLEL:-5}"
 
 ./e2e_test \
     --output-directory="${RESULTS_DIR}" \
@@ -39,7 +40,8 @@ TEST_TIMEOUT="${TEST_TIMEOUT:-0}"
     --format="${CUCUMBER_OUTPUT_FORMAT}" \
     --wait-time-for-ingress-status="${WAIT_FOR_STATUS_TIMEOUT}" \
     --wait-time-for-ready="${WAIT_FOR_STATUS_TIMEOUT}" \
-    --test.timeout="${TEST_TIMEOUT}"
+    --test.timeout="${TEST_TIMEOUT}" \
+    --feature-parallel="${TEST_PARALLEL}"
 ret=$?
 
 exit 0

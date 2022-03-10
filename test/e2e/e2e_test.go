@@ -45,9 +45,11 @@ import (
 	"github.com/bfenetworks/ingress-bfe/test/e2e/steps/conformance/ingressclass"
 	"github.com/bfenetworks/ingress-bfe/test/e2e/steps/conformance/loadbalancing"
 	"github.com/bfenetworks/ingress-bfe/test/e2e/steps/conformance/pathrules"
-	"github.com/bfenetworks/ingress-bfe/test/e2e/steps/rules/host"
+	"github.com/bfenetworks/ingress-bfe/test/e2e/steps/rules/host1"
+	"github.com/bfenetworks/ingress-bfe/test/e2e/steps/rules/host2"
 	"github.com/bfenetworks/ingress-bfe/test/e2e/steps/rules/multipleingress"
-	rules_path "github.com/bfenetworks/ingress-bfe/test/e2e/steps/rules/path"
+	"github.com/bfenetworks/ingress-bfe/test/e2e/steps/rules/path1"
+	"github.com/bfenetworks/ingress-bfe/test/e2e/steps/rules/path2"
 	"github.com/bfenetworks/ingress-bfe/test/e2e/steps/rules/patherr"
 )
 
@@ -58,6 +60,7 @@ var (
 	godogNoColors      bool
 	godogOutput        string
 	godogTestFeature   string
+	FeatureParallel    int
 )
 
 func TestMain(m *testing.M) {
@@ -76,6 +79,7 @@ func TestMain(m *testing.M) {
 	flag.StringVar(&kubernetes.IngressControllerServiceName, "ingress-controller-service-name", "bfe-controller-service", "Sets the name of the service for ingress controller")
 	flag.StringVar(&kubernetes.K8sNodeAddr, "k8s-node-addr", "127.0.0.1", "Sets the ip address of one k8s node")
 	flag.StringVar(&godogTestFeature, "feature", "", "Sets the file to test")
+	flag.IntVar(&FeatureParallel, "feature-parallel", 1, "Sets the file to test")
 	flag.BoolVar(&http.EnableDebug, "enable-http-debug", false, "Enable dump of requests and responses of HTTP requests (useful for debug)")
 	flag.BoolVar(&kubernetes.EnableOutputYamlDefinitions, "enable-output-yaml-definitions", false, "Dump yaml definitions of Kubernetes objects before creation")
 
@@ -114,43 +118,59 @@ func setup() error {
 	return nil
 }
 
+type InitialFunc struct {
+	Scenario func(*godog.ScenarioContext)
+	Suite    func(*godog.TestSuiteContext)
+}
+
 var (
-	features = map[string]func(*godog.ScenarioContext){
-		"features/conformance/host_rules.feature":           hostrules.InitializeScenario,
-		"features/conformance/ingress_class.feature":        ingressclass.InitializeScenario,
-		"features/conformance/load_balancing.feature":       loadbalancing.InitializeScenario,
-		"features/conformance/path_rules.feature":           pathrules.InitializeScenario,
-		"features/rules/host_rule1.feature":                 host.InitializeScenario,
-		"features/rules/host_rule2.feature":                 host.InitializeScenario,
-		"features/rules/multiple_ingress.feature":           multipleingress.InitializeScenario,
-		"features/rules/path_rule1.feature":                 rules_path.InitializeScenario,
-		"features/rules/path_rule2.feature":                 rules_path.InitializeScenario,
-		"features/rules/path_err.feature":                   patherr.InitializeScenario,
-		"features/annotations/route/cookie.feature":         cookie.InitializeScenario,
-		"features/annotations/route/header.feature":         header.InitializeScenario,
-		"features/annotations/route/priority.feature":       priority.InitializeScenario,
-		"features/annotations/balance/load_balance.feature": loadbalance.InitializeScenario,
+	features = map[string]InitialFunc{
+		"features/conformance/host_rules.feature":           {hostrules.InitializeScenario, nil},
+		"features/conformance/ingress_class.feature":        {ingressclass.InitializeScenario, nil},
+		"features/conformance/load_balancing.feature":       {loadbalancing.InitializeScenario, nil},
+		"features/conformance/path_rules.feature":           {pathrules.InitializeScenario, pathrules.InitializeSuite},
+		"features/rules/host_rule1.feature":                 {host1.InitializeScenario, nil},
+		"features/rules/host_rule2.feature":                 {host2.InitializeScenario, nil},
+		"features/rules/multiple_ingress.feature":           {multipleingress.InitializeScenario, nil},
+		"features/rules/path_rule1.feature":                 {path1.InitializeScenario, path1.InitializeSuite},
+		"features/rules/path_rule2.feature":                 {path2.InitializeScenario, path2.InitializeSuite},
+		"features/rules/path_err.feature":                   {patherr.InitializeScenario, nil},
+		"features/annotations/route/cookie.feature":         {cookie.InitializeScenario, nil},
+		"features/annotations/route/header.feature":         {header.InitializeScenario, nil},
+		"features/annotations/route/priority.feature":       {priority.InitializeScenario, nil},
+		"features/annotations/balance/load_balance.feature": {loadbalance.InitializeScenario, nil},
 	}
 )
 
 func TestSuite(t *testing.T) {
 	var failed bool
 
-	activeFeatures := make(map[string]func(*godog.ScenarioContext))
+	activeFeatures := make(map[string]InitialFunc)
 	for file, init := range features {
 		if strings.HasPrefix(file, godogTestFeature) {
 			activeFeatures[file] = init
 		}
 	}
 
-	for feature, scenarioContext := range activeFeatures {
-		err := testFeature(feature, scenarioContext)
-		if err != nil {
-			if godogStopOnFailure {
-				t.Fatal(err)
+	queue := make(chan int, FeatureParallel)
+
+	for i := 0; i < FeatureParallel; i++ {
+		queue <- 1
+	}
+
+	for feature, initFunc := range activeFeatures {
+		<-queue
+		go func(feature string, init InitialFunc) {
+			err := testFeature(feature, init)
+			if err != nil {
+				failed = true
 			}
-			failed = true
-		}
+			queue <- 1
+		}(feature, initFunc)
+	}
+
+	for i := 0; i < FeatureParallel; i++ {
+		<-queue
 	}
 
 	if failed {
@@ -159,7 +179,7 @@ func TestSuite(t *testing.T) {
 
 }
 
-func testFeature(feature string, scenarioInitializer func(*godog.ScenarioContext)) error {
+func testFeature(feature string, initFunc InitialFunc) error {
 	var testOutput io.Writer
 	// default output is stdout
 	testOutput = os.Stdout
@@ -190,9 +210,10 @@ func testFeature(feature string, scenarioInitializer func(*godog.ScenarioContext
 	}
 
 	exitCode := godog.TestSuite{
-		Name:                "e2e-test",
-		ScenarioInitializer: scenarioInitializer,
-		Options:             &opts,
+		Name:                 "e2e-test",
+		TestSuiteInitializer: initFunc.Suite,
+		ScenarioInitializer:  initFunc.Scenario,
+		Options:              &opts,
 	}.Run()
 	if exitCode > 0 {
 		return fmt.Errorf("unexpected exit code testing %v: %v", feature, exitCode)

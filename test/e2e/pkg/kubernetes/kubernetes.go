@@ -46,6 +46,7 @@ import (
 	clientset "k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/util/flowcontrol"
 	"sigs.k8s.io/yaml"
 
 	// ensure auth plugins are loaded
@@ -87,6 +88,8 @@ func LoadClientset() (*clientset.Clientset, error) {
 		}
 	}
 
+	config.RateLimiter = flowcontrol.NewTokenBucketRateLimiter(100, 100)
+
 	// TODO: add version information?
 	config.UserAgent = fmt.Sprintf(
 		"%s (%s/%s) ingress-conformance",
@@ -105,7 +108,7 @@ func LoadClientset() (*clientset.Clientset, error) {
 
 // NewNamespace creates a new namespace using ingress-conformance- as prefix.
 func NewNamespace(c kubernetes.Interface) (string, error) {
-	ns := &corev1.Namespace{
+	nsParam := &corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: "ingress-conformance-",
 			Labels: map[string]string{
@@ -116,12 +119,12 @@ func NewNamespace(c kubernetes.Interface) (string, error) {
 
 	var err error
 
-	err = displayYamlDefinition(ns)
+	err = displayYamlDefinition(nsParam)
 	if err != nil {
 		return "", fmt.Errorf("unable show yaml definition: %v", err)
 	}
 
-	ns, err = c.CoreV1().Namespaces().Create(context.TODO(), ns, metav1.CreateOptions{})
+	ns, err := c.CoreV1().Namespaces().Create(context.TODO(), nsParam, metav1.CreateOptions{})
 	if err != nil {
 		return "", fmt.Errorf("unable to create namespace: %v", err)
 	}
@@ -130,7 +133,7 @@ func NewNamespace(c kubernetes.Interface) (string, error) {
 }
 
 // DeleteNamespace deletes a namespace and all the objects inside
-func DeleteNamespace(c kubernetes.Interface, namespace string) error {
+func DeleteNamespaceBlocking(c kubernetes.Interface, namespace string) error {
 	grace := int64(0)
 	pb := metav1.DeletePropagationForeground
 
@@ -145,7 +148,7 @@ func DeleteNamespace(c kubernetes.Interface, namespace string) error {
 }
 
 // DeleteNamespace deletes a namespace and all the objects inside
-func DeleteNamespaceNonBlock(c kubernetes.Interface, namespace string) error {
+func DeleteNamespace(c kubernetes.Interface, namespace string) error {
 	grace := int64(0)
 	pb := metav1.DeletePropagationBackground
 
@@ -179,7 +182,7 @@ func CleanupNamespaces(c kubernetes.Interface) error {
 	}
 
 	for _, namespace := range namespaces.Items {
-		err := DeleteNamespaceNonBlock(c, namespace.Name)
+		err := DeleteNamespace(c, namespace.Name)
 		if err != nil {
 			return err
 		}
@@ -435,7 +438,7 @@ func isRetryableAPIError(err error) bool {
 	}
 
 	// in case backend start slowly
-	if err != nil && strings.Contains(err.Error(), "no avail backend") {
+	if err != nil && (strings.Contains(err.Error(), "no avail backend") || strings.Contains(err.Error(), "conflict with")) {
 		return true
 	}
 
