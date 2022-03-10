@@ -4,9 +4,17 @@ English | [中文](README-CN.md)
 
 ## Overview
 
-BFE Ingress Controller is an implementation of Kubernetes [Ingress Controller][] based on [BFE][], to fulfill  [Ingress][] in Kubernetes. 
+BFE Ingress Controller is an implementation of Kubernetes [Ingress Controller][] based on [BFE][], to fulfill [Ingress][] in Kubernetes.
+
+## Features and Advantages
+
+- Traffic routing based on Host, Path, Cookie and Header
+- Support for load balancing among multiple Services of the same application
+- Flexible plugin framework, based on which developers can add new features efficiently
+- Configuration hot reload, avoiding impact on existing long connections
 
 ## Quick start
+
 See [Deployment](docs/en_us/deployment.md) for quick start of using BFE Ingress Controller.
 
 ## Documentation
