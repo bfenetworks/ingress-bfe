@@ -62,10 +62,8 @@ func NewClusterConfig(version string) *ClusterConfig {
 	clusterBackend := make(cluster_table_conf.AllClusterBackend)
 
 	return &ClusterConfig{
-		gslbVersion:         version,
-		clusterTableVersion: version,
-		ingress2Cluster:     setmultimap.New(),
-		service2Cluster:     setmultimap.New(),
+		ingress2Cluster: setmultimap.New(),
+		service2Cluster: setmultimap.New(),
 		gslbConf: gslb_conf.GslbConf{
 			Clusters: &gslbCluster,
 			Hostname: &hostname,

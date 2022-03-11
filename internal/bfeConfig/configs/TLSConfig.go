@@ -58,12 +58,10 @@ type TLSConfig struct {
 
 func NewTLSConfig(version string) *TLSConfig {
 	tlsConf := &TLSConfig{
-		serverCertVersion: version,
-		tlsRuleVersion:    version,
-		ingress2secret:    setmultimap.New(),
-		serverCertConf:    newServerCertConf(version),
-		tlsRuleConf:       newTlsRuleConf(version),
-		certs:             make(map[string]certConf),
+		ingress2secret: setmultimap.New(),
+		serverCertConf: newServerCertConf(version),
+		tlsRuleConf:    newTlsRuleConf(version),
+		certs:          make(map[string]certConf),
 	}
 
 	return tlsConf
