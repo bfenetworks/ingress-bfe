@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.3.0 (2021-03-12)
+
+### Enhancements:
+- Record k8s event for status change. [#47](https://github.com/bfenetworks/ingress-bfe/pull/47)
+- E2E test support. [#57](https://github.com/bfenetworks/ingress-bfe/pull/57), [#60](https://github.com/bfenetworks/ingress-bfe/pull/60)
+- Optimize startup logic. [#40](https://github.com/bfenetworks/ingress-bfe/pull/40), [#61](https://github.com/bfenetworks/ingress-bfe/pull/61)
+- Docs improvement. [#38](https://github.com/bfenetworks/ingress-bfe/pull/38), [#39](https://github.com/bfenetworks/ingress-bfe/pull/39), [#41](https://github.com/bfenetworks/ingress-bfe/pull/41), [#42](https://github.com/bfenetworks/ingress-bfe/pull/42), [#52](https://github.com/bfenetworks/ingress-bfe/pull/52), [#56](https://github.com/bfenetworks/ingress-bfe/pull/56), [#58](https://github.com/bfenetworks/ingress-bfe/pull/58), [#59](https://github.com/bfenetworks/ingress-bfe/pull/59)
+- License related. [#50](https://github.com/bfenetworks/ingress-bfe/pull/50), [#51](https://github.com/bfenetworks/ingress-bfe/pull/51)
+
+
+
 ## v0.2.2 (2021-11-17)
 
 ### Enhancements:
