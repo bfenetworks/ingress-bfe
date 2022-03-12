@@ -52,13 +52,10 @@ type ServerDataConfig struct {
 
 func NewServerDataConfig(version string) *ServerDataConfig {
 	return &ServerDataConfig{
-		hostTableVersion:      version,
-		routeTableVersion:     version,
-		bfeClusterConfVersion: version,
-		routeRuleCache:        NewRouteRuleCache(),
-		hostTableConf:         newHostTableConf(util.NewVersion()),
-		routeTableFile:        newRouteTableConfFile(version),
-		bfeClusterConf:        newBfeClusterConf(version),
+		routeRuleCache: NewRouteRuleCache(),
+		hostTableConf:  newHostTableConf(version),
+		routeTableFile: newRouteTableConfFile(version),
+		bfeClusterConf: newBfeClusterConf(version),
 	}
 }
 
