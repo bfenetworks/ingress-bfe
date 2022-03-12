@@ -1,0 +1,73 @@
+<h2 class="mb-3">Features overview</h2>
+<table class="table table-striped table-bordered dt-responsive nowrap">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">Feature name</th>
+      <th scope="col"></th>
+      <th scope="col">Status</th>
+      <th scope="col">Total</th>
+      <th scope="col">Passed</th>
+      <th scope="col">Failed</th>
+      <%if(+suite.totalScenariosCount.pending.count > 0) { %><th scope="col">Pending</th><%} %>
+      <%if(+suite.totalScenariosCount.skipped.count > 0) { %><th scope="col">Skip</th><%} %>
+      <%if(+suite.totalScenariosCount.notDefined.count > 0) { %><th scope="col">Undefined</th><%} %>
+      <%if(+suite.totalScenariosCount.ambiguous.count > 0) { %><th scope="col">Ambiguous</th><%} %>
+      <th scope="col">Duration</th>
+    </tr>
+  </thead>
+  <tbody>
+    <%suite.features.forEach(function(feature, featureIndex) { %>
+    <tr>
+      <td>
+        <a href="features/<%-feature.id%>.html"><%- feature.name %></a>
+      </td>
+      <td class="text-center">
+        <%if (feature.tags) { %>
+          <%var amount = feature.tags.length; %>
+          <%var tags = feature.tags.reduce((tags, tag) => tags + tag.name + ' ', ''); %>
+          <%if (amount > 0 ){ %>
+            <i class="material-icons" data-toggle="tooltip" data-placement="top" title="<%- tags.trim() %>">bookmark<% if(amount > 1 ) { %>s<% } %></i><span></span>
+          <%} %>
+        <%} %>
+      </td>
+      <td class="text-center">
+        <%var statusIcon; %>
+        <%var status; %>
+        <%var statusColor; %>
+        <%if (feature.isFailed) { %>
+          <%status = 'Failed'; %>
+          <%statusIcon = 'error'; %>
+          <%statusColor = 'text-danger'; %>
+        <%} else if (feature.isAmbiguous) { %>
+          <%status = 'Ambiguous'; %>
+          <%statusIcon = 'face'; %>
+          <%statusColor = 'ambiguous-color'; %>
+        <%} else if (feature.isNotdefined) { %>
+          <%status = 'Not Defined'; %>
+          <%statusIcon = 'help'; %>
+          <%statusColor = 'not-defined-color'; %>
+        <%} else if (feature.isPending) { %>
+          <%status = 'Pending'; %>
+          <%statusIcon = 'pending'; %>
+          <%statusColor = 'pending-color'; %>
+        <%} else if (feature.isSkipped) { %>
+          <%status = 'Skipped'; %>
+          <%statusIcon = 'double_arrow'; %>
+          <%statusColor = 'skipped-color'; %>
+        <%} else { %>
+            <%status = 'Passed'; %>
+            <%statusIcon = 'check_circle'; %>
+          <%statusColor = 'passed-color'; %>
+        <%} %>
+      <i class="material-icons <%- statusColor %>" data-toggle="tooltip" data-placement="top" title="<%- status %>" ><%- statusIcon %></i></td>
+      <td class="text-right <%- !feature.totalFeatureScenariosCount.total ? 'none' : '' %>"><%- feature.totalFeatureScenariosCount.total %></td>
+      <td class="text-right <%- !feature.totalFeatureScenariosCount.passed.count ? 'none' : '' %>"><%- feature.totalFeatureScenariosCount.passed.count %></td>
+      <td class="text-right <%- !feature.totalFeatureScenariosCount.failed.count ? 'none' : '' %>"><%- feature.totalFeatureScenariosCount.failed.count %></td><%if(+suite.totalScenariosCount.skipped.count > 0) { %>
+      <td class="text-right <%- !feature.totalFeatureScenariosCount.skipped.count ? 'none' : '' %>"><%- feature.totalFeatureScenariosCount.skipped.count %></td><%} %><%if(+suite.totalScenariosCount.pending.count > 0) { %>
+      <td class="text-right <%- !feature.totalFeatureScenariosCount.pending.count ? 'none' : '' %>"><%- feature.totalFeatureScenariosCount.pending.count %></td><%} %><%if(+suite.totalScenariosCount.notDefined.count > 0) { %>
+      <td class="text-right <%- !feature.totalFeatureScenariosCount.notDefined.count ? 'none' : '' %>"><%- feature.totalFeatureScenariosCount.notDefined.count %></td><%} %><%if(+suite.totalScenariosCount.ambiguous.count > 0) { %>
+      <td class="text-right <%- !feature.totalFeatureScenariosCount.ambiguous.count ? 'none' : '' %>"><%- feature.totalFeatureScenariosCount.ambiguous.count %></td><%} %>
+      <td><%- feature.time %></td>
+    </tr><%}); %>
+  </tbody>
+</table>

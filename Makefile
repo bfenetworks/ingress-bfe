@@ -30,6 +30,7 @@ GOGEN        := $(GO) generate
 GOCLEAN      := $(GO) clean
 GOFLAGS      := -race
 STATICCHECK  := staticcheck
+LICENSEEYE   := license-eye
 
 # init arch
 ARCH := $(shell getconf LONG_BIT)
@@ -70,6 +71,18 @@ check:
 	$(GO) get honnef.co/go/tools/cmd/staticcheck
 	$(STATICCHECK) ./...
 
+# make license-eye-install
+license-eye-install:
+	$(GO) install github.com/apache/skywalking-eyes/cmd/license-eye@latest
+
+# make license-check, check code file's license declaration
+license-check: license-eye-install
+	$(LICENSEEYE) header check
+
+# make license-fix, fix code file's license declaration
+license-fix: license-eye-install
+	$(LICENSEEYE) header fix
+
 # make docker
 docker:
 	docker build \
@@ -82,5 +95,18 @@ clean:
 	$(GOCLEAN)
 	rm -rf $(OUTDIR)
 
+# e2e test
+
+kind-cluster:
+	test/script/kind-create-cluster.sh
+
+test-env: docker kind-cluster
+	test/script/kind-load-images.sh $(INGRESS_VERSION)
+	test/script/deploy-controller.sh $(INGRESS_VERSION)
+
+e2e-test: test-env
+	test/e2e/run.sh
+	test/script/kind-delete-cluster.sh
+
 # avoid filename conflict and speed up build
-.PHONY: all compile test clean build
+.PHONY: all compile test clean build docker e2e-test test-env kind-cluster

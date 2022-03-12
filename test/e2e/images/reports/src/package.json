@@ -1,0 +1,14 @@
+{
+  "name": "ingress-conformance-reports",
+  "version": "0.0.1",
+  "dependencies": {
+    "ejs": "^3.1.5",
+    "fs-extra": "^9.0.1",
+    "js-base64": "^3.4.5",
+    "moment": "^2.27.0"
+  },
+  "scripts": {
+    "run": "node index"
+  },
+  "license": "Apache-2.0"
+}

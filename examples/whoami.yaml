@@ -4,7 +4,6 @@ metadata:
   name: whoami
   namespace: ingress-bfe
   labels:
-  labels:
     app.kubernetes.io/name: whoami
     app.kubernetes.io/instance: whoami
 spec:

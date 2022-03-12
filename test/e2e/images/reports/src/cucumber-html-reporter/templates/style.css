@@ -1,0 +1,209 @@
+/* colors */
+.ambiguous-color {
+	color: #E74C3C !important;
+}
+
+.failed-color {
+	color: #E74C3C !important;
+}
+
+.not-defined-color {
+	color: #F39C12 !important;
+}
+
+.passed-color {
+	color: #1ABB9C !important;
+}
+
+.pending-color {
+	color: #FFD119 !important;
+}
+
+.skipped-color {
+	color: #3498DB !important;
+}
+
+/* backgrounds */
+.ambiguous-background {
+	background: #b73122 !important;
+}
+
+.failed-background {
+	background: #E74C3C !important;
+}
+
+.not-defined-background {
+	background: #F39C12 !important;
+}
+
+.passed-background {
+	background: #1ABB9C !important;
+}
+
+.pending-background {
+	background: #FFD119 !important;
+}
+
+.skipped-background {
+	background: #3498DB !important;
+}
+
+ul.quick-list {
+	padding-left: 0;
+	display: inline-block;
+}
+
+ul.quick-list li,
+table.quick-list tr {
+	padding-left: 10px;
+	list-style: none;
+	margin: 0;
+	padding-bottom: 6px;
+	padding-top: 4px;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+
+ul.quick-list li .meta-data-title,
+table.quick-list td.meta-data-title {
+	display: inline-block;
+	min-width: 75px;
+	font-weight: bold;
+}
+
+ul.quick-list li span,
+table.quick-list td {
+	line-height: 28px;
+}
+
+ul.quick-list li,
+table.quick-list tr {
+	border-bottom: 1px solid #efefef;
+	padding: 0.5em 0;
+}
+
+ul.quick-list li:last-child,
+table.quick-list tr:last-child {
+	border-bottom: none;
+}
+
+ul.quick-list li i {
+	padding-right: 10px;
+	color: #757679;
+}
+
+.screenshot {
+	max-height: 100%;
+	max-width: 100%;
+}
+
+/* Features / Scenarios */
+
+.scenario-step-container {
+	margin-bottom: 10px;
+}
+
+.scenario-step-container .label {
+	display: inline-block;
+	text-align: center;
+	width: 30px;
+}
+
+.scenario-step-container .text {
+	display: inline;
+}
+
+.scenario-step-container .duration {
+	position: relative;
+	float: right;
+}
+
+.scenario-step-container .text .keyword.highlight {
+	font-size: 1.2em;
+	font-weight: 700;
+}
+
+.scenario-scroll-bar {
+	overflow-x: scroll;
+}
+
+.scenario-step-collapse,
+.scenario-scroll-bar .arguments {
+	margin-left: 30px;
+	width: auto;
+}
+
+/* NUEVO */
+
+td p {
+	padding: 0;
+	margin: 0
+}
+
+td.percentage {
+	text-align: right;
+}
+
+div.chart {
+	position: relative;
+}
+
+body {
+	background-color: #fff !important
+}
+
+h2 {
+	border-left: 3px solid orange;
+	padding-left: 4px;
+	font-size: 1.5rem
+}
+
+h5 {
+	border-left: 2px solid orange;
+	padding-left: 4px
+}
+
+th {
+	font-weight: bolder
+}
+
+.step {
+	color: #ffffff;
+	display: inline-block;
+	font-size: 14px;
+	height: 30px;
+	margin-right: 1px;
+	padding: 5px;
+	text-align: center;
+	width: 30px;
+}
+
+.step:first-of-type {
+	margin-left: 30px;
+}
+
+code {
+	padding: 20px;
+	background-color: #f8f8f8;
+	display: block;
+}
+
+.card {
+	border: 1px solid rgba(0, 0, 0, .12);
+}
+
+body {
+	min-height: 75rem;
+	padding-top: 4.5rem;
+}
+
+.scenario-step-collapse {
+	padding: 0;
+	margin: 0;
+}
+
+kbd {
+	background-color: lightgrey;
+	color: black;
+}

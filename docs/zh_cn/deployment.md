@@ -33,4 +33,9 @@ kubectl apply -f https://raw.githubusercontent.com/bfenetworks/ingress-bfe/devel
 kubectl apply -f https://raw.githubusercontent.com/bfenetworks/ingress-bfe/develop/examples/ingress.yaml  
 ```
 
+* 创建k8s Ingress资源，验证消息路由 (kubernetes version >=1.19)
+``` shell script
+kubectl apply -f https://raw.githubusercontent.com/bfenetworks/ingress-bfe/develop/examples/ingress-v1.19.yaml
+
+```
 

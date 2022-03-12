@@ -37,6 +37,13 @@ rules:
   - list
   - watch
 - apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch  
+- apiGroups:
   - extensions
   resources:
   - ingresses
@@ -85,7 +92,6 @@ metadata:
   labels:
     app.kubernetes.io/name: bfe-ingress-controller
     app.kubernetes.io/instance: bfe-ingress-controller
-
 spec:
   replicas: 1
   selector:
@@ -95,6 +101,7 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: bfe-ingress-controller
+        app.kubernetes.io/instance: bfe-ingress-controller        
     spec:
       serviceAccountName: bfe-ingress-controller
       containers:

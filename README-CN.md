@@ -4,9 +4,17 @@
 
 ## 简介
 
-BFE Ingress Controller 为基于 [BFE][] 实现的[Kubernetes Ingress Controller][]，用于支持在 Kubernetes 中使用 [Ingress][]。 
+BFE Ingress Controller 为基于 [BFE][] 实现的[Kubernetes Ingress Controller][]，用于支持在 Kubernetes 中使用 [Ingress][] 进行流量接入，并利用BFE的众多优秀特点和强大能力。
+
+## 特性和优势
+
+- 路由转发：支持基于Host、Path、Cookie、Header的路由规则
+- 多服务间负载均衡：支持在提供相同服务的多个Service之间进行负载均衡
+- 灵活的模块框架：采用灵活的模块框架设计，支持高效率定制开发扩展功能
+- 配置热加载：支持配置热加载，配置的更新和生效不会影响已存在的长连接
 
 ## 开始使用
+
 详见[部署指南](docs/zh_cn/deployment.md)
 
 ## 说明文档
@@ -33,7 +41,7 @@ BFE Ingress Controller 为基于 [BFE][] 实现的[Kubernetes Ingress Controller
 
   <table>
   <tr>
-  <td><img src="https://bfeopensource.bj.bcebos.com/wechatQRCode.png" width="100"></td>
+  <td><img src="https://raw.githubusercontent.com/clarinette9/bfe-external-resource/main/wechatQRCode.png" width="100"></td>
   </tr>
   </table>
 

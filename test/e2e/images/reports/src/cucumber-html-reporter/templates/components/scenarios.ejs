@@ -1,0 +1,180 @@
+<% scenarios && scenarios.forEach(function(scenario, scenarioIndex) { %>
+<div class="col-sm-12 mb-3">
+  <div class="card m-1">
+    <div class="card-body">
+      <div class="card-title m-0">
+        <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario<%- scenarioIndex %>" class="h5 text-<%- getScenarioStatus(scenario) %>">
+          <%- scenario.keyword %>: <span class="text-muted"><%- scenario.name %></span>
+        </a>
+        <p><%- scenario.description %></p>
+      </div>
+
+      <div id="scenario<%- scenarioIndex %>" class="mt-3 collapse show">
+      <% scenario.steps.forEach( function(step, stepIndex) { %>
+      <% if(!step.hidden || step.image || step.text || step.html || step.attachment) { %>
+      <div class="scenario-step-container">
+        <% if(step.result) { %>
+        <% if(step.result.status === 'passed') { %>
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        <% } else if(step.result.status === 'failed') { %>
+        <div class="label" data-toggle="tooltip" data-placement="top" title="Step failed"> <i class="material-icons text-danger">error</i>
+        </div>
+        <% } else if(step.result.status === 'skipped') { %>
+        <div class="label" data-toggle="tooltip" data-placement="top" title="Step is skipped">
+          <i class="material-icons skipped-color">double_arrow</i>
+        </div>
+        <% } else if(step.result.status === 'pending') { %>
+        <div class="label" data-toggle="tooltip" data-placement="top" title="Step is pending">
+          <i class="material-icons pending-color">pending</i>
+        </div>
+        <% } else if(step.result.status === 'ambiguous') { %>
+        <div class="label" data-toggle="tooltip" data-placement="top" title="Step has double step implementation and failed because of that.">
+          <i class="material-icons ambiguous-color">face</i>
+        </div>
+        <% } else { %>
+        <div class="label" data-toggle="tooltip" data-placement="top" title="Step has no implementation.">
+          <i class="material-icons not-defined-color">help</i>
+        </div>
+        <% } %>
+        <% } %>
+        <div class="text">
+          <span class="keyword highlight"><%- step.keyword %></span>
+          <% if (step.time) { -%>
+          <span class="duration"><%- step.time %></span>
+          <% } else { -%>
+          <span class="duration">0s</span>
+          <% } -%>
+          <% if(step.name) { -%>
+          <%
+            var stepName = step.name.replace(/(?!^)"(.*?)"/g, "<kbd>$1</kbd>");
+            stepName = stepName.replace(/[response status\-code must be ](\d+)/g, " <kbd>$1</kbd>");
+          %>
+          <%- stepName -%>
+          <% if(step.restWireData) { %>
+          <a class="btn text-primary" data-toggle="collapse" href="#<%- step.id %>">+Show Parameter</a>
+          <div id="<%- step.id %>" class="collapse ml-3 mr-3">
+            <code>
+              <pre><%- step.restWireData %></pre>
+            </code>
+          </div>
+          <% } %>
+          <% } %>
+        </div>
+        <% if(step.result) { %>
+        <% if (step.result.error_message) { %><a class="btn text-danger" href="#error<%- scenarioIndex %><%- stepIndex %>-error" data-toggle="collapse">+Show Error</a><% } %>
+        <% if (step.text || step.json) { %><a href="#info<%- scenarioIndex %><%- stepIndex %>-text" data-toggle="collapse">+Show Info</a><% } %>
+        <% if (step.html) { %><a href="#info<%- scenarioIndex %><%- stepIndex %>-html" data-toggle="collapse">+Show Info</a><% } %>
+        <% if (step.image) { %><a href="#info<%- scenarioIndex %><%- stepIndex %>-image" data-toggle="collapse">+Screenshot</a><% } %>
+        <% if (step.attachments && step.attachments.length > 0) { %>
+        <span>[</span>
+        <% step.attachments.forEach(function(attachment, attachmentIndex) { %>
+        <a href="#info<%- scenarioIndex %><%- stepIndex %>-attachment<%- attachmentIndex %>" data-toggle="collapse">Attachment</a>
+        <% if ( attachmentIndex < (step.attachments.length - 1) ) { %>
+        <span>,</span>
+        <% } %>
+        <% }); %>
+        <span span>]</span>
+        <% } %>
+        <% } %>
+      </div>
+      <% if(step.result) { %>
+      <% if (step.result.error_message) { %>
+      <div id="error<%- scenarioIndex %><%- stepIndex %>-error" class="scenario-step-collapse collapse bg-danger p-2 ml-3 mr-3">
+        <pre class="info text-white p-0 m-0"><%- step.result.error_message.replace(/</g, '(').replace(/>/g, ')') %></pre>
+      </div>
+      <% } %>
+      <% if (step.json) { %>
+      <div id="info<%- scenarioIndex %><%- stepIndex %>-text" class="scenario-step-collapse collapse">
+        <pre class="info">
+          <% try { %><%- JSON.stringify(step.json, undefined, 2) %>
+          <% } catch (error) { %><%- step.json %>
+          <% } %>
+        </pre>
+      </div>
+      <% } %>
+      <% if (step.text) { %>
+      <div id="info<%- scenarioIndex %><%- stepIndex %>-text" class="scenario-step-collapse collapse">
+        <pre class="info"><%- step.text.join('<br>') %></pre>
+      </div>
+      <% } %>
+      <% if (step.html) { %>
+      <div id="info<%- scenarioIndex %><%- stepIndex %>-html" class="scenario-step-collapse collapse">
+        <div class="info"><%- step.html.join('<br/>') %></div>
+      </div>
+      <% } %>
+      <% if (step.image) { %>
+      <div id="info<%- scenarioIndex %><%- stepIndex %>-image" class="scenario-step-collapse collapse">
+        <% for( var i = 0; i < step.image.length; i++ ) { %>
+        <img class="screenshot" src="<%- step.image[i] %>" />
+        <% } %>
+      </div>
+      <% } %>
+      <% if (step.attachments && step.attachments.length > 0) { %>
+      <% step.attachments.forEach(function(attachment, attachmentIndex) { %>
+      <div id="info<%- scenarioIndex %><%- stepIndex %>-attachment<%- attachmentIndex %>" class="scenario-step-collapse collapse">
+        <object class="attachment-object" type="<%- attachment.type %>" id="my_attachments_<%- attachmentIndex %>" data="<%- attachment.data %>"></object>
+      </div>
+      <% }); %>
+      <% } %>
+      <% } %>
+      <% if(step.arguments) { %>
+      <% for( var i = 0; i < step.arguments.length; i++ ) { %>
+      <div class="scenario-scroll-bar">
+        <% if(step.arguments[i]["rows"]) { %>
+        <table class="table arguments">
+          <% var rows = step.arguments[i]["rows"]; %>
+          <tr>
+            <% var cells = rows[0]["cells"]; %>
+            <% for( var k = 0; k < cells.length; k++ ) { %>
+            <th><%- cells[k] %></th>
+            <% } %>
+          </tr>
+          <% for( var j = 1; j < rows.length; j++ ) { %>
+          <tr>
+            <% var cells = rows[j]["cells"]; %>
+            <% for( var k = 0; k < cells.length; k++ ) { %>
+            <td><%- cells[k] %></td>
+            <% } %>
+          </tr>
+          <% } %>
+        </table>
+        <% } %>
+      </div>
+      <% if(step.arguments[i]["content"]) { %>
+      <pre class="info"><%- step.arguments[i]["content"].replace(/</g, '(').replace(/>/g, ')') %></pre>
+      <% } %>
+      <% } %>
+      <% } %>
+      <% } %>
+      <% }); %>
+      </div>
+    </div>
+    <div class="card-footer p-1 border-<%- getScenarioStatus(scenario) %> pl-3 pr-3">
+      Duration: <%- scenario.time %> <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      <div class="d-inline-block float-right">
+        <% if (scenario.ambiguous) { %>
+        <span class="step ambiguous-background" data-toggle="tooltip" data-placement="top"
+          title="Scenario has double step implementation and failed because of that."><%- scenario.ambiguous %></span>
+        <% } %>
+        <% if (scenario.pending) { %>
+        <span class="step pending-background" data-toggle="tooltip" title="Scenario is pending"><%- scenario.pending %></span>
+        <% } %>
+        <% if (scenario.skipped) { %>
+        <span class="step skipped-background" data-toggle="tooltip" title="Scenario is skipped"><%- scenario.skipped %></span>
+        <% } %>
+        <% if (scenario.failed) { %>
+        <span class="step failed-background" data-toggle="tooltip" title="Scenario failed"><%- scenario.failed %></span>
+        <% } %>
+        <% if (scenario.passed) { %>
+        <span class="step passed-background" data-toggle="tooltip" title="Scenario passed"><%- scenario.passed %></span>
+        <% } %>
+        <% if (scenario.notDefine) { %>
+        <span class="step not-defined-background" data-toggle="tooltip" title="Scenario has nop step implementation."><%- scenario.notDefined %></span>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+<% }); %>

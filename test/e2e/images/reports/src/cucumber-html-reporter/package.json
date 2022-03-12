@@ -1,0 +1,35 @@
+{
+  "name": "multiple-cucumber-html-reporter",
+  "version": "1.18.0",
+  "description": "Generate beautiful Cucumber reports for multiple instances purposes",
+  "keywords": [
+    "cucumber",
+    "html",
+    "test report",
+    "multiple-cucumber-html-reporter",
+    "html report",
+    "json to html"
+  ],
+  "main": "lib/generate-report.js",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wswebcreation/multiple-cucumber-html-reporter.git"
+  },
+  "author": "wswebcreation",
+  "homepage": "https://github.com/wswebcreation/multiple-cucumber-html-reporter#readme",
+  "dependencies": {
+    "ejs": "^3.1.3",
+    "fs-extra": "^9.0.1",
+    "js-base64": "^3.4.1",
+    "moment": "^2.27.0"
+  },
+  "devDependencies": {
+    "coveralls": "^3.1.0",
+    "eslint": "^7.7.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.0",
+    "jest": "^26.2.1",
+    "np": "^6.3.2"
+  }
+}

@@ -3,7 +3,7 @@
 [comment]: <> "For user"
 * 部署
     * [部署指南](deployment.md)
-    * [基于角色的控制访问（RBAC）](rbac.md)
+    * [基于角色的访问控制（RBAC）](rbac.md)
 * 配置
     * [配置指南](ingress/basic.md)
     * [生效状态](ingress/validate-state.md)
@@ -20,6 +20,9 @@
 [comment]: <> "For developer"
 * [参与贡献](contribute/how-to-contribute.md)
     * [如何贡献代码](contribute/contribute-codes.md)
+      * [代码结构说明](development/source-code-layout.md)
+      * [核心工作原理](development/core-logic.md)
+      * [Annotation 开发指南](development/annotation-implement-guide.md)
     * [如何贡献文档](contribute/contribute-documents.md)
     * [版本发布说明](https://www.bfe-networks.net/zh_cn/development/release_regulation/)
 
