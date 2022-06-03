@@ -38,8 +38,8 @@ BFE 的配置定义可以通过以下方式获得：
 >   - [TLS协议配置](https://www.bfe-networks.net/zh_cn/configuration/tls_conf/tls_rule_conf.data/)
 > - 扩展模块配置
 >   - [mod_header 配置](https://www.bfe-networks.net/zh_cn/modules/mod_header/mod_header/)
->   - [mod_redirect 配置](https://www.bfe-networks.net/zh_cn/modules/mod_header/mod_redirect/)
->   - [mod_rewrite 配置](https://www.bfe-networks.net/zh_cn/modules/mod_header/mod_rewrite/)
+>   - [mod_redirect 配置](https://www.bfe-networks.net/zh_cn/modules/mod_redirect/mod_redirect/)
+>   - [mod_rewrite 配置](https://www.bfe-networks.net/zh_cn/modules/mod_rewrite/mod_rewrite/)
 
 ## BFE配置如何生效
 
