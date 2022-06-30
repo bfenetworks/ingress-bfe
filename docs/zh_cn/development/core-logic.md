@@ -7,6 +7,7 @@
 > - 什么是 [Ingress Controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/)
 
 ![arch](../../images/arch.jpg)
+
 BFE Ingress Controller 的核心处理逻辑是：
 1. 监听获取 k8s 集群中的 Ingress 资源
 2. 解析 Ingress 资源中定义的配置逻辑，生成对应的 BFE 配置
@@ -38,8 +39,8 @@ BFE 的配置定义可以通过以下方式获得：
 >   - [TLS协议配置](https://www.bfe-networks.net/zh_cn/configuration/tls_conf/tls_rule_conf.data/)
 > - 扩展模块配置
 >   - [mod_header 配置](https://www.bfe-networks.net/zh_cn/modules/mod_header/mod_header/)
->   - [mod_redirect 配置](https://www.bfe-networks.net/zh_cn/modules/mod_header/mod_redirect/)
->   - [mod_rewrite 配置](https://www.bfe-networks.net/zh_cn/modules/mod_header/mod_rewrite/)
+>   - [mod_redirect 配置](https://www.bfe-networks.net/zh_cn/modules/mod_redirect/mod_redirect/)
+>   - [mod_rewrite 配置](https://www.bfe-networks.net/zh_cn/modules/mod_rewrite/mod_rewrite/)
 
 ## BFE配置如何生效
 
