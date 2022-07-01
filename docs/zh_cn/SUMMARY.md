@@ -15,6 +15,8 @@
     * [配置文件示例](example/example.md)
     * [灰度发布示例](example/canary-release.md)
 * [常见问题](FAQ/FAQ.md)
+* 附录
+  * [Annotations](appendix/annotations.md)
 ---
 
 [comment]: <> "For developer"
