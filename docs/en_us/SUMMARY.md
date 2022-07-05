@@ -15,6 +15,9 @@
     * [Config File Example](example/example.md)
     * [Canary Release Example](example/canary-release.md)
 * [FAQ](FAQ/FAQ.md)
+* Appendix
+  * [Annotations](appendix/annotations.md)
+
 ---
 
 [comment]: <> "For developer"

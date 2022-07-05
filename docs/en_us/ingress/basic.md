@@ -107,9 +107,10 @@ BFE Ingress Controller support below pathType：
 
 BFE Ingress Controller supports advanced conditions by configuring `annotation`.
 
-Advanced conditions are shared in a Ingress resource. So all the rules in the same Ingress resource will be restrained by advanced conditions, if configured.
+Advanced conditions are shared in an Ingress resource. 
+So all the rules in the same Ingress resource will be restrained by advanced conditions, if configured.
 
-Currently BFE Ingress Controller supports two types of advanced condition: cookie and header.
+Currently, BFE Ingress Controller supports two types of advanced condition: cookie and header.
 
 #### Cookie
 
