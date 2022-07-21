@@ -228,8 +228,8 @@ kbd {
      <a href="../index.html" class="btn btn-light active mr-4" role="button" aria-pressed="true">Home</a>
      <div class="mx-auto">
         <strong>BFE-ingress-controller</strong>
-        <strong>version:</strong> <em class="pl-1 pr-3">0.3.0</em>
-        <strong>time:</strong> <em class="pl-1 pr-3">2022-03-12T04:59:47Z</em>
+        <strong>version:</strong> <em class="pl-1 pr-3">0.3.0-dev</em>
+        <strong>time:</strong> <em class="pl-1 pr-3">2022-07-21T05:51:42Z</em>
       </div>
    </nav>
    <main role="main" class="container">
@@ -270,13 +270,13 @@ kbd {
           <td>
             <p data-toggle="tooltip" data-placement="left" title="Scenario passed">Passed</p>
           </td>
-          <td class="percentage">100.00%</td>
+          <td class="percentage">85.71%</td>
         </tr>
         <tr>
           <td>
             <p data-toggle="tooltip" data-placement="left" title="Scenario failed">Failed</p>
           </td>
-          <td class="percentage">0.00%</td>
+          <td class="percentage">14.29%</td>
       </tbody>
     </table>
   </div>
@@ -310,7 +310,7 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">Given </span>
-                    <span class="duration">5s</span>
+                    <span class="duration">10s</span>
                               
           an Ingress resource in a new random namespace          
           <a class="btn text-primary" data-toggle="collapse" href="#same-host-in-multiple-ingresses-an-ingress-with-path-rules-slash-and-host-should-not-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace">+Show Parameter</a>
@@ -352,7 +352,7 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">Then </span>
-                    <span class="duration">3s</span>
+                    <span class="duration">6s</span>
                               
           The Ingress status shows the IP address or FQDN where it is exposed          
           
@@ -387,7 +387,7 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">And </span>
-                    <span class="duration">15s</span>
+                    <span class="duration">10s</span>
                               
           an Ingress resource          
           <a class="btn text-primary" data-toggle="collapse" href="#same-host-in-multiple-ingresses-an-ingress-with-path-rules-slash-and-host-should-not-send-traffic-to-the-matching-backend-service-an-Ingress-resource">+Show Parameter</a>
@@ -526,7 +526,7 @@ kbd {
       </div>
     </div>
     <div class="card-footer p-1 border-success pl-3 pr-3">
-      Duration: 29s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      Duration: 32s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
       <div class="d-inline-block float-right">
         
         
@@ -545,7 +545,7 @@ kbd {
   <div class="card m-1">
     <div class="card-body">
       <div class="card-title m-0">
-        <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario1" class="h5 text-success">
+        <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario1" class="h5 text-danger">
           Scenario: <span class="text-muted">An Ingress with path rules slash and host should send traffic to the matching backend service</span>
         </a>
         <p>  (path /test and host same-host matches request /test and host same-host)</p>
@@ -564,7 +564,7 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">Given </span>
-                    <span class="duration">10s</span>
+                    <span class="duration">5s</span>
                               
           an Ingress resource in a new random namespace          
           <a class="btn text-primary" data-toggle="collapse" href="#same-host-in-multiple-ingresses-an-ingress-with-path-rules-slash-and-host-should-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace">+Show Parameter</a>
@@ -683,7 +683,7 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">Then </span>
-                    <span class="duration">6s</span>
+                    <span class="duration">3s</span>
                               
           The Ingress status shows the IP address or FQDN where it is exposed          
           
@@ -746,8 +746,7 @@ kbd {
       <div class="scenario-step-container">
         
         
-        <div class="label" title="Success">
-          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        <div class="label" data-toggle="tooltip" data-placement="top" title="Step failed"> <i class="material-icons text-danger">error</i>
         </div>
         
         
@@ -759,7 +758,7 @@ kbd {
           
         </div>
         
-        
+        <a class="btn text-danger" href="#error15-error" data-toggle="collapse">+Show Error</a>
         
         
         
@@ -767,6 +766,10 @@ kbd {
         
       </div>
       
+      
+      <div id="error15-error" class="scenario-step-collapse collapse bg-danger p-2 ml-3 mr-3">
+        <pre class="info text-white p-0 m-0">expected status code 200 but 500 was returned</pre>
+      </div>
       
       
       
@@ -781,8 +784,8 @@ kbd {
       <div class="scenario-step-container">
         
         
-        <div class="label" title="Success">
-          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        <div class="label" data-toggle="tooltip" data-placement="top" title="Step is skipped">
+          <i class="material-icons skipped-color">double_arrow</i>
         </div>
         
         
@@ -814,15 +817,19 @@ kbd {
       
       </div>
     </div>
-    <div class="card-footer p-1 border-success pl-3 pr-3">
-      Duration: 27s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+    <div class="card-footer p-1 border-danger pl-3 pr-3">
+      Duration: 19s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
       <div class="d-inline-block float-right">
         
         
         
+        <span class="step skipped-background" data-toggle="tooltip" title="Scenario is skipped">1</span>
         
         
-        <span class="step passed-background" data-toggle="tooltip" title="Scenario passed">7</span>
+        <span class="step failed-background" data-toggle="tooltip" title="Scenario failed">1</span>
+        
+        
+        <span class="step passed-background" data-toggle="tooltip" title="Scenario passed">5</span>
         
         
       </div>
@@ -930,7 +937,7 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">And </span>
-                    <span class="duration">10s</span>
+                    <span class="duration">5s</span>
                               
           an Ingress resource          
           <a class="btn text-primary" data-toggle="collapse" href="#same-host-in-multiple-ingresses-an-ingress-with-path-rules-slash-and-host-should-send-traffic-to-the-matching-backend-service-an-Ingress-resource">+Show Parameter</a>
@@ -972,7 +979,7 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">Then </span>
-                    <span class="duration">3s</span>
+                    <span class="duration">6s</span>
                               
           The Ingress status shows the IP address or FQDN where it is exposed          
           
@@ -1104,7 +1111,7 @@ kbd {
       </div>
     </div>
     <div class="card-footer p-1 border-success pl-3 pr-3">
-      Duration: 24s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      Duration: 22s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
       <div class="d-inline-block float-right">
         
         
@@ -1142,7 +1149,7 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">Given </span>
-                    <span class="duration">10s</span>
+                    <span class="duration">5s</span>
                               
           an Ingress resource in a new random namespace          
           <a class="btn text-primary" data-toggle="collapse" href="#same-host-in-multiple-ingresses-an-ingress-with-path-rules-slash-and-host-should-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace">+Show Parameter</a>
@@ -1219,7 +1226,7 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">And </span>
-                    <span class="duration">10s</span>
+                    <span class="duration">5s</span>
                               
           an Ingress resource          
           <a class="btn text-primary" data-toggle="collapse" href="#same-host-in-multiple-ingresses-an-ingress-with-path-rules-slash-and-host-should-send-traffic-to-the-matching-backend-service-an-Ingress-resource">+Show Parameter</a>
@@ -1261,7 +1268,7 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">Then </span>
-                    <span class="duration">6s</span>
+                    <span class="duration">3s</span>
                               
           The Ingress status shows the IP address or FQDN where it is exposed          
           
@@ -1393,7 +1400,7 @@ kbd {
       </div>
     </div>
     <div class="card-footer p-1 border-success pl-3 pr-3">
-      Duration: 32s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      Duration: 19s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
       <div class="d-inline-block float-right">
         
         
@@ -1550,7 +1557,7 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">Then </span>
-                    <span class="duration">3s</span>
+                    <span class="duration">6s</span>
                               
           The Ingress status shows the IP address or FQDN where it is exposed          
           
@@ -1682,7 +1689,7 @@ kbd {
       </div>
     </div>
     <div class="card-footer p-1 border-success pl-3 pr-3">
-      Duration: 19s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      Duration: 22s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
       <div class="d-inline-block float-right">
         
         
@@ -2009,7 +2016,7 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">Given </span>
-                    <span class="duration">10s</span>
+                    <span class="duration">5s</span>
                               
           an Ingress resource in a new random namespace          
           <a class="btn text-primary" data-toggle="collapse" href="#same-host-in-multiple-ingresses-an-ingress-with-path-rules-slash-and-host-should-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace">+Show Parameter</a>
@@ -2260,7 +2267,7 @@ kbd {
       </div>
     </div>
     <div class="card-footer p-1 border-success pl-3 pr-3">
-      Duration: 27s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      Duration: 22s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
       <div class="d-inline-block float-right">
         
         
@@ -2317,8 +2324,8 @@ kbd {
           datasets: [
             {
               data: [
-                7,
-                0,
+                6,
+                1,
                 0,
                 0,
                 0,
