@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This document describe how to deploy BFE Ingress Controller in an environment with RBAC enabled.
+This document describes how to deploy BFE Ingress Controller in an environment with RBAC enabled.
 
 Kubernetes use [Role-based access control](https://kubernetes.io/docs/reference/access-authn-authz/rbac/), and define below objects：
 
@@ -14,7 +14,7 @@ Kubernetes use [Role-based access control](https://kubernetes.io/docs/reference/
   - `ClusterRoleBinding` , to grant permissions defined in `ClusterRole` to user
   - `RoleBinding` , to grant permissions defined in `Role` to user
 
-To deploy a BFE Ingress Controller instance in an environment with RBAC enabled, use the `ServiceAccount` that binded to a `ClusterRole`, which has been granted with all permissions BFE Ingress Controller required.
+To deploy a BFE Ingress Controller instance in an environment with RBAC enabled, use the `ServiceAccount` that bound to a `ClusterRole`, which has been granted with all permissions BFE Ingress Controller required.
 
 ## Minimum permission set
 

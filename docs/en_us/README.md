@@ -1,6 +1,6 @@
 # BFE Ingress Controller
 
-BFE Ingress Controller is a Kubernetes [Ingress Controller][] based on [BFE][], to fullfill the [Ingress][] in Kubernetes. 
+BFE Ingress Controller is a Kubernetes [Ingress Controller][] based on [BFE][], to fulfill the [Ingress][] in Kubernetes. 
 
 [Documents](SUMMARY.md)
 

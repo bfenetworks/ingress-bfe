@@ -1,7 +1,7 @@
 # Configuration Guide
 
 ## Introduction
-Configure Ingress resources to define routes for accessing Services in Kubernetes cluster from outside of the cluster. For more information about Ingress, please refer to [Ingress][] .
+Configure Ingress resources to define routes for accessing Services in Kubernetes cluster from outside the cluster. For more information about Ingress, please refer to [Ingress][] .
 
 Refer to [ingress.yaml](../../examples/ingress.yaml) when configuring Ingress resources in yaml files.
 
@@ -137,7 +137,7 @@ Requests containing a header with name=`key` and value=`value` are considered ma
 
 #### Restriction
 
-- In a Ingress resource, for each advanced condition type, no more than one `Annotation` can be configured.
+- In an Ingress resource, for each advanced condition type, no more than one `Annotation` can be configured.
   
 - If more than one `Annotation`s of the same advanced condition type are configured in the same Ingress resource, the last one takes effect.
   
@@ -163,7 +163,7 @@ Set `kubernetes.io/ingress.class` in annotations of Ingress. Default value is `b
 
 ### Set in IngressClass
 
-For K8S vesions from 1.18, set controller to `bfe-networks.com/ingress-controller` in IngressClass of K8S Cluster. Example:
+For K8S versions from 1.18, set controller to `bfe-networks.com/ingress-controller` in IngressClass of K8S Cluster. Example:
 
 ```yaml
 apiVersion: networking.k8s.io/v1beta1
