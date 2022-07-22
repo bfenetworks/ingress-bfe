@@ -125,7 +125,7 @@
      create mode 100644 233
     ```
     
-    <b> <font color="red">需要注意的是：您需要在commit中添加说明（commit message）以触发CI单测，写法如下：</font> </b>
+    <b> <span style="color: red; ">需要注意的是：您需要在commit中添加说明（commit message）以触发CI单测，写法如下：</span> </b>
     
     ```bash
     # 触发develop分支的CI单测
