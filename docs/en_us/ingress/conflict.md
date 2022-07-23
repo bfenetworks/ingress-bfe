@@ -1,7 +1,7 @@
 # Route Rule Conflict
 
 ## Definition
-If Ingress configurations will create Ingress resources containing at least one identical Ingress rule (host, path and advanced conditions are all the same), a route rule conflict happens. 
+If Ingress configurations create Ingress resources containing at least one identical Ingress rule (host, path and advanced conditions are all the same), a route rule conflict happens. 
 
 ## Conflict handling: first-created-resource-win principle
 
@@ -51,7 +51,7 @@ spec:
           servicePort: 80
 
 ```
-In above configuration, there is conflict between ingress-A and ingress-B, and ingress-A is created before ingress-B. So only ingress-A will been created and take effect.
+In above configuration, there is conflict between ingress-A and ingress-B, and ingress-A is created before ingress-B. So only ingress-A will be created and take effect.
 
 ## Ingress status feedback
 If an Ingress resource is invalid due to route rule conflict, after the ingress status is written back, the `status` in `annotation` will be set as “fail”, and `message` will tell which Ingress resource it has conflict with.

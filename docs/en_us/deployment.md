@@ -11,7 +11,7 @@ Install BFE Ingress Controller in either of two ways:
 kubectl apply -f https://raw.githubusercontent.com/bfenetworks/ingress-bfe/develop/examples/controller-all.yaml
 ```
 
-- Above configure file uses latest version of [BFE Ingress Controller  image](https://hub.docker.com/r/bfenetworks/bfe-ingress-controller) in Docker Hub. You can edit configure file to specify other version of the image.
+- Above configure file uses the latest version of [BFE Ingress Controller  image](https://hub.docker.com/r/bfenetworks/bfe-ingress-controller) in Docker Hub. You can edit configure file to specify other version of the image.
 
 - For details of permission configuration, please find more information in [Role-Based Access Control](rbac.md)
 

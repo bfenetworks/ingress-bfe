@@ -1,11 +1,11 @@
 # Ingress status
 
 ## Feedback for ingress status
-The validation of the Ingress configuration is an asynchronous process. The status can only be returned after the configuation has taken effect.
+The validation of the Ingress configuration is an asynchronous process. The status can only be returned after the configuration has taken effect.
 
 In order to provide feedback for ingress status, BFE Ingress Controller will write status back to its annotations. 
 
-**BFE Ingress Controller defines the annotation for status as follow:**
+**BFE Ingress Controller defines the annotation for status as follows:**
 
 ```yaml
 #bfe.ingress.kubernetes.io/bfe-ingress-status is the reserved Annotation key of BFE Ingress Controller

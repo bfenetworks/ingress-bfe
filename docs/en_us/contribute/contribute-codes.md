@@ -75,7 +75,7 @@ See more instruction in [Deploy Guide](../deployment.md)
 
     Provides commit message for each commit, to let other people know what is changed in this commit.`git commit` .
     
-    <b> <font color="red">Notice：commit message is also required to trigger CI unit test，format as below:</font> </b>
+    <b> <span style="color: red; ">Notice：commit message is also required to trigger CI unit test，format as below:</span> </b>
     
     ```bash
     # trigger CI unit test in develop branch
