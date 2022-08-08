@@ -16,17 +16,17 @@ package configs
 import (
 	"fmt"
 
+	"github.com/bfenetworks/bfe/bfe_config/bfe_cluster_conf/cluster_table_conf"
+	"github.com/bfenetworks/bfe/bfe_config/bfe_cluster_conf/gslb_conf"
+	"github.com/jwangsadinata/go-multimap/setmultimap"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/bfenetworks/bfe/bfe_config/bfe_cluster_conf/cluster_table_conf"
-	"github.com/bfenetworks/bfe/bfe_config/bfe_cluster_conf/gslb_conf"
 	"github.com/bfenetworks/ingress-bfe/internal/bfeConfig/annotations"
+	"github.com/bfenetworks/ingress-bfe/internal/bfeConfig/configs/log"
 	"github.com/bfenetworks/ingress-bfe/internal/bfeConfig/util"
 	"github.com/bfenetworks/ingress-bfe/internal/option"
-	"github.com/jwangsadinata/go-multimap/setmultimap"
 )
 
 const (
@@ -34,10 +34,6 @@ const (
 
 	GslbData         = "cluster_conf/gslb.data"
 	ClusterTableData = "cluster_conf/cluster_table.data"
-)
-
-var (
-	log = ctrl.Log.WithName("configBuilder")
 )
 
 var (
@@ -243,7 +239,7 @@ func (c *ClusterConfig) newSubClusterBackend(ep *corev1.Endpoints, port intstr.I
 // getTargetPort returns real targetport of backend pod
 func getTargetPort(backendPort netv1.ServiceBackendPort, svc *corev1.Service) intstr.IntOrString {
 	if svc == nil {
-		log.V(0).Info("service not found in getting target port")
+		log.Log.V(0).Info("service not found in getting target port")
 		return intstr.IntOrString{}
 	}
 
@@ -313,7 +309,7 @@ func (c *ClusterConfig) UpdateService(service *corev1.Service, endpoint *corev1.
 		// targetPort not found, which is not allowed for normal backend beside default backend
 		if targetPort.IntVal == 0 && len(targetPort.StrVal) == 0 && serviceName != option.Opts.Ingress.DefaultBackend {
 			c.DeleteService(service.Namespace, service.Name)
-			log.V(0).Info("ingress backend port not found in service", "namespace", service.Namespace, "name", service.Name, "port", util.ParsePort(name))
+			log.Log.V(0).Info("ingress backend port not found in service", "namespace", service.Namespace, "name", service.Name, "port", util.ParsePort(name))
 			return fmt.Errorf("cluster [%s] error, port can not found in service", name)
 		} else {
 			(*c.clusterTableConf.Config)[name][serviceName] = c.newSubClusterBackend(endpoint, targetPort)

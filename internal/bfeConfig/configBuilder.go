@@ -19,6 +19,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/bfenetworks/ingress-bfe/internal/bfeConfig/configs/modules"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -37,6 +38,7 @@ type ConfigBuilder struct {
 	serverDataConf *configs.ServerDataConfig
 	clusterConf    *configs.ClusterConfig
 	tlsConf        *configs.TLSConfig
+	modules        []modules.BFEModuleConfig
 }
 
 func NewConfigBuilder() *ConfigBuilder {
@@ -45,6 +47,7 @@ func NewConfigBuilder() *ConfigBuilder {
 		serverDataConf: configs.NewServerDataConfig(version),
 		clusterConf:    configs.NewClusterConfig(version),
 		tlsConf:        configs.NewTLSConfig(version),
+		modules:        modules.InitBFEModules(version),
 	}
 }
 
@@ -68,6 +71,19 @@ func (c *ConfigBuilder) UpdateIngress(ingress *netv1.Ingress, services map[strin
 		return err
 	}
 
+	// update modules
+	for i, module := range c.modules {
+		if err := module.UpdateIngress(ingress); err != nil {
+			c.clusterConf.DeleteIngress(ingress.Namespace, ingress.Name)
+			c.serverDataConf.DeleteIngress(ingress.Namespace, ingress.Name)
+			c.tlsConf.DeleteIngress(ingress.Namespace, ingress.Name)
+			for j := 0; j < i; j++ {
+				c.modules[j].DeleteIngress(ingress.Namespace, ingress.Name)
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -78,13 +94,17 @@ func (c *ConfigBuilder) DeleteIngress(namespace, name string) {
 	c.serverDataConf.DeleteIngress(namespace, name)
 	c.clusterConf.DeleteIngress(namespace, name)
 	c.tlsConf.DeleteIngress(namespace, name)
+
+	for _, module := range c.modules {
+		module.DeleteIngress(namespace, name)
+	}
 }
 
 func (c *ConfigBuilder) UpdateService(service *corev1.Service, endpoint *corev1.Endpoints) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	c.clusterConf.UpdateService(service, endpoint)
+	_ = c.clusterConf.UpdateService(service, endpoint)
 }
 
 func (c *ConfigBuilder) DeleteService(namespace, name string) {
@@ -155,5 +175,15 @@ func (c *ConfigBuilder) reload() error {
 			c.tlsConf)
 		return err
 	}
+
+	for _, module := range c.modules {
+		if err := module.Reload(); err != nil {
+			log.Error(err, "Fail to reload config",
+				module.Name(),
+				module)
+			return err
+		}
+	}
+
 	return nil
 }

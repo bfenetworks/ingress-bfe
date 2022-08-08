@@ -24,6 +24,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
+	net_url "net/url"
 	"regexp"
 	"strings"
 	"time"
@@ -63,7 +64,7 @@ type CapturedResponse struct {
 }
 
 // CaptureRoundTrip will perform an HTTP request and return the CapturedRequest and CapturedResponse tuple
-func CaptureRoundTrip(method, scheme, hostname, path, location string, headerInfo http.Header) (*CapturedRequest, *CapturedResponse, error) {
+func CaptureRoundTrip(method, scheme, hostname, path, location string, query net_url.Values, headerInfo http.Header, doRedirect bool) (*CapturedRequest, *CapturedResponse, error) {
 	var capturedTLSHostname string
 	var certificate *x509.Certificate
 
@@ -101,7 +102,14 @@ func CaptureRoundTrip(method, scheme, hostname, path, location string, headerInf
 		},
 	}
 
+	queryStr := ""
+	if query != nil {
+		queryStr = query.Encode()
+	}
 	url := fmt.Sprintf("%s://%s/%s", scheme, location, strings.TrimPrefix(path, "/"))
+	if queryStr != "" {
+		url = url + "?" + queryStr
+	}
 	req, err := http.NewRequest(method, url, nil)
 	if err != nil {
 		return nil, nil, err
@@ -142,13 +150,13 @@ func CaptureRoundTrip(method, scheme, hostname, path, location string, headerInf
 	// check if the result is a redirect and return a new request
 	// this avoids the issue of URLs without valid DNS names and
 	// also sends the traffic to the ingress controller IP address or FQDN
-	if isRedirect(resp.StatusCode) {
+	if isRedirect(resp.StatusCode) && doRedirect {
 		redirectURL, err := resp.Location()
 		if err != nil {
 			return nil, nil, err
 		}
 
-		return CaptureRoundTrip(method, redirectURL.Scheme, redirectURL.Hostname(), redirectURL.Path, location, headerInfo)
+		return CaptureRoundTrip(method, redirectURL.Scheme, redirectURL.Hostname(), redirectURL.Path, location, query, headerInfo, true)
 	}
 
 	capReq := CapturedRequest{}
