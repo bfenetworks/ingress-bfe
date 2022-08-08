@@ -86,7 +86,8 @@ func (c *BaseCache) PutRule(rule Rule) error {
 	return c.BaseRules.put(rule)
 }
 
-// GetRules sorts and returns the Rules in the cache
+// GetRules sorts the rules from high to low priority and returns them.
+// Please refer to CompareRule to learn more about how to compare the priorities of Rules.
 func (c *BaseCache) GetRules() []Rule {
 	var ruleList []Rule
 	for _, paths := range c.BaseRules.RuleMap {
@@ -126,9 +127,9 @@ func (c *BaseCache) UpdateByIngress(_ *netv1.Ingress) error {
 // The caller can customize the behavior of this function through the three functions beforeUpdate, afterUpdate and buildRule.
 func (c *BaseCache) UpdateByIngressFramework(
 	ingress *netv1.Ingress,
+	buildRule BuildRuleFunc,
 	beforeUpdate BeforeUpdateIngressFunc,
 	afterUpdate AfterUpdateIngressFunc,
-	buildRule BuildRuleFunc,
 ) error {
 	if buildRule == nil {
 		return errors.New("buildRule should not be nil")

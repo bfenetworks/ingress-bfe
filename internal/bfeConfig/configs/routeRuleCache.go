@@ -91,8 +91,6 @@ func (c *RouteRuleCache) getRouteRules() (basicRuleList []*routeRule, advancedRu
 func (c *RouteRuleCache) UpdateByIngress(ingress *netv1.Ingress) error {
 	return c.BaseCache.UpdateByIngressFramework(
 		ingress,
-		nil,
-		nil,
 		func(ingress *netv1.Ingress, host, path string, httpPath netv1.HTTPIngressPath) (cache.Rule, error) {
 			ingressName := util.NamespacedName(ingress.Namespace, ingress.Name)
 			return newRouteRule(
@@ -104,5 +102,7 @@ func (c *RouteRuleCache) UpdateByIngress(ingress *netv1.Ingress) error {
 				ingress.CreationTimestamp.Time,
 			), nil
 		},
+		nil,
+		nil,
 	)
 }

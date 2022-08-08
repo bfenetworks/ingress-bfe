@@ -52,10 +52,6 @@ func (c redirectRuleCache) UpdateByIngress(ingress *netv1.Ingress) error {
 	}
 	return c.BaseCache.UpdateByIngressFramework(
 		ingress,
-		func() (bool, error) {
-			return cmd != "", err
-		},
-		nil,
 		func(ingress *netv1.Ingress, host, path string, _ netv1.HTTPIngressPath) (cache.Rule, error) {
 			// preCheck
 			if err := checkAction(cmd, param); err != nil {
@@ -84,5 +80,9 @@ func (c redirectRuleCache) UpdateByIngress(ingress *netv1.Ingress) error {
 				action:     action,
 			}, nil
 		},
+		func() (bool, error) {
+			return cmd != "", err
+		},
+		nil,
 	)
 }
