@@ -241,17 +241,17 @@ kbd {
         
         <span class="tag">@annotations</span>
         
-        <span class="tag">@router.header</span>
+        <span class="tag">@router.cookie</span>
         
         <span class="tag">@release-1.22</span>
         
         
         
-        <h1>Feature: <small>Header rules</small></h1>
-        <p>  An Ingress may define routing rules based on the request path and header.
+        <h1>Feature: <small>Redirect</small></h1>
+        <p>  An Ingress may define redirection rules in its annotations.
 
-  If the HTTP request path matches the paths and header info in the
-  Ingress objects, the traffic is routed to its backend service.</p>
+  If the a Request matches the rule defined in a Ingress which have redirection annotations,
+  BFE should return a Response whose header has the corresponding Location and Status Code according to the annotations in the Ingress.</p>
       </div>
       <div class="col-sm-12 col-md-6">
         <div class="row justify-content-end">
@@ -294,9 +294,9 @@ kbd {
     <div class="card-body">
       <div class="card-title m-0">
         <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario0" class="h5 text-success">
-          Scenario: <span class="text-muted">An Ingress with path rules and header should send traffic to the matching backend service</span>
+          Scenario: <span class="text-muted">An Ingress with annotation `bfe.ingress.kubernetes.io/redirect.url-set` but</span>
         </a>
-        <p>  (exact / and header matches request / with header)</p>
+        <p>  no annotation `bfe.ingress.kubernetes.io/redirect.response-status`.</p>
       </div>
 
       <div id="scenario0" class="mt-3 collapse show">
@@ -312,13 +312,13 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">Given </span>
-                    <span class="duration">20s</span>
+                    <span class="duration">5s</span>
                               
-          an Ingress resource in a new random namespace          
-          <a class="btn text-primary" data-toggle="collapse" href="#header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace">+Show Parameter</a>
-          <div id="header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace" class="collapse ml-3 mr-3">
+          an Ingress resource with redirection annotations          
+          <a class="btn text-primary" data-toggle="collapse" href="#redirect-an-ingress-with-annotation--bfe-ingress-kubernetes-io-redirect-url-set--but-an-Ingress-resource-with-redirection-annotations">+Show Parameter</a>
+          <div id="redirect-an-ingress-with-annotation--bfe-ingress-kubernetes-io-redirect-url-set--but-an-Ingress-resource-with-redirection-annotations" class="collapse ml-3 mr-3">
             <code>
-              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: header-rules<br />  annotations:<br />    bfe.ingress.kubernetes.io/router.header: "h_key:h_value"<br />spec:<br />  rules:<br />    - host: "exact-path-header-key"<br />      http:<br />        paths:<br />          - path: /<br />            pathType: Exact<br />            backend:<br />              service:<br />                name: exact-h-key<br />                port:<br />                  number: 3000</pre>
+              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: redirect-url-set<br />  annotations:<br />    bfe.ingress.kubernetes.io/redirect.url-set: "https://www.baidu.com"<br />spec:<br />  rules:<br />    - host: "foo.com"<br />      http:<br />        paths:<br />          - path: /bar<br />            pathType: Prefix<br />            backend:<br />              service:<br />                name: foo-exact<br />                port:<br />                  number: 3000</pre>
             </code>
           </div>
           
@@ -391,14 +391,7 @@ kbd {
           <span class="keyword highlight">When </span>
                     <span class="duration">0s</span>
                               
-          I send a <kbd>GET</kbd> request to <kbd>http://exact-path-header-key/</kbd> with header          
-          <a class="btn text-primary" data-toggle="collapse" href="#header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-I-send-a--GET--request-to--http---exact-path-header-key---with-header">+Show Parameter</a>
-          <div id="header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-I-send-a--GET--request-to--http---exact-path-header-key---with-header" class="collapse ml-3 mr-3">
-            <code>
-              <pre>{"h_key": ["h_value"]}</pre>
-            </code>
-          </div>
-          
+          I send a <kbd>GET</kbd> request to <kbd>http://foo.com/bar</kbd>          
           
         </div>
         
@@ -433,7 +426,7 @@ kbd {
           <span class="keyword highlight">Then </span>
                     <span class="duration">0s</span>
                               
-          the response status-code must be <kbd>200</kbd>          
+          the response status-code must be <kbd>302</kbd>          
           
         </div>
         
@@ -468,7 +461,7 @@ kbd {
           <span class="keyword highlight">And </span>
                     <span class="duration">0s</span>
                               
-          the response must be served by the <kbd>exact-h-key</kbd> service          
+          the response location must be <kbd>https://www.baidu.com</kbd>          
           
         </div>
         
@@ -493,7 +486,7 @@ kbd {
       </div>
     </div>
     <div class="card-footer p-1 border-success pl-3 pr-3">
-      Duration: 26s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      Duration: 11s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
       <div class="d-inline-block float-right">
         
         
@@ -513,9 +506,9 @@ kbd {
     <div class="card-body">
       <div class="card-title m-0">
         <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario1" class="h5 text-success">
-          Scenario: <span class="text-muted">An Ingress with path rules and header should not send traffic to the matching backend service</span>
+          Scenario: <span class="text-muted">An Ingress with annotation `bfe.ingress.kubernetes.io/redirect.url-set` and</span>
         </a>
-        <p>  (exact / and header matches request / without header)</p>
+        <p>  annotation `bfe.ingress.kubernetes.io/redirect.response-status`.</p>
       </div>
 
       <div id="scenario1" class="mt-3 collapse show">
@@ -531,13 +524,13 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">Given </span>
-                    <span class="duration">5s</span>
+                    <span class="duration">15s</span>
                               
-          an Ingress resource in a new random namespace          
-          <a class="btn text-primary" data-toggle="collapse" href="#header-rules-an-ingress-with-path-rules-and-header-should-not-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace">+Show Parameter</a>
-          <div id="header-rules-an-ingress-with-path-rules-and-header-should-not-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace" class="collapse ml-3 mr-3">
+          an Ingress resource with redirection annotations          
+          <a class="btn text-primary" data-toggle="collapse" href="#redirect-an-ingress-with-annotation--bfe-ingress-kubernetes-io-redirect-url-set--and-an-Ingress-resource-with-redirection-annotations">+Show Parameter</a>
+          <div id="redirect-an-ingress-with-annotation--bfe-ingress-kubernetes-io-redirect-url-set--and-an-Ingress-resource-with-redirection-annotations" class="collapse ml-3 mr-3">
             <code>
-              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: header-rules<br />  annotations:<br />    bfe.ingress.kubernetes.io/router.header: "h_key:h_value"<br />spec:<br />  rules:<br />    - host: "exact-path-no-header"<br />      http:<br />        paths:<br />          - path: /<br />            pathType: Exact<br />            backend:<br />              service:<br />                name: exact-h-key<br />                port:<br />                  number: 3000</pre>
+              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: redirect-url-set<br />  annotations:<br />    bfe.ingress.kubernetes.io/redirect.url-set: "https://www.baidu.com"<br />    bfe.ingress.kubernetes.io/redirect.response-status: 301<br />spec:<br />  rules:<br />    - host: "foo.com"<br />      http:<br />        paths:<br />          - path: /bar<br />            pathType: Prefix<br />            backend:<br />              service:<br />                name: foo-exact<br />                port:<br />                  number: 3000</pre>
             </code>
           </div>
           
@@ -610,7 +603,7 @@ kbd {
           <span class="keyword highlight">When </span>
                     <span class="duration">0s</span>
                               
-          I send a <kbd>GET</kbd> request to <kbd>http://exact-path-no-header/</kbd>          
+          I send a <kbd>GET</kbd> request to <kbd>http://foo.com/bar</kbd>          
           
         </div>
         
@@ -645,7 +638,42 @@ kbd {
           <span class="keyword highlight">Then </span>
                     <span class="duration">0s</span>
                               
-          the response status-code must be <kbd>500</kbd>          
+          the response status-code must be <kbd>301</kbd>          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">And </span>
+                    <span class="duration">0s</span>
+                              
+          the response location must be <kbd>https://www.baidu.com</kbd>          
           
         </div>
         
@@ -670,14 +698,14 @@ kbd {
       </div>
     </div>
     <div class="card-footer p-1 border-success pl-3 pr-3">
-      Duration: 11s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      Duration: 21s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
       <div class="d-inline-block float-right">
         
         
         
         
         
-        <span class="step passed-background" data-toggle="tooltip" title="Scenario passed">4</span>
+        <span class="step passed-background" data-toggle="tooltip" title="Scenario passed">5</span>
         
         
       </div>
@@ -690,9 +718,9 @@ kbd {
     <div class="card-body">
       <div class="card-title m-0">
         <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario2" class="h5 text-success">
-          Scenario: <span class="text-muted">An Ingress with path rules and header should send traffic to the matching backend service</span>
+          Scenario: <span class="text-muted">An Ingress with annotation `bfe.ingress.kubernetes.io/redirect.url-from-query` but</span>
         </a>
-        <p>  (exact / and header null matches request / with header)</p>
+        <p>  no annotation `bfe.ingress.kubernetes.io/redirect.response-status`.</p>
       </div>
 
       <div id="scenario2" class="mt-3 collapse show">
@@ -708,13 +736,13 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">Given </span>
-                    <span class="duration">5s</span>
+                    <span class="duration">10s</span>
                               
-          an Ingress resource in a new random namespace          
-          <a class="btn text-primary" data-toggle="collapse" href="#header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace">+Show Parameter</a>
-          <div id="header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace" class="collapse ml-3 mr-3">
+          an Ingress resource with redirection annotations          
+          <a class="btn text-primary" data-toggle="collapse" href="#redirect-an-ingress-with-annotation--bfe-ingress-kubernetes-io-redirect-url-from-query--but-an-Ingress-resource-with-redirection-annotations">+Show Parameter</a>
+          <div id="redirect-an-ingress-with-annotation--bfe-ingress-kubernetes-io-redirect-url-from-query--but-an-Ingress-resource-with-redirection-annotations" class="collapse ml-3 mr-3">
             <code>
-              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: header-rules<br />  annotations:<br />    bfe.ingress.kubernetes.io/router.header: ""<br />spec:<br />  rules:<br />    - host: "header-null"<br />      http:<br />        paths:<br />          - path: /<br />            pathType: Exact<br />            backend:<br />              service:<br />                name: h-key-null<br />                port:<br />                  number: 3000</pre>
+              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: redirect-url-from-query<br />  annotations:<br />    bfe.ingress.kubernetes.io/redirect.url-from-query: "location"<br />spec:<br />  rules:<br />    - host: "foo.com"<br />      http:<br />        paths:<br />          - path: /bar<br />            pathType: Prefix<br />            backend:<br />              service:<br />                name: foo-exact<br />                port:<br />                  number: 3000</pre>
             </code>
           </div>
           
@@ -787,14 +815,7 @@ kbd {
           <span class="keyword highlight">When </span>
                     <span class="duration">0s</span>
                               
-          I send a <kbd>GET</kbd> request to <kbd>http://header-null/</kbd> with header          
-          <a class="btn text-primary" data-toggle="collapse" href="#header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-I-send-a--GET--request-to--http---header-null---with-header">+Show Parameter</a>
-          <div id="header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-I-send-a--GET--request-to--http---header-null---with-header" class="collapse ml-3 mr-3">
-            <code>
-              <pre>{"h_key": ["h_value"]}</pre>
-            </code>
-          </div>
-          
+          I send a <kbd>GET</kbd> request to <kbd>http://foo.com/bar?location=https://www.baidu.com</kbd>          
           
         </div>
         
@@ -829,7 +850,7 @@ kbd {
           <span class="keyword highlight">Then </span>
                     <span class="duration">0s</span>
                               
-          the response status-code must be <kbd>200</kbd>          
+          the response status-code must be <kbd>302</kbd>          
           
         </div>
         
@@ -864,7 +885,7 @@ kbd {
           <span class="keyword highlight">And </span>
                     <span class="duration">0s</span>
                               
-          the response must be served by the <kbd>h-key-null</kbd> service          
+          the response location must be <kbd>https://www.baidu.com</kbd>          
           
         </div>
         
@@ -889,7 +910,7 @@ kbd {
       </div>
     </div>
     <div class="card-footer p-1 border-success pl-3 pr-3">
-      Duration: 11s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      Duration: 16s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
       <div class="d-inline-block float-right">
         
         
@@ -909,9 +930,9 @@ kbd {
     <div class="card-body">
       <div class="card-title m-0">
         <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario3" class="h5 text-success">
-          Scenario: <span class="text-muted">An Ingress with path rules and header should send traffic to the matching backend service</span>
+          Scenario: <span class="text-muted">An Ingress with annotation `bfe.ingress.kubernetes.io/redirect.url-from-query` and</span>
         </a>
-        <p>  (exact / and header null matches request / without header)</p>
+        <p>  annotation `bfe.ingress.kubernetes.io/redirect.response-status`.</p>
       </div>
 
       <div id="scenario3" class="mt-3 collapse show">
@@ -929,11 +950,11 @@ kbd {
           <span class="keyword highlight">Given </span>
                     <span class="duration">5s</span>
                               
-          an Ingress resource in a new random namespace          
-          <a class="btn text-primary" data-toggle="collapse" href="#header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace">+Show Parameter</a>
-          <div id="header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace" class="collapse ml-3 mr-3">
+          an Ingress resource with redirection annotations          
+          <a class="btn text-primary" data-toggle="collapse" href="#redirect-an-ingress-with-annotation--bfe-ingress-kubernetes-io-redirect-url-from-query--and-an-Ingress-resource-with-redirection-annotations">+Show Parameter</a>
+          <div id="redirect-an-ingress-with-annotation--bfe-ingress-kubernetes-io-redirect-url-from-query--and-an-Ingress-resource-with-redirection-annotations" class="collapse ml-3 mr-3">
             <code>
-              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: header-rules<br />  annotations:<br />    bfe.ingress.kubernetes.io/router.header: ""<br />spec:<br />  rules:<br />    - host: "header-null"<br />      http:<br />        paths:<br />          - path: /<br />            pathType: Exact<br />            backend:<br />              service:<br />                name: h-key-null-without-header<br />                port:<br />                  number: 3000</pre>
+              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: redirect-url-from-query<br />  annotations:<br />    bfe.ingress.kubernetes.io/redirect.url-from-query: "location"<br />    bfe.ingress.kubernetes.io/redirect.response-status: 301<br />spec:<br />  rules:<br />    - host: "foo.com"<br />      http:<br />        paths:<br />          - path: /bar<br />            pathType: Prefix<br />            backend:<br />              service:<br />                name: foo-exact<br />                port:<br />                  number: 3000</pre>
             </code>
           </div>
           
@@ -1006,7 +1027,7 @@ kbd {
           <span class="keyword highlight">When </span>
                     <span class="duration">0s</span>
                               
-          I send a <kbd>GET</kbd> request to <kbd>http://header-null/</kbd>          
+          I send a <kbd>GET</kbd> request to <kbd>http://foo.com/bar?location=https://www.baidu.com</kbd>          
           
         </div>
         
@@ -1041,7 +1062,7 @@ kbd {
           <span class="keyword highlight">Then </span>
                     <span class="duration">0s</span>
                               
-          the response status-code must be <kbd>200</kbd>          
+          the response status-code must be <kbd>301</kbd>          
           
         </div>
         
@@ -1076,7 +1097,7 @@ kbd {
           <span class="keyword highlight">And </span>
                     <span class="duration">0s</span>
                               
-          the response must be served by the <kbd>h-key-null-without-header</kbd> service          
+          the response location must be <kbd>https://www.baidu.com</kbd>          
           
         </div>
         
@@ -1121,9 +1142,9 @@ kbd {
     <div class="card-body">
       <div class="card-title m-0">
         <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario4" class="h5 text-success">
-          Scenario: <span class="text-muted">An Ingress with path rules and header should send traffic to the matching backend service</span>
+          Scenario: <span class="text-muted">An Ingress with annotation `bfe.ingress.kubernetes.io/redirect.url-prefix-add` but</span>
         </a>
-        <p>  (exact / and header only key matches request / with header only key)</p>
+        <p>  no annotation `bfe.ingress.kubernetes.io/redirect.response-status`.</p>
       </div>
 
       <div id="scenario4" class="mt-3 collapse show">
@@ -1141,11 +1162,859 @@ kbd {
           <span class="keyword highlight">Given </span>
                     <span class="duration">5s</span>
                               
-          an Ingress resource in a new random namespace          
-          <a class="btn text-primary" data-toggle="collapse" href="#header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace">+Show Parameter</a>
-          <div id="header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace" class="collapse ml-3 mr-3">
+          an Ingress resource with redirection annotations          
+          <a class="btn text-primary" data-toggle="collapse" href="#redirect-an-ingress-with-annotation--bfe-ingress-kubernetes-io-redirect-url-prefix-add--but-an-Ingress-resource-with-redirection-annotations">+Show Parameter</a>
+          <div id="redirect-an-ingress-with-annotation--bfe-ingress-kubernetes-io-redirect-url-prefix-add--but-an-Ingress-resource-with-redirection-annotations" class="collapse ml-3 mr-3">
             <code>
-              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: header-rules<br />  annotations:<br />    bfe.ingress.kubernetes.io/router.header: "h-key"<br />spec:<br />  rules:<br />    - host: "header-only-key"<br />      http:<br />        paths:<br />          - path: /<br />            pathType: Exact<br />            backend:<br />              service:<br />                name: header-only-key<br />                port:<br />                  number: 3000</pre>
+              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: redirect-url-set<br />  annotations:<br />    bfe.ingress.kubernetes.io/redirect.url-prefix-add: "https://new.org/api"<br />spec:<br />  rules:<br />    - host: "foo.com"<br />      http:<br />        paths:<br />          - path: /bar<br />            pathType: Prefix<br />            backend:<br />              service:<br />                name: foo-exact<br />                port:<br />                  number: 3000</pre>
+            </code>
+          </div>
+          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">And </span>
+                    <span class="duration">3s</span>
+                              
+          The Ingress status shows the IP address or FQDN where it is exposed          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">When </span>
+                    <span class="duration">0s</span>
+                              
+          I send a <kbd>GET</kbd> request to <kbd>http://foo.com/bar</kbd>          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">Then </span>
+                    <span class="duration">0s</span>
+                              
+          the response status-code must be <kbd>302</kbd>          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">And </span>
+                    <span class="duration">0s</span>
+                              
+          the response location must be <kbd>https://new.org/api/bar</kbd>          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      </div>
+    </div>
+    <div class="card-footer p-1 border-success pl-3 pr-3">
+      Duration: 8s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      <div class="d-inline-block float-right">
+        
+        
+        
+        
+        
+        <span class="step passed-background" data-toggle="tooltip" title="Scenario passed">5</span>
+        
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="col-sm-12 mb-3">
+  <div class="card m-1">
+    <div class="card-body">
+      <div class="card-title m-0">
+        <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario5" class="h5 text-success">
+          Scenario: <span class="text-muted">An Ingress with annotation `bfe.ingress.kubernetes.io/redirect.url-prefix-add` and</span>
+        </a>
+        <p>  annotation `bfe.ingress.kubernetes.io/redirect.response-status`.</p>
+      </div>
+
+      <div id="scenario5" class="mt-3 collapse show">
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">Given </span>
+                    <span class="duration">5s</span>
+                              
+          an Ingress resource with redirection annotations          
+          <a class="btn text-primary" data-toggle="collapse" href="#redirect-an-ingress-with-annotation--bfe-ingress-kubernetes-io-redirect-url-prefix-add--and-an-Ingress-resource-with-redirection-annotations">+Show Parameter</a>
+          <div id="redirect-an-ingress-with-annotation--bfe-ingress-kubernetes-io-redirect-url-prefix-add--and-an-Ingress-resource-with-redirection-annotations" class="collapse ml-3 mr-3">
+            <code>
+              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: redirect-url-set<br />  annotations:<br />    bfe.ingress.kubernetes.io/redirect.url-prefix-add: "https://new.org/api"<br />    bfe.ingress.kubernetes.io/redirect.response-status: 301<br />spec:<br />  rules:<br />    - host: "foo.com"<br />      http:<br />        paths:<br />          - path: /bar<br />            pathType: Prefix<br />            backend:<br />              service:<br />                name: foo-exact<br />                port:<br />                  number: 3000</pre>
+            </code>
+          </div>
+          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">And </span>
+                    <span class="duration">6s</span>
+                              
+          The Ingress status shows the IP address or FQDN where it is exposed          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">When </span>
+                    <span class="duration">0s</span>
+                              
+          I send a <kbd>GET</kbd> request to <kbd>http://foo.com/bar</kbd>          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">Then </span>
+                    <span class="duration">0s</span>
+                              
+          the response status-code must be <kbd>301</kbd>          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">And </span>
+                    <span class="duration">0s</span>
+                              
+          the response location must be <kbd>https://new.org/api/bar</kbd>          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      </div>
+    </div>
+    <div class="card-footer p-1 border-success pl-3 pr-3">
+      Duration: 11s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      <div class="d-inline-block float-right">
+        
+        
+        
+        
+        
+        <span class="step passed-background" data-toggle="tooltip" title="Scenario passed">5</span>
+        
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="col-sm-12 mb-3">
+  <div class="card m-1">
+    <div class="card-body">
+      <div class="card-title m-0">
+        <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario6" class="h5 text-success">
+          Scenario: <span class="text-muted">An Ingress with annotation `bfe.ingress.kubernetes.io/redirect.scheme-set` but</span>
+        </a>
+        <p>  no annotation `bfe.ingress.kubernetes.io/redirect.response-status`.</p>
+      </div>
+
+      <div id="scenario6" class="mt-3 collapse show">
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">Given </span>
+                    <span class="duration">10s</span>
+                              
+          an Ingress resource with redirection annotations          
+          <a class="btn text-primary" data-toggle="collapse" href="#redirect-an-ingress-with-annotation--bfe-ingress-kubernetes-io-redirect-scheme-set--but-an-Ingress-resource-with-redirection-annotations">+Show Parameter</a>
+          <div id="redirect-an-ingress-with-annotation--bfe-ingress-kubernetes-io-redirect-scheme-set--but-an-Ingress-resource-with-redirection-annotations" class="collapse ml-3 mr-3">
+            <code>
+              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: redirect-url-set<br />  annotations:<br />    bfe.ingress.kubernetes.io/redirect.scheme-set: https<br />spec:<br />  rules:<br />    - host: "foo.com"<br />      http:<br />        paths:<br />          - path: /bar<br />            pathType: Prefix<br />            backend:<br />              service:<br />                name: foo-exact<br />                port:<br />                  number: 3000</pre>
+            </code>
+          </div>
+          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">And </span>
+                    <span class="duration">6s</span>
+                              
+          The Ingress status shows the IP address or FQDN where it is exposed          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">When </span>
+                    <span class="duration">0s</span>
+                              
+          I send a <kbd>GET</kbd> request to <kbd>http://foo.com/bar</kbd>          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">Then </span>
+                    <span class="duration">0s</span>
+                              
+          the response status-code must be <kbd>302</kbd>          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">And </span>
+                    <span class="duration">0s</span>
+                              
+          the response location must be <kbd>https://foo.com/bar</kbd>          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      </div>
+    </div>
+    <div class="card-footer p-1 border-success pl-3 pr-3">
+      Duration: 16s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      <div class="d-inline-block float-right">
+        
+        
+        
+        
+        
+        <span class="step passed-background" data-toggle="tooltip" title="Scenario passed">5</span>
+        
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="col-sm-12 mb-3">
+  <div class="card m-1">
+    <div class="card-body">
+      <div class="card-title m-0">
+        <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario7" class="h5 text-success">
+          Scenario: <span class="text-muted">An Ingress with annotation `bfe.ingress.kubernetes.io/redirect.scheme-set` and</span>
+        </a>
+        <p>  annotation `bfe.ingress.kubernetes.io/redirect.response-status`.</p>
+      </div>
+
+      <div id="scenario7" class="mt-3 collapse show">
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">Given </span>
+                    <span class="duration">5s</span>
+                              
+          an Ingress resource with redirection annotations          
+          <a class="btn text-primary" data-toggle="collapse" href="#redirect-an-ingress-with-annotation--bfe-ingress-kubernetes-io-redirect-scheme-set--and-an-Ingress-resource-with-redirection-annotations">+Show Parameter</a>
+          <div id="redirect-an-ingress-with-annotation--bfe-ingress-kubernetes-io-redirect-scheme-set--and-an-Ingress-resource-with-redirection-annotations" class="collapse ml-3 mr-3">
+            <code>
+              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: redirect-url-set<br />  annotations:<br />    bfe.ingress.kubernetes.io/redirect.scheme-set: https<br />    bfe.ingress.kubernetes.io/redirect.response-status: 301<br />spec:<br />  rules:<br />    - host: "foo.com"<br />      http:<br />        paths:<br />          - path: /bar<br />            pathType: Prefix<br />            backend:<br />              service:<br />                name: foo-exact<br />                port:<br />                  number: 3000</pre>
+            </code>
+          </div>
+          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">And </span>
+                    <span class="duration">6s</span>
+                              
+          The Ingress status shows the IP address or FQDN where it is exposed          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">When </span>
+                    <span class="duration">0s</span>
+                              
+          I send a <kbd>GET</kbd> request to <kbd>http://foo.com/bar</kbd>          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">Then </span>
+                    <span class="duration">0s</span>
+                              
+          the response status-code must be <kbd>301</kbd>          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">And </span>
+                    <span class="duration">0s</span>
+                              
+          the response location must be <kbd>https://foo.com/bar</kbd>          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      </div>
+    </div>
+    <div class="card-footer p-1 border-success pl-3 pr-3">
+      Duration: 11s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      <div class="d-inline-block float-right">
+        
+        
+        
+        
+        
+        <span class="step passed-background" data-toggle="tooltip" title="Scenario passed">5</span>
+        
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="col-sm-12 mb-3">
+  <div class="card m-1">
+    <div class="card-body">
+      <div class="card-title m-0">
+        <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario8" class="h5 text-success">
+          Scenario: <span class="text-muted">An Ingress with annotation `bfe.ingress.kubernetes.io/redirect.url-set` whose value</span>
+        </a>
+        <p>  is invalid</p>
+      </div>
+
+      <div id="scenario8" class="mt-3 collapse show">
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">Given </span>
+                    <span class="duration">5s</span>
+                              
+          an Ingress resource with redirection annotations          
+          <a class="btn text-primary" data-toggle="collapse" href="#redirect-an-ingress-with-annotation--bfe-ingress-kubernetes-io-redirect-url-set--whose-value-an-Ingress-resource-with-redirection-annotations">+Show Parameter</a>
+          <div id="redirect-an-ingress-with-annotation--bfe-ingress-kubernetes-io-redirect-url-set--whose-value-an-Ingress-resource-with-redirection-annotations" class="collapse ml-3 mr-3">
+            <code>
+              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: redirect-url-set<br />  annotations:<br />    bfe.ingress.kubernetes.io/redirect.url-set: aaa-bbb<br />spec:<br />  rules:<br />    - host: "foo.com"<br />      http:<br />        paths:<br />          - path: /bar<br />            pathType: Prefix<br />            backend:<br />              service:<br />                name: foo-exact<br />                port:<br />                  number: 3000</pre>
             </code>
           </div>
           
@@ -1227,13 +2096,13 @@ kbd {
   <div class="card m-1">
     <div class="card-body">
       <div class="card-title m-0">
-        <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario5" class="h5 text-success">
-          Scenario: <span class="text-muted">An Ingress with path rules and header should send traffic to the matching backend service</span>
+        <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario9" class="h5 text-success">
+          Scenario: <span class="text-muted">An Ingress with annotation `bfe.ingress.kubernetes.io/redirect.url-prefix-add` whose value</span>
         </a>
-        <p>  (exact / and header only key matches request / without header)</p>
+        <p>  is invalid url</p>
       </div>
 
-      <div id="scenario5" class="mt-3 collapse show">
+      <div id="scenario9" class="mt-3 collapse show">
       
       
       <div class="scenario-step-container">
@@ -1248,11 +2117,11 @@ kbd {
           <span class="keyword highlight">Given </span>
                     <span class="duration">5s</span>
                               
-          an Ingress resource in a new random namespace          
-          <a class="btn text-primary" data-toggle="collapse" href="#header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace">+Show Parameter</a>
-          <div id="header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace" class="collapse ml-3 mr-3">
+          an Ingress resource with redirection annotations          
+          <a class="btn text-primary" data-toggle="collapse" href="#redirect-an-ingress-with-annotation--bfe-ingress-kubernetes-io-redirect-url-prefix-add--whose-value-an-Ingress-resource-with-redirection-annotations">+Show Parameter</a>
+          <div id="redirect-an-ingress-with-annotation--bfe-ingress-kubernetes-io-redirect-url-prefix-add--whose-value-an-Ingress-resource-with-redirection-annotations" class="collapse ml-3 mr-3">
             <code>
-              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: header-rules<br />  annotations:<br />    bfe.ingress.kubernetes.io/router.header: "h-key"<br />spec:<br />  rules:<br />    - host: "header-only-key"<br />      http:<br />        paths:<br />          - path: /<br />            pathType: Exact<br />            backend:<br />              service:<br />                name: header-only-key-no-header<br />                port:<br />                  number: 3000</pre>
+              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: redirect-url-set<br />  annotations:<br />    bfe.ingress.kubernetes.io/redirect.url-prefix-add: invalid-url<br />spec:<br />  rules:<br />    - host: "foo.com"<br />      http:<br />        paths:<br />          - path: /bar<br />            pathType: Prefix<br />            backend:<br />              service:<br />                name: foo-exact<br />                port:<br />                  number: 3000</pre>
             </code>
           </div>
           
@@ -1334,13 +2203,13 @@ kbd {
   <div class="card m-1">
     <div class="card-body">
       <div class="card-title m-0">
-        <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario6" class="h5 text-success">
-          Scenario: <span class="text-muted">An Ingress with path rules and header should send traffic to the matching backend service</span>
+        <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario10" class="h5 text-success">
+          Scenario: <span class="text-muted">An Ingress with annotation `bfe.ingress.kubernetes.io/redirect.url-prefix-add` whose value</span>
         </a>
-        <p>  (exact / and header normal matches request / with header right)</p>
+        <p>  is valid url with fragment</p>
       </div>
 
-      <div id="scenario6" class="mt-3 collapse show">
+      <div id="scenario10" class="mt-3 collapse show">
       
       
       <div class="scenario-step-container">
@@ -1355,11 +2224,11 @@ kbd {
           <span class="keyword highlight">Given </span>
                     <span class="duration">10s</span>
                               
-          an Ingress resource in a new random namespace          
-          <a class="btn text-primary" data-toggle="collapse" href="#header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace">+Show Parameter</a>
-          <div id="header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace" class="collapse ml-3 mr-3">
+          an Ingress resource with redirection annotations          
+          <a class="btn text-primary" data-toggle="collapse" href="#redirect-an-ingress-with-annotation--bfe-ingress-kubernetes-io-redirect-url-prefix-add--whose-value-an-Ingress-resource-with-redirection-annotations">+Show Parameter</a>
+          <div id="redirect-an-ingress-with-annotation--bfe-ingress-kubernetes-io-redirect-url-prefix-add--whose-value-an-Ingress-resource-with-redirection-annotations" class="collapse ml-3 mr-3">
             <code>
-              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: header-rules<br />  annotations:<br />    bfe.ingress.kubernetes.io/router.header: "User-Agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36"<br />spec:<br />  rules:<br />    - host: "header-normal-user-agent"<br />      http:<br />        paths:<br />          - path: /<br />            pathType: Exact<br />            backend:<br />              service:<br />                name: header-normal-right<br />                port:<br />                  number: 3000</pre>
+              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: redirect-url-set<br />  annotations:<br />    bfe.ingress.kubernetes.io/redirect.url-prefix-add: https://example.org/path#fragment<br />spec:<br />  rules:<br />    - host: "foo.com"<br />      http:<br />        paths:<br />          - path: /bar<br />            pathType: Prefix<br />            backend:<br />              service:<br />                name: foo-exact<br />                port:<br />                  number: 3000</pre>
             </code>
           </div>
           
@@ -1395,121 +2264,9 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">And </span>
-                    <span class="duration">6s</span>
-                              
-          The Ingress status shows the IP address or FQDN where it is exposed          
-          
-        </div>
-        
-        
-        
-        
-        
-        
-        
-      </div>
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      <div class="scenario-step-container">
-        
-        
-        <div class="label" title="Success">
-          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
-        </div>
-        
-        
-        <div class="text">
-          <span class="keyword highlight">When </span>
                     <span class="duration">0s</span>
                               
-          I send a <kbd>GET</kbd> request to <kbd>http://header-normal-user-agent/</kbd> with header          
-          <a class="btn text-primary" data-toggle="collapse" href="#header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-I-send-a--GET--request-to--http---header-normal-user-agent---with-header">+Show Parameter</a>
-          <div id="header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-I-send-a--GET--request-to--http---header-normal-user-agent---with-header" class="collapse ml-3 mr-3">
-            <code>
-              <pre>{"User-Agent": ["Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36"]}</pre>
-            </code>
-          </div>
-          
-          
-        </div>
-        
-        
-        
-        
-        
-        
-        
-      </div>
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      <div class="scenario-step-container">
-        
-        
-        <div class="label" title="Success">
-          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
-        </div>
-        
-        
-        <div class="text">
-          <span class="keyword highlight">Then </span>
-                    <span class="duration">0s</span>
-                              
-          the response status-code must be <kbd>200</kbd>          
-          
-        </div>
-        
-        
-        
-        
-        
-        
-        
-      </div>
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      <div class="scenario-step-container">
-        
-        
-        <div class="label" title="Success">
-          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
-        </div>
-        
-        
-        <div class="text">
-          <span class="keyword highlight">And </span>
-                    <span class="duration">0s</span>
-                              
-          the response must be served by the <kbd>header-normal-right</kbd> service          
+          The Ingress status should not be success          
           
         </div>
         
@@ -1534,14 +2291,14 @@ kbd {
       </div>
     </div>
     <div class="card-footer p-1 border-success pl-3 pr-3">
-      Duration: 16s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      Duration: 10s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
       <div class="d-inline-block float-right">
         
         
         
         
         
-        <span class="step passed-background" data-toggle="tooltip" title="Scenario passed">5</span>
+        <span class="step passed-background" data-toggle="tooltip" title="Scenario passed">2</span>
         
         
       </div>
@@ -1553,13 +2310,120 @@ kbd {
   <div class="card m-1">
     <div class="card-body">
       <div class="card-title m-0">
-        <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario7" class="h5 text-success">
-          Scenario: <span class="text-muted">An Ingress with path rules and header should send traffic to the matching backend service</span>
+        <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario11" class="h5 text-success">
+          Scenario: <span class="text-muted">An Ingress with annotation `bfe.ingress.kubernetes.io/redirect.scheme-set` whose value</span>
         </a>
-        <p>  (exact / and header normal dose not matches request / without header)</p>
+        <p>  is not http or https</p>
       </div>
 
-      <div id="scenario7" class="mt-3 collapse show">
+      <div id="scenario11" class="mt-3 collapse show">
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">Given </span>
+                    <span class="duration">10s</span>
+                              
+          an Ingress resource with redirection annotations          
+          <a class="btn text-primary" data-toggle="collapse" href="#redirect-an-ingress-with-annotation--bfe-ingress-kubernetes-io-redirect-scheme-set--whose-value-an-Ingress-resource-with-redirection-annotations">+Show Parameter</a>
+          <div id="redirect-an-ingress-with-annotation--bfe-ingress-kubernetes-io-redirect-scheme-set--whose-value-an-Ingress-resource-with-redirection-annotations" class="collapse ml-3 mr-3">
+            <code>
+              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: redirect-url-set<br />  annotations:<br />    bfe.ingress.kubernetes.io/redirect.scheme-set: ftp<br />spec:<br />  rules:<br />    - host: "foo.com"<br />      http:<br />        paths:<br />          - path: /bar<br />            pathType: Prefix<br />            backend:<br />              service:<br />                name: foo-exact<br />                port:<br />                  number: 3000</pre>
+            </code>
+          </div>
+          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">And </span>
+                    <span class="duration">0s</span>
+                              
+          The Ingress status should not be success          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      </div>
+    </div>
+    <div class="card-footer p-1 border-success pl-3 pr-3">
+      Duration: 10s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      <div class="d-inline-block float-right">
+        
+        
+        
+        
+        
+        <span class="step passed-background" data-toggle="tooltip" title="Scenario passed">2</span>
+        
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="col-sm-12 mb-3">
+  <div class="card m-1">
+    <div class="card-body">
+      <div class="card-title m-0">
+        <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario12" class="h5 text-success">
+          Scenario: <span class="text-muted">An Ingress with multiple redirection location annotations should not be created successfully.</span>
+        </a>
+        <p></p>
+      </div>
+
+      <div id="scenario12" class="mt-3 collapse show">
       
       
       <div class="scenario-step-container">
@@ -1574,407 +2438,11 @@ kbd {
           <span class="keyword highlight">Given </span>
                     <span class="duration">5s</span>
                               
-          an Ingress resource in a new random namespace          
-          <a class="btn text-primary" data-toggle="collapse" href="#header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace">+Show Parameter</a>
-          <div id="header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace" class="collapse ml-3 mr-3">
+          an Ingress resource with redirection annotations          
+          <a class="btn text-primary" data-toggle="collapse" href="#redirect-an-ingress-with-multiple-redirection-location-annotations-should-not-be-created-successfully--an-Ingress-resource-with-redirection-annotations">+Show Parameter</a>
+          <div id="redirect-an-ingress-with-multiple-redirection-location-annotations-should-not-be-created-successfully--an-Ingress-resource-with-redirection-annotations" class="collapse ml-3 mr-3">
             <code>
-              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: header-rules<br />  annotations:<br />    bfe.ingress.kubernetes.io/router.header: "user-agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36"<br />spec:<br />  rules:<br />    - host: "header-normal"<br />      http:<br />        paths:<br />          - path: /<br />            pathType: Exact<br />            backend:<br />              service:<br />                name: header-normal-right<br />                port:<br />                  number: 3000</pre>
-            </code>
-          </div>
-          
-          
-        </div>
-        
-        
-        
-        
-        
-        
-        
-      </div>
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      <div class="scenario-step-container">
-        
-        
-        <div class="label" title="Success">
-          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
-        </div>
-        
-        
-        <div class="text">
-          <span class="keyword highlight">And </span>
-                    <span class="duration">6s</span>
-                              
-          The Ingress status shows the IP address or FQDN where it is exposed          
-          
-        </div>
-        
-        
-        
-        
-        
-        
-        
-      </div>
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      <div class="scenario-step-container">
-        
-        
-        <div class="label" title="Success">
-          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
-        </div>
-        
-        
-        <div class="text">
-          <span class="keyword highlight">When </span>
-                    <span class="duration">0s</span>
-                              
-          I send a <kbd>GET</kbd> request to <kbd>http://header-normal/</kbd>          
-          
-        </div>
-        
-        
-        
-        
-        
-        
-        
-      </div>
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      <div class="scenario-step-container">
-        
-        
-        <div class="label" title="Success">
-          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
-        </div>
-        
-        
-        <div class="text">
-          <span class="keyword highlight">Then </span>
-                    <span class="duration">0s</span>
-                              
-          the response status-code must be <kbd>500</kbd>          
-          
-        </div>
-        
-        
-        
-        
-        
-        
-        
-      </div>
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      </div>
-    </div>
-    <div class="card-footer p-1 border-success pl-3 pr-3">
-      Duration: 11s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
-      <div class="d-inline-block float-right">
-        
-        
-        
-        
-        
-        <span class="step passed-background" data-toggle="tooltip" title="Scenario passed">4</span>
-        
-        
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="col-sm-12 mb-3">
-  <div class="card m-1">
-    <div class="card-body">
-      <div class="card-title m-0">
-        <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario8" class="h5 text-success">
-          Scenario: <span class="text-muted">An Ingress with path rules and header should send traffic to the matching backend service</span>
-        </a>
-        <p>  (exact / and header a:b:c matches request / with header right)</p>
-      </div>
-
-      <div id="scenario8" class="mt-3 collapse show">
-      
-      
-      <div class="scenario-step-container">
-        
-        
-        <div class="label" title="Success">
-          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
-        </div>
-        
-        
-        <div class="text">
-          <span class="keyword highlight">Given </span>
-                    <span class="duration">10s</span>
-                              
-          an Ingress resource in a new random namespace          
-          <a class="btn text-primary" data-toggle="collapse" href="#header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace">+Show Parameter</a>
-          <div id="header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace" class="collapse ml-3 mr-3">
-            <code>
-              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: header-rules<br />  annotations:<br />    bfe.ingress.kubernetes.io/router.header: "a:b:c"<br />spec:<br />  rules:<br />    - host: "header-a-b-c"<br />      http:<br />        paths:<br />          - path: /<br />            pathType: Exact<br />            backend:<br />              service:<br />                name: header-a-b-c-right<br />                port:<br />                  number: 3000</pre>
-            </code>
-          </div>
-          
-          
-        </div>
-        
-        
-        
-        
-        
-        
-        
-      </div>
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      <div class="scenario-step-container">
-        
-        
-        <div class="label" title="Success">
-          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
-        </div>
-        
-        
-        <div class="text">
-          <span class="keyword highlight">And </span>
-                    <span class="duration">6s</span>
-                              
-          The Ingress status shows the IP address or FQDN where it is exposed          
-          
-        </div>
-        
-        
-        
-        
-        
-        
-        
-      </div>
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      <div class="scenario-step-container">
-        
-        
-        <div class="label" title="Success">
-          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
-        </div>
-        
-        
-        <div class="text">
-          <span class="keyword highlight">When </span>
-                    <span class="duration">0s</span>
-                              
-          I send a <kbd>GET</kbd> request to <kbd>http://header-a-b-c/</kbd> with header          
-          <a class="btn text-primary" data-toggle="collapse" href="#header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-I-send-a--GET--request-to--http---header-a-b-c---with-header">+Show Parameter</a>
-          <div id="header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-I-send-a--GET--request-to--http---header-a-b-c---with-header" class="collapse ml-3 mr-3">
-            <code>
-              <pre>{"a": ["b:c"]}</pre>
-            </code>
-          </div>
-          
-          
-        </div>
-        
-        
-        
-        
-        
-        
-        
-      </div>
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      <div class="scenario-step-container">
-        
-        
-        <div class="label" title="Success">
-          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
-        </div>
-        
-        
-        <div class="text">
-          <span class="keyword highlight">Then </span>
-                    <span class="duration">0s</span>
-                              
-          the response status-code must be <kbd>200</kbd>          
-          
-        </div>
-        
-        
-        
-        
-        
-        
-        
-      </div>
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      <div class="scenario-step-container">
-        
-        
-        <div class="label" title="Success">
-          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
-        </div>
-        
-        
-        <div class="text">
-          <span class="keyword highlight">And </span>
-                    <span class="duration">0s</span>
-                              
-          the response must be served by the <kbd>header-a-b-c-right</kbd> service          
-          
-        </div>
-        
-        
-        
-        
-        
-        
-        
-      </div>
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      </div>
-    </div>
-    <div class="card-footer p-1 border-success pl-3 pr-3">
-      Duration: 16s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
-      <div class="d-inline-block float-right">
-        
-        
-        
-        
-        
-        <span class="step passed-background" data-toggle="tooltip" title="Scenario passed">5</span>
-        
-        
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="col-sm-12 mb-3">
-  <div class="card m-1">
-    <div class="card-body">
-      <div class="card-title m-0">
-        <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario9" class="h5 text-success">
-          Scenario: <span class="text-muted">An Ingress with path rules and header should send traffic to the matching backend service</span>
-        </a>
-        <p>  (exact / and header a:b:c dose not matches request / without header)</p>
-      </div>
-
-      <div id="scenario9" class="mt-3 collapse show">
-      
-      
-      <div class="scenario-step-container">
-        
-        
-        <div class="label" title="Success">
-          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
-        </div>
-        
-        
-        <div class="text">
-          <span class="keyword highlight">Given </span>
-                    <span class="duration">10s</span>
-                              
-          an Ingress resource in a new random namespace          
-          <a class="btn text-primary" data-toggle="collapse" href="#header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace">+Show Parameter</a>
-          <div id="header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace" class="collapse ml-3 mr-3">
-            <code>
-              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: header-rules<br />  annotations:<br />    bfe.ingress.kubernetes.io/router.header: "a:b:c"<br />spec:<br />  rules:<br />    - host: "header-a-b-c-without"<br />      http:<br />        paths:<br />          - path: /<br />            pathType: Exact<br />            backend:<br />              service:<br />                name: without-header-a-b-c<br />                port:<br />                  number: 3000</pre>
+              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: redirect-url-set<br />  annotations:<br />    bfe.ingress.kubernetes.io/redirect.scheme-set: https<br />    bfe.ingress.kubernetes.io/redirect.url-prefix-add: "https://new.org/api"<br />    bfe.ingress.kubernetes.io/redirect.response-status: 301<br />spec:<br />  rules:<br />    - host: "foo.com"<br />      http:<br />        paths:<br />          - path: /bar<br />            pathType: Prefix<br />            backend:<br />              service:<br />                name: foo-exact<br />                port:<br />                  number: 3000</pre>
             </code>
           </div>
           
@@ -2012,77 +2480,7 @@ kbd {
           <span class="keyword highlight">And </span>
                     <span class="duration">3s</span>
                               
-          The Ingress status shows the IP address or FQDN where it is exposed          
-          
-        </div>
-        
-        
-        
-        
-        
-        
-        
-      </div>
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      <div class="scenario-step-container">
-        
-        
-        <div class="label" title="Success">
-          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
-        </div>
-        
-        
-        <div class="text">
-          <span class="keyword highlight">When </span>
-                    <span class="duration">0s</span>
-                              
-          I send a <kbd>GET</kbd> request to <kbd>http://header-a-b-c-without/</kbd>          
-          
-        </div>
-        
-        
-        
-        
-        
-        
-        
-      </div>
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      <div class="scenario-step-container">
-        
-        
-        <div class="label" title="Success">
-          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
-        </div>
-        
-        
-        <div class="text">
-          <span class="keyword highlight">Then </span>
-                    <span class="duration">0s</span>
-                              
-          the response status-code must be <kbd>500</kbd>          
+          The Ingress status should not be success          
           
         </div>
         
@@ -2107,14 +2505,14 @@ kbd {
       </div>
     </div>
     <div class="card-footer p-1 border-success pl-3 pr-3">
-      Duration: 13s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      Duration: 8s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
       <div class="d-inline-block float-right">
         
         
         
         
         
-        <span class="step passed-background" data-toggle="tooltip" title="Scenario passed">4</span>
+        <span class="step passed-background" data-toggle="tooltip" title="Scenario passed">2</span>
         
         
       </div>
@@ -2126,13 +2524,13 @@ kbd {
   <div class="card m-1">
     <div class="card-body">
       <div class="card-title m-0">
-        <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario10" class="h5 text-success">
-          Scenario: <span class="text-muted">An Ingress with path rules and header should send traffic to the matching backend service</span>
+        <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario13" class="h5 text-success">
+          Scenario: <span class="text-muted">An Ingress with redirection response-status annotation but no redirection location annotations</span>
         </a>
-        <p>  (exact / and header a:+/?%#& matches request / with header right)</p>
+        <p>  should not be created successfully.</p>
       </div>
 
-      <div id="scenario10" class="mt-3 collapse show">
+      <div id="scenario13" class="mt-3 collapse show">
       
       
       <div class="scenario-step-container">
@@ -2147,11 +2545,11 @@ kbd {
           <span class="keyword highlight">Given </span>
                     <span class="duration">5s</span>
                               
-          an Ingress resource in a new random namespace          
-          <a class="btn text-primary" data-toggle="collapse" href="#header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace">+Show Parameter</a>
-          <div id="header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace" class="collapse ml-3 mr-3">
+          an Ingress resource with redirection annotations          
+          <a class="btn text-primary" data-toggle="collapse" href="#redirect-an-ingress-with-redirection-response-status-annotation-but-no-redirection-location-annotations-an-Ingress-resource-with-redirection-annotations">+Show Parameter</a>
+          <div id="redirect-an-ingress-with-redirection-response-status-annotation-but-no-redirection-location-annotations-an-Ingress-resource-with-redirection-annotations" class="collapse ml-3 mr-3">
             <code>
-              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: header-rules<br />  annotations:<br />    bfe.ingress.kubernetes.io/router.header: "a:+/?%#&"<br />spec:<br />  rules:<br />    - host: "header-special-character"<br />      http:<br />        paths:<br />          - path: /<br />            pathType: Exact<br />            backend:<br />              service:<br />                name: header-special-character-right<br />                port:<br />                  number: 3000</pre>
+              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: redirect-url-set<br />  annotations:<br />    bfe.ingress.kubernetes.io/redirect.response-status: 301<br />spec:<br />  rules:<br />    - host: "foo.com"<br />      http:<br />        paths:<br />          - path: /bar<br />            pathType: Prefix<br />            backend:<br />              service:<br />                name: foo-exact<br />                port:<br />                  number: 3000</pre>
             </code>
           </div>
           
@@ -2187,121 +2585,9 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">And </span>
-                    <span class="duration">6s</span>
-                              
-          The Ingress status shows the IP address or FQDN where it is exposed          
-          
-        </div>
-        
-        
-        
-        
-        
-        
-        
-      </div>
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      <div class="scenario-step-container">
-        
-        
-        <div class="label" title="Success">
-          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
-        </div>
-        
-        
-        <div class="text">
-          <span class="keyword highlight">When </span>
                     <span class="duration">0s</span>
                               
-          I send a <kbd>GET</kbd> request to <kbd>http://header-special-character/</kbd> with header          
-          <a class="btn text-primary" data-toggle="collapse" href="#header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-I-send-a--GET--request-to--http---header-special-character---with-header">+Show Parameter</a>
-          <div id="header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-I-send-a--GET--request-to--http---header-special-character---with-header" class="collapse ml-3 mr-3">
-            <code>
-              <pre>{"a": ["+/?%#&"]}</pre>
-            </code>
-          </div>
-          
-          
-        </div>
-        
-        
-        
-        
-        
-        
-        
-      </div>
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      <div class="scenario-step-container">
-        
-        
-        <div class="label" title="Success">
-          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
-        </div>
-        
-        
-        <div class="text">
-          <span class="keyword highlight">Then </span>
-                    <span class="duration">0s</span>
-                              
-          the response status-code must be <kbd>200</kbd>          
-          
-        </div>
-        
-        
-        
-        
-        
-        
-        
-      </div>
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      <div class="scenario-step-container">
-        
-        
-        <div class="label" title="Success">
-          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
-        </div>
-        
-        
-        <div class="text">
-          <span class="keyword highlight">And </span>
-                    <span class="duration">0s</span>
-                              
-          the response must be served by the <kbd>header-special-character-right</kbd> service          
+          The Ingress status should not be success          
           
         </div>
         
@@ -2326,14 +2612,14 @@ kbd {
       </div>
     </div>
     <div class="card-footer p-1 border-success pl-3 pr-3">
-      Duration: 11s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      Duration: 5s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
       <div class="d-inline-block float-right">
         
         
         
         
         
-        <span class="step passed-background" data-toggle="tooltip" title="Scenario passed">5</span>
+        <span class="step passed-background" data-toggle="tooltip" title="Scenario passed">2</span>
         
         
       </div>
@@ -2345,13 +2631,13 @@ kbd {
   <div class="card m-1">
     <div class="card-body">
       <div class="card-title m-0">
-        <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario11" class="h5 text-success">
-          Scenario: <span class="text-muted">An Ingress with path rules and header should send traffic to the matching backend service</span>
+        <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario14" class="h5 text-success">
+          Scenario: <span class="text-muted">An Ingress with redirection response-status annotation whose value is not 3XX</span>
         </a>
-        <p>  (exact / and header a:+/?%#& matches request / without header)</p>
+        <p></p>
       </div>
 
-      <div id="scenario11" class="mt-3 collapse show">
+      <div id="scenario14" class="mt-3 collapse show">
       
       
       <div class="scenario-step-container">
@@ -2366,11 +2652,11 @@ kbd {
           <span class="keyword highlight">Given </span>
                     <span class="duration">5s</span>
                               
-          an Ingress resource in a new random namespace          
-          <a class="btn text-primary" data-toggle="collapse" href="#header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace">+Show Parameter</a>
-          <div id="header-rules-an-ingress-with-path-rules-and-header-should-send-traffic-to-the-matching-backend-service-an-Ingress-resource-in-a-new-random-namespace" class="collapse ml-3 mr-3">
+          an Ingress resource with redirection annotations          
+          <a class="btn text-primary" data-toggle="collapse" href="#redirect-an-ingress-with-redirection-response-status-annotation-whose-value-is-not-3xx-an-Ingress-resource-with-redirection-annotations">+Show Parameter</a>
+          <div id="redirect-an-ingress-with-redirection-response-status-annotation-whose-value-is-not-3xx-an-Ingress-resource-with-redirection-annotations" class="collapse ml-3 mr-3">
             <code>
-              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: header-rules<br />  annotations:<br />    bfe.ingress.kubernetes.io/router.header: "a:+/?%#&"<br />spec:<br />  rules:<br />    - host: "header-special-character-no"<br />      http:<br />        paths:<br />          - path: /<br />            pathType: Exact<br />            backend:<br />              service:<br />                name: header-special-character-no<br />                port:<br />                  number: 3000</pre>
+              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: redirect-url-set<br />  annotations:<br />    bfe.ingress.kubernetes.io/redirect.scheme-set: https<br />    bfe.ingress.kubernetes.io/redirect.response-status: 404<br />spec:<br />  rules:<br />    - host: "foo.com"<br />      http:<br />        paths:<br />          - path: /bar<br />            pathType: Prefix<br />            backend:<br />              service:<br />                name: foo-exact<br />                port:<br />                  number: 3000</pre>
             </code>
           </div>
           
@@ -2406,79 +2692,9 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">And </span>
-                    <span class="duration">6s</span>
+                    <span class="duration">3s</span>
                               
-          The Ingress status shows the IP address or FQDN where it is exposed          
-          
-        </div>
-        
-        
-        
-        
-        
-        
-        
-      </div>
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      <div class="scenario-step-container">
-        
-        
-        <div class="label" title="Success">
-          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
-        </div>
-        
-        
-        <div class="text">
-          <span class="keyword highlight">When </span>
-                    <span class="duration">0s</span>
-                              
-          I send a <kbd>GET</kbd> request to <kbd>http://header-special-character-no/</kbd>          
-          
-        </div>
-        
-        
-        
-        
-        
-        
-        
-      </div>
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      <div class="scenario-step-container">
-        
-        
-        <div class="label" title="Success">
-          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
-        </div>
-        
-        
-        <div class="text">
-          <span class="keyword highlight">Then </span>
-                    <span class="duration">0s</span>
-                              
-          the response status-code must be <kbd>500</kbd>          
+          The Ingress status should not be success          
           
         </div>
         
@@ -2503,14 +2719,121 @@ kbd {
       </div>
     </div>
     <div class="card-footer p-1 border-success pl-3 pr-3">
-      Duration: 11s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      Duration: 8s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
       <div class="d-inline-block float-right">
         
         
         
         
         
-        <span class="step passed-background" data-toggle="tooltip" title="Scenario passed">4</span>
+        <span class="step passed-background" data-toggle="tooltip" title="Scenario passed">2</span>
+        
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="col-sm-12 mb-3">
+  <div class="card m-1">
+    <div class="card-body">
+      <div class="card-title m-0">
+        <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario15" class="h5 text-success">
+          Scenario: <span class="text-muted">An Ingress with redirection response-status annotation whose value type is not string</span>
+        </a>
+        <p></p>
+      </div>
+
+      <div id="scenario15" class="mt-3 collapse show">
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">Given </span>
+                    <span class="duration">5s</span>
+                              
+          an Ingress resource with redirection annotations          
+          <a class="btn text-primary" data-toggle="collapse" href="#redirect-an-ingress-with-redirection-response-status-annotation-whose-value-type-is-not-string-an-Ingress-resource-with-redirection-annotations">+Show Parameter</a>
+          <div id="redirect-an-ingress-with-redirection-response-status-annotation-whose-value-type-is-not-string-an-Ingress-resource-with-redirection-annotations" class="collapse ml-3 mr-3">
+            <code>
+              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: redirect-url-set<br />  annotations:<br />    bfe.ingress.kubernetes.io/redirect.scheme-set: https<br />    bfe.ingress.kubernetes.io/redirect.response-status: some-code<br />spec:<br />  rules:<br />    - host: "foo.com"<br />      http:<br />        paths:<br />          - path: /bar<br />            pathType: Prefix<br />            backend:<br />              service:<br />                name: foo-exact<br />                port:<br />                  number: 3000</pre>
+            </code>
+          </div>
+          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="scenario-step-container">
+        
+        
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
+        </div>
+        
+        
+        <div class="text">
+          <span class="keyword highlight">And </span>
+                    <span class="duration">3s</span>
+                              
+          The Ingress status should not be success          
+          
+        </div>
+        
+        
+        
+        
+        
+        
+        
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      </div>
+    </div>
+    <div class="card-footer p-1 border-success pl-3 pr-3">
+      Duration: 8s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      <div class="d-inline-block float-right">
+        
+        
+        
+        
+        
+        <span class="step passed-background" data-toggle="tooltip" title="Scenario passed">2</span>
         
         
       </div>
@@ -2560,7 +2883,7 @@ kbd {
           datasets: [
             {
               data: [
-                12,
+                16,
                 0,
                 0,
                 0,
