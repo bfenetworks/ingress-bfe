@@ -113,7 +113,7 @@ func iSendARequestToWithHeader(method, rawURL string, header *godog.DocString) e
 	if err != nil {
 		return err
 	}
-	return state.CaptureRoundTrip(method, u.Scheme, u.Host, u.Path, headerInfo)
+	return state.CaptureRoundTrip(method, u.Scheme, u.Host, u.Path, nil, headerInfo, true)
 }
 
 func theResponseStatuscodeMustBe(statusCode int) error {
@@ -129,7 +129,7 @@ func iSendARequestTo(method string, rawURL string) error {
 	if err != nil {
 		return err
 	}
-	return state.CaptureRoundTrip(method, u.Scheme, u.Host, u.Path, nil)
+	return state.CaptureRoundTrip(method, u.Scheme, u.Host, u.Path, nil, nil, true)
 }
 
 func theIngressStatusShouldNotBeSuccess() error {

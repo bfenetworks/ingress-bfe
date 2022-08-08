@@ -14,6 +14,8 @@
 #
 FROM golang:1.16-alpine3.14 AS build
 
+RUN apk add build-base
+
 WORKDIR /bfe-ingress-controller
 COPY . .
 RUN build/build.sh

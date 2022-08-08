@@ -109,7 +109,7 @@ func iSendRequestsTo(totalRequest int, method string, rawURL string) error {
 	}
 
 	for iteration := 1; iteration <= totalRequest; iteration++ {
-		err := state.CaptureRoundTrip(method, u.Scheme, u.Host, u.Path, nil)
+		err := state.CaptureRoundTrip(method, u.Scheme, u.Host, u.Path, nil, nil, true)
 		if err != nil {
 			return err
 		}

@@ -19,10 +19,11 @@ import (
 	"github.com/bfenetworks/bfe/bfe_config/bfe_tls_conf/server_cert_conf"
 	"github.com/bfenetworks/bfe/bfe_config/bfe_tls_conf/tls_rule_conf"
 	"github.com/bfenetworks/bfe/bfe_tls"
-	"github.com/bfenetworks/ingress-bfe/internal/bfeConfig/util"
 	"github.com/jwangsadinata/go-multimap/setmultimap"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
+
+	"github.com/bfenetworks/ingress-bfe/internal/bfeConfig/util"
 )
 
 const (

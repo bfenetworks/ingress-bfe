@@ -104,7 +104,7 @@ func theIngressStatusShowsTheIPAddressOrFQDNWhereItIsExposed() error {
 }
 
 func iSendARequestToHttp(method string, hostname string, path string) error {
-	return state.CaptureRoundTrip(method, "http", hostname, path, nil)
+	return state.CaptureRoundTrip(method, "http", hostname, path, nil, nil, true)
 }
 
 func theResponseStatuscodeMustBe(statusCode int) error {

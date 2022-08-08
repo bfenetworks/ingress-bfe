@@ -38,6 +38,7 @@ import (
 	"github.com/bfenetworks/ingress-bfe/test/e2e/pkg/kubernetes"
 	"github.com/bfenetworks/ingress-bfe/test/e2e/pkg/kubernetes/templates"
 	"github.com/bfenetworks/ingress-bfe/test/e2e/steps/annotations/balance/loadbalance"
+	"github.com/bfenetworks/ingress-bfe/test/e2e/steps/annotations/redirect"
 	"github.com/bfenetworks/ingress-bfe/test/e2e/steps/annotations/route/cookie"
 	"github.com/bfenetworks/ingress-bfe/test/e2e/steps/annotations/route/header"
 	"github.com/bfenetworks/ingress-bfe/test/e2e/steps/annotations/route/priority"
@@ -139,6 +140,7 @@ var (
 		"features/annotations/route/header.feature":         {header.InitializeScenario, nil},
 		"features/annotations/route/priority.feature":       {priority.InitializeScenario, nil},
 		"features/annotations/balance/load_balance.feature": {loadbalance.InitializeScenario, nil},
+		"features/annotations/redirect/redirect.feature":    {redirect.InitializeScenario, nil},
 	}
 )
 
