@@ -19,6 +19,24 @@
 |:---|:---|:---|
 | [bfe.ingress.kubernetes.io/balance.weight][] | 配置多 Service 之间的负载均衡 | JSON 字符串。示例：`{"svc": {"sub-svc1":80, "sub-svc2":20}}` |
 
+## 配置重定向
+
+### Response Location相关
+
+| Annotation名 | 作用 | 值 |
+|:---|:---|:---|
+| [bfe.ingress.kubernetes.io/redirect.url-set][] | 设置重定向Location为指定值 | 字符串。示例：`https://www.baidu.com` |
+| [bfe.ingress.kubernetes.io/redirect.url-from-query][] | 设置重定向Location为指定请求Query值 | 字符串。需要取值的Query的key。 |
+| [bfe.ingress.kubernetes.io/redirect.url-prefix-add][] | 设置重定向Location为原始URL增加指定前缀 | 字符串。示例：`https://www.baidu.com?prefixPath` |
+| [bfe.ingress.kubernetes.io/redirect.scheme-set][] | 设置重定向Location为原始URL并修改协议(支持HTTP和HTTPS) | 字符串。示例：`https` |
+
+### Response Status Code
+
+| Annotation名 | 作用 | 值 |
+|:---|:---|:---|
+| [bfe.ingress.kubernetes.io/redirect.response-status][] | 设置重定向Response的状态码，该Annotation为可选项 | 数字形式的字符串。可选：`301`、`302`、`303`、`307`、`308`，默认为`302` |
+
+
 ## 系统保留
 
 | Annotation名 | 作用 | 值 |
