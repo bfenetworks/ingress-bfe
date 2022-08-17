@@ -1,15 +1,15 @@
-# 重定向配置
+# Redirect
 
-BFE Ingress Controller支持通过在声明在Ingress中使用注解（Annotations）的方式，对当前Ingress匹配的流量进行重定向。
+The BFE Ingress Controller supports redirecting traffic matched by the Ingress by using `metadata.annotations` of the Ingress object.
 
-## 配置方式
+## How to Config
 
-Ingress 资源内
+In the Ingress object,
 
-- `spec.rules`定义路由规则
-- `metadata.annotations`定义对符合路由规则的流量，重定向响应的行为
+- `spec.rules` defines the route rules;
+- `metadata.annotations` defines the behavior of redirecting traffic matched by the Ingress.
 
-参考格式：
+Reference format:
 
 ```yaml
 metadata:
@@ -30,74 +30,74 @@ spec:
   - ...
 ```
 
-## 重定向Location
+## Redirect Location
 
-BFE Ingress Controller支持使用4种方式配置重定向目标URL。
+The BFE Ingress Controller supports 4 ways to configure the redirect location.
 
 ### 静态URL
 
-通过设置 `bfe.ingress.kubernetes.io/redirect.url-set`，配置静态重定向目标URL。
+Use `bfe.ingress.kubernetes.io/redirect.url-set` to config the static redirect location。
 
-例如：
+For example:
 
 ```yaml
 bfe.ingress.kubernetes.io/redirect.target: "https://www.baidu.com"
 ```
 
-对应示例
+Corresponding scenario:
 
 - Request: http://host/path?query-key=value
 - Response: https://www.baidu.com
 
-### 从Query中获得URL
+### Fetch URL from Query
 
-例如：
+For example:
 
 ```yaml
 bfe.ingress.kubernetes.io/redirect.url-from-query: url
 ```
 
-对应示例
+Corresponding scenario:
 
 - Request: https://host/path?url=https%3A%2F%2Fwww.baidu.com
 - Response: https://www.baidu.com
 
-### 添加前缀
+### Add Prefix
 
-例如：
+For example:
 
 ```yaml
 bfe.ingress.kubernetes.io/redirect.url-prefix-add: "http://www.baidu.com/redirect"
 ```
 
-对应示例
+Corresponding scenario:
 
 - Request: https://host/path?query-key=value
 - Response: http://www.baidu.com/redirect/path?query-key=value
 
-### 设置 Scheme
+### Set Scheme
 
-修改请求的协议。目前仅支持HTTP和HTTPS。
+Change the scheme of the request。Only HTTP and HTTPS are supported.
 
-例如：
+For example:
 
 ```yaml
 bfe.ingress.kubernetes.io/redirect.scheme-set: http
 ```
 
-对应示例
+Corresponding scenario:
 
 - Request: https://host/path?query-key=value
 - Response: http://host/path?query-key=value
 
-## 重定向状态码
+## Response Status Code
 
-默认情况下，重定向Response的状态码为302。也可以通过设置 `bfe.ingress.kubernetes.io/redirect.response-status`，手动指定重定向的状态码。
+By default, the status code of the redirect response is `302`. Users can manually specify the redirect status code by setting `bfe.ingress.kubernetes.io/redirect.response-status`.
 
-例如：
+For example:
 
 ```yaml
 bfe.ingress.kubernetes.io/redirect.response-status: 301
 ```
 
-目前支持的重定向状态码有：301、302、303、307、308。
+The supported redirection status codes are: 301, 302, 303, 307, 308.
