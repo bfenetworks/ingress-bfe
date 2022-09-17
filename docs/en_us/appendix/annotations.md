@@ -51,3 +51,13 @@
 [bfe.ingress.kubernetes.io/router.header]: ../ingress/basic.md#header
 
 [bfe.ingress.kubernetes.io/balance.weight]: ../ingress/load-balance.md
+
+[bfe.ingress.kubernetes.io/redirect.url-set]: ../ingress/redirect.md#static-url
+
+[bfe.ingress.kubernetes.io/redirect.url-from-query]:  ../ingress/redirect.md#
+
+[bfe.ingress.kubernetes.io/redirect.url-prefix-add]: ../ingress/redirect.md#add-prefix
+
+[bfe.ingress.kubernetes.io/redirect.scheme-set]: ../ingress/redirect.md#set-scheme
+
+[bfe.ingress.kubernetes.io/redirect.response-status]: ../ingress/redirect.md#response-status-code

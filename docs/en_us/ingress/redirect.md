@@ -32,9 +32,9 @@ spec:
 
 ## Redirect Location
 
-The BFE Ingress Controller supports 4 ways to configure the redirect location.
+The BFE Ingress Controller supports 4 ways to configure the redirect location, and only one of them can be set in an Ingress object.
 
-### 静态URL
+### Static URL
 
 Use `bfe.ingress.kubernetes.io/redirect.url-set` to config the static redirect location。
 
@@ -51,6 +51,8 @@ Corresponding scenario:
 
 ### Fetch URL from Query
 
+Redirect location is fetched from specific Query of request URL, query key is specified by `bfe.ingress.kubernetes.io/redirect.url-from-query`.
+
 For example:
 
 ```yaml
@@ -63,6 +65,8 @@ Corresponding scenario:
 - Response: https://www.baidu.com
 
 ### Add Prefix
+
+Redirect location is a combination of given prefix and the `Path` of request URL, the prefix is set by `bfe.ingress.kubernetes.io/redirect.url-prefix-add`.
 
 For example:
 

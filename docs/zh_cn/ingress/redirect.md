@@ -32,7 +32,7 @@ spec:
 
 ## 重定向Location
 
-BFE Ingress Controller支持使用4种方式配置重定向目标URL。
+BFE Ingress Controller支持使用4种方式配置重定向目标URL，并且每个Ingress对象仅允许使用一种配置方式。
 
 ### 静态URL
 
@@ -51,6 +51,8 @@ bfe.ingress.kubernetes.io/redirect.target: "https://www.baidu.com"
 
 ### 从Query中获得URL
 
+从请求URL的指定`Query`值中获取重定向目标URL。通过设置`bfe.ingress.kubernetes.io/redirect.url-from-query`指定Query名。
+
 例如：
 
 ```yaml
@@ -64,6 +66,8 @@ bfe.ingress.kubernetes.io/redirect.url-from-query: url
 
 ### 添加前缀
 
+重定向目标URL由指定前缀和请求URL的`Path`拼接而成。通过`bfe.ingress.kubernetes.io/redirect.url-prefix-add`设置拼接的前缀字符串。
+
 例如：
 
 ```yaml
@@ -75,7 +79,7 @@ bfe.ingress.kubernetes.io/redirect.url-prefix-add: "http://www.baidu.com/redirec
 - Request: https://host/path?query-key=value
 - Response: http://www.baidu.com/redirect/path?query-key=value
 
-### 设置 Scheme
+### 设置Scheme
 
 修改请求的协议。目前仅支持HTTP和HTTPS。
 

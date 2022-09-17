@@ -52,3 +52,13 @@
 [bfe.ingress.kubernetes.io/router.header]: ../ingress/basic.md#header
 
 [bfe.ingress.kubernetes.io/balance.weight]: ../ingress/load-balance.md
+
+[bfe.ingress.kubernetes.io/redirect.url-set]: ../ingress/redirect.md#静态URL
+
+[bfe.ingress.kubernetes.io/redirect.url-from-query]:  ../ingress/redirect.md#从Query中获得URL
+
+[bfe.ingress.kubernetes.io/redirect.url-prefix-add]: ../ingress/redirect.md#添加前缀
+
+[bfe.ingress.kubernetes.io/redirect.scheme-set]: ../ingress/redirect.md#设置Scheme
+
+[bfe.ingress.kubernetes.io/redirect.response-status]: ../ingress/redirect.md#重定向状态码
