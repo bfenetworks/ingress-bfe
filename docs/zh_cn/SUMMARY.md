@@ -11,6 +11,7 @@
     * [路由冲突处理](ingress/conflict.md)
     * [TLS 配置](ingress/tls.md)
     * [负载均衡](ingress/load-balance.md)
+    * [重定向](ingress/redirect.md)
 * 配置示例
     * [配置文件示例](example/example.md)
     * [灰度发布示例](example/canary-release.md)

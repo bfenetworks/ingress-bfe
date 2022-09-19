@@ -11,6 +11,7 @@
     * [Principles of Handling Route Rule Conflicts](ingress/conflict.md)
     * [TLS  Configuration](ingress/tls.md)
     * [Load Balance](ingress/load-balance.md)
+    * [Redirect](ingress/redirect.md)
 * Configuration Examples
     * [Config File Example](example/example.md)
     * [Canary Release Example](example/canary-release.md)
