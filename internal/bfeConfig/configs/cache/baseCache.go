@@ -107,6 +107,7 @@ func (c *BaseCache) GetRules() []Rule {
 // DeleteByIngress deletes the Rules of an Ingress from the cache
 func (c *BaseCache) DeleteByIngress(ingress string) {
 	c.BaseRules.delete(ingress)
+	c.Version = util.NewVersion()
 }
 
 // ContainsIngress returns true if ingress exist in cache

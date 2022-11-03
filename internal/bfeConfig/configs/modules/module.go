@@ -15,8 +15,10 @@
 package modules
 
 import (
-	"github.com/bfenetworks/ingress-bfe/internal/bfeConfig/configs/modules/redirect"
 	netv1 "k8s.io/api/networking/v1"
+
+	"github.com/bfenetworks/ingress-bfe/internal/bfeConfig/configs/modules/redirect"
+	"github.com/bfenetworks/ingress-bfe/internal/bfeConfig/configs/modules/rewrite"
 )
 
 // BFEModuleConfig is an abstraction of the BFE module configuration.
@@ -39,5 +41,6 @@ func InitBFEModules(version string) []BFEModuleConfig {
 	var modules []BFEModuleConfig
 	// mod_redirect
 	modules = append(modules, redirect.NewRedirectConfig(version))
+	modules = append(modules, rewrite.NewRewriteConfig(version))
 	return modules
 }
