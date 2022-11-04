@@ -205,6 +205,20 @@ func NewIngress(c kubernetes.Interface, namespace string, ingress *networking.In
 	return nil
 }
 
+// UpdateIngress updates an existing ingress
+func UpdateIngress(c kubernetes.Interface, namespace string, ingress *networking.Ingress) error {
+	err := displayYamlDefinition(ingress)
+	if err != nil {
+		return fmt.Errorf("unable show yaml definition: %v", err)
+	}
+
+	if _, err := c.NetworkingV1().Ingresses(namespace).Update(context.TODO(), ingress, metav1.UpdateOptions{}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // IngressFromSpec deserializes an Ingress definition using an IngressSpec
 func IngressFromSpec(name, namespace, ingressSpec string) (*networking.Ingress, error) {
 	if namespace == metav1.NamespaceNone || namespace == metav1.NamespaceDefault {
