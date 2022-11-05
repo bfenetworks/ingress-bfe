@@ -260,7 +260,7 @@ Feature: Redirect
     When I send a "GET" request to "http://foo.com/bar"
     Then the response status-code must be 302
     And the response location must be "https://www.baidu.com"
-    Then update the ingress by removing the redirect annotations
+    Then update the ingress
     """
     apiVersion: networking.k8s.io/v1
     kind: Ingress
@@ -278,6 +278,50 @@ Feature: Redirect
                     name: foo-exact
                     port:
                       number: 3000
+    """
+    And The Ingress status shows the IP address or FQDN where it is exposed
+    When I send a "GET" request to "http://foo.com/bar"
+    Then the response status-code must be 200
+
+  Scenario: An Ingress with redirect annotations is applied and
+  then the ingress is updated by removing the rules.
+    Given an Ingress resource with redirection annotations
+    """
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: redirect-url-set
+      annotations:
+        bfe.ingress.kubernetes.io/redirect.url-set: "https://www.baidu.com"
+    spec:
+      rules:
+        - host: "foo.com"
+          http:
+            paths:
+              - path: /bar
+                pathType: Prefix
+                backend:
+                  service:
+                    name: foo-exact
+                    port:
+                      number: 3000
+    """
+    And The Ingress status shows the IP address or FQDN where it is exposed
+    When I send a "GET" request to "http://foo.com/bar"
+    Then the response status-code must be 302
+    And the response location must be "https://www.baidu.com"
+    Then update the ingress
+    """
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: redirect-url-set
+    spec:
+      defaultBackend:
+        service:
+          name: foo-exact
+          port:
+            number: 3000
     """
     And The Ingress status shows the IP address or FQDN where it is exposed
     When I send a "GET" request to "http://foo.com/bar"

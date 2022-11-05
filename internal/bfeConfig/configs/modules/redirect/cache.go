@@ -42,6 +42,10 @@ func newRedirectRuleCache(version string) *redirectRuleCache {
 }
 
 func (c redirectRuleCache) UpdateByIngress(ingress *netv1.Ingress) error {
+	if len(ingress.Spec.Rules) == 0 {
+		return nil
+	}
+
 	cmd, param, err := parseRedirectActionFromAnnotations(ingress.Annotations)
 	if err != nil {
 		return err

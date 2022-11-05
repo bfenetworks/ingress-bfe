@@ -35,7 +35,7 @@ var state *tstate.Scenario
 // InitializeScenario configures the Feature to test
 func InitializeScenario(ctx *godog.ScenarioContext) {
 	ctx.Step(`^an Ingress resource with redirection annotations$`, anIngressResourceWithRedirectionAnnotations)
-	ctx.Step(`^update the ingress by removing the redirect annotations$`, updateIngress)
+	ctx.Step(`^update the ingress$`, updateIngress)
 	ctx.Step(`^The Ingress status shows the IP address or FQDN where it is exposed$`, theIngressStatusShowsTheIPAddressOrFQDNWhereItIsExposed)
 	ctx.Step(`^I send a "([^"]*)" request to "([^"]*)"$`, iSendARequestTo)
 	ctx.Step(`^the response status-code must be (\d+)$`, theResponseStatusCodeMustBe)
