@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//Package rewrite is the module of rewrite url.
+//This file defines rewrite & cache's struct, also implements update ingress method.
 package rewrite
 
 import (
@@ -19,20 +21,19 @@ import (
 
 	netv1 "k8s.io/api/networking/v1"
 
-	. "github.com/bfenetworks/bfe/bfe_basic/action"
+	ac "github.com/bfenetworks/bfe/bfe_basic/action"
+	"github.com/bfenetworks/ingress-bfe/internal/bfeConfig/annotations"
 	"github.com/bfenetworks/ingress-bfe/internal/bfeConfig/configs/cache"
 	"github.com/bfenetworks/ingress-bfe/internal/bfeConfig/util"
 )
 
 type rewriteRule struct {
 	*cache.BaseRule
-	actions []Action
+	actions []ac.Action
 	//last means whether to continue match other conditions, only support true in this version
 	last *bool
-	//cond is rewrite action's condition, but not supported in this version
-	cond map[string]string
 	// when defines callback point, only support AfterLocation in this version
-	when string // default and only support AfterLocation
+	when string // default AfterLocation
 }
 
 type rewriteRuleCache struct {
@@ -46,40 +47,50 @@ func newRewriteRuleCache(version string) *rewriteRuleCache {
 }
 
 func (c rewriteRuleCache) UpdateByIngress(ingress *netv1.Ingress) error {
-	parsedActions, actionOrder, err := parseRewriteAction(ingress.Annotations)
+	rewriteActions, err := annotations.GetRewriteActions(ingress.Annotations)
 	if err != nil {
 		return err
 	}
 
-	if len(parsedActions) == 0 {
+	if len(rewriteActions) == 0 {
 		return nil
 	}
 
-	for callback, callbackParams := range parsedActions {
+	for callback, callbackActions := range rewriteActions {
 		e := c.UpdateByIngressFramework(
 			ingress,
 			func(ingress *netv1.Ingress, host, path string, _ netv1.HTTPIngressPath) (cache.Rule, error) {
-				actions := make([]Action, 0)
-				for cmd, params := range callbackParams {
-					if cmd == ActionQueryAdd || cmd == ActionQueryRename {
-						for i := 0; i < len(params); i += 2 {
-							ac := Action{
+				actions := make([]ac.Action, 0)
+				for cmd, p := range callbackActions {
+					if cmd == "QUERY_ADD" || cmd == "QUERY_RENAME" {
+						for i := 0; i < len(p.Params); i += 2 {
+							ac := ac.Action{
 								Cmd:    cmd,
-								Params: params[i : i+2],
+								Params: p.Params[i : i+2],
 							}
 							actions = append(actions, ac)
 						}
+					} else if cmd == "PATH_STRIP" {
+						prefix, err := annotations.ConvertStripParam(p.Params[0], path)
+						if err != nil {
+							return nil, err
+						}
+						ac := ac.Action{
+							Cmd:    "PATH_PREFIX_TRIM",
+							Params: []string{prefix},
+						}
+						actions = append(actions, ac)
 					} else {
-						ac := Action{
+						ac := ac.Action{
 							Cmd:    cmd,
-							Params: params,
+							Params: p.Params,
 						}
 						actions = append(actions, ac)
 					}
 				}
 				// sort by user defined action order
 				sort.SliceStable(actions, func(i, j int) bool {
-					return actionOrder[callback][actions[i].Cmd] < actionOrder[callback][actions[j].Cmd]
+					return callbackActions[actions[i].Cmd].Order < callbackActions[actions[j].Cmd].Order
 				})
 				last := true
 				return &rewriteRule{
