@@ -21,7 +21,7 @@ import (
 
 	netv1 "k8s.io/api/networking/v1"
 
-	ac "github.com/bfenetworks/bfe/bfe_basic/action"
+	bfeac "github.com/bfenetworks/bfe/bfe_basic/action"
 	"github.com/bfenetworks/ingress-bfe/internal/bfeConfig/annotations"
 	"github.com/bfenetworks/ingress-bfe/internal/bfeConfig/configs/cache"
 	"github.com/bfenetworks/ingress-bfe/internal/bfeConfig/util"
@@ -29,7 +29,7 @@ import (
 
 type rewriteRule struct {
 	*cache.BaseRule
-	actions []ac.Action
+	actions []bfeac.Action
 	//last means whether to continue match other conditions, only support true in this version
 	last *bool
 	// when defines callback point, only support AfterLocation in this version
@@ -47,12 +47,12 @@ func newRewriteRuleCache(version string) *rewriteRuleCache {
 }
 
 func (c rewriteRuleCache) UpdateByIngress(ingress *netv1.Ingress) error {
-	rewriteActions, err := annotations.GetRewriteActions(ingress.Annotations)
+	rewriteActions, err := annotations.GetRewriteAction(ingress.Annotations)
 	if err != nil {
 		return err
 	}
 
-	if len(rewriteActions) == 0 {
+	if rewriteActions == nil {
 		return nil
 	}
 
@@ -60,28 +60,28 @@ func (c rewriteRuleCache) UpdateByIngress(ingress *netv1.Ingress) error {
 		e := c.UpdateByIngressFramework(
 			ingress,
 			func(ingress *netv1.Ingress, host, path string, _ netv1.HTTPIngressPath) (cache.Rule, error) {
-				actions := make([]ac.Action, 0)
+				actions := make([]bfeac.Action, 0)
 				for cmd, p := range callbackActions {
 					if cmd == "QUERY_ADD" || cmd == "QUERY_RENAME" {
 						for i := 0; i < len(p.Params); i += 2 {
-							ac := ac.Action{
+							ac := bfeac.Action{
 								Cmd:    cmd,
 								Params: p.Params[i : i+2],
 							}
 							actions = append(actions, ac)
 						}
 					} else if cmd == "PATH_STRIP" {
-						prefix, err := annotations.ConvertStripParam(p.Params[0], path)
+						prefix, err := annotations.GetPathStripPrefix(path, p.Params[0])
 						if err != nil {
 							return nil, err
 						}
-						ac := ac.Action{
+						ac := bfeac.Action{
 							Cmd:    "PATH_PREFIX_TRIM",
 							Params: []string{prefix},
 						}
 						actions = append(actions, ac)
 					} else {
-						ac := ac.Action{
+						ac := bfeac.Action{
 							Cmd:    cmd,
 							Params: p.Params,
 						}

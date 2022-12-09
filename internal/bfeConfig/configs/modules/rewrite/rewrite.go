@@ -131,7 +131,7 @@ func (c *ModRewriteConfig) updateRewriteConf() error {
 	rewriteConfFile := newRewriteConfFile(c.rewriteRuleCache.Version)
 	// map rule to config segment through callback point
 	for cb := range segmentRules {
-		err := annotations.CheckCallBackPoint(cb)
+		err := annotations.CheckAllowedCallBack(cb)
 		if err != nil {
 			return err
 		}
