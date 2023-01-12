@@ -128,13 +128,23 @@ func (s *Scenario) AssertMethod(method string) error {
 	return nil
 }
 
+// normalizePath returns a normalized path, which query param's order is fixed.
+// if parsing the path string failed, return empty string.
+func normalizePath(path string) string {
+	p, err := net_url.Parse(path)
+	if err != nil {
+		return ""
+	}
+	return p.Path
+}
+
 // AssertRequestPath returns an error if the captured request path does not match the expected value
 func (s *Scenario) AssertRequestPath(path string) error {
 	if !strings.HasPrefix(path, "/") {
 		path = fmt.Sprintf("/%s", path)
 	}
 
-	if s.CapturedRequest.Path != path {
+	if normalizePath(path) != normalizePath(s.CapturedRequest.Path) {
 		return fmt.Errorf("expected the request path to be %v but it was %v", path, s.CapturedRequest.Path)
 	}
 
