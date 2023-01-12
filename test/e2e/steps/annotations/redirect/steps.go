@@ -16,6 +16,7 @@ package redirect
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/url"
 	"time"
@@ -34,6 +35,7 @@ var state *tstate.Scenario
 // InitializeScenario configures the Feature to test
 func InitializeScenario(ctx *godog.ScenarioContext) {
 	ctx.Step(`^an Ingress resource with redirection annotations$`, anIngressResourceWithRedirectionAnnotations)
+	ctx.Step(`^update the ingress$`, updateIngress)
 	ctx.Step(`^The Ingress status shows the IP address or FQDN where it is exposed$`, theIngressStatusShowsTheIPAddressOrFQDNWhereItIsExposed)
 	ctx.Step(`^I send a "([^"]*)" request to "([^"]*)"$`, iSendARequestTo)
 	ctx.Step(`^the response status-code must be (\d+)$`, theResponseStatusCodeMustBe)
@@ -76,6 +78,23 @@ func anIngressResourceWithRedirectionAnnotations(spec *godog.DocString) error {
 	}
 
 	state.IngressName = ingress.GetName()
+
+	return nil
+}
+
+func updateIngress(spec *godog.DocString) error {
+	ingress, err := kubernetes.IngressFromManifest(state.Namespace, spec.Content)
+	if err != nil {
+		return err
+	}
+	if ingress.GetName() != state.IngressName {
+		return errors.New("ingress name is not match with the ingressName stored in the state when try to update")
+	}
+
+	err = kubernetes.UpdateIngress(kubernetes.KubeClient, state.Namespace, ingress)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

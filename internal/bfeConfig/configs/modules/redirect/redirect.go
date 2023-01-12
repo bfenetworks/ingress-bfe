@@ -57,10 +57,6 @@ func newRedirectConfFile(version string) *mod_redirect.RedirectConfFile {
 }
 
 func (r *ModRedirectConfig) UpdateIngress(ingress *netv1.Ingress) error {
-	if len(ingress.Spec.Rules) == 0 {
-		return nil
-	}
-
 	ingressName := util.NamespacedName(ingress.Namespace, ingress.Name)
 	if r.redirectRuleCache.ContainsIngress(ingressName) {
 		r.redirectRuleCache.DeleteByIngress(ingressName)
