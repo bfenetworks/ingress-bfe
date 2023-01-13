@@ -64,7 +64,7 @@ func IngressClassFilter(ctx context.Context, r client.Reader, annots map[string]
 
 // matchIngressClass matches for specific or default ingress class
 // Params:
-//	targetCls:
+//	targetCls: target ingress class name
 //		if non-nil, matches ingress class with the same name
 //		if nil, matches default ingress class
 func matchIngressClass(targetCls *string, testCls v1.Object) bool {
