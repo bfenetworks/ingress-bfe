@@ -34,7 +34,34 @@
 
 | Annotation Name | Function | Value |
 |:---|:---|:---|
-| [bfe.ingress.kubernetes.io/redirect.response-status][] | (Optional) Set the Status Code of the Redirect Response | Number String. Optional `301`、`302`、`303`、`307`、`308`，default is `302` |
+| [bfe.ingress.kubernetes.io/redirect.response-status][] | (Optional) Set the Status Code of the Redirect Response | Number String. Optional `301`、`302`、`303`、`307`、`308`,default is `302` |
+
+## Rewrite URL
+
+### Host
+
+| Annotation Name                                              | Function                           | Value                                                        |
+| :----------------------------------------------------------- | :--------------------------------- | :----------------------------------------------------------- |
+| [bfe.ingress.kubernetes.io/rewrite-url.host][]               | Set the host to specified value.   | JSON string. i.e. `[{"params": "baidu.com"}]` ,`params` should be string. |
+| [bfe.ingress.kubernetes.io/rewrite-url.host-from-path-prefix][] | Set host to specified path prefix. | JSON string.  i.e. `[{"params": "true"}]`,`params` should be bool string. |
+
+### Path
+
+| Annotation Name                                             | Function                                  | Value                                                        |
+| :---------------------------------------------------------- | :---------------------------------------- | :----------------------------------------------------------- |
+| [bfe.ingress.kubernetes.io/rewrite-url.path][]              | Set path to specified value.              | JSON string. i.e. `[{"params": "/foo/bar"}]`,`params` should be path string. |
+| [bfe.ingress.kubernetes.io/rewrite-url.path-prefix-add][]   | Add prefix to original path.              | JSON string. i.e. `[{"params": "/bar"}]`,`params` should be path prefix string. |
+| [bfe.ingress.kubernetes.io/rewrite-url.path-prefix-trim][]  | Trim prefix from original path.           | JSON string. i.e. `[{"params": "/bar"}]`,`params` should be path prefix string. |
+| [bfe.ingress.kubernetes.io/rewrite-url.path-prefix-strip][] | Strip prefix segments from original path. | JSON string. i.e.  `[{"params": "1"}]`,`params` should be number string. |
+
+### Query
+
+| Annotation Name                                              | Function                                   | Value                                                        |
+| :----------------------------------------------------------- | :----------------------------------------- | :----------------------------------------------------------- |
+| [bfe.ingress.kubernetes.io/rewrite-url.query-add][] | Add query.                                 | JSON string. i.e.  `[{"params": "{"name": "alice"}"}]`,`params` should be  JSON string of dict. |
+| [bfe.ingress.kubernetes.io/rewrite-url.query-delete][] | Delete query.                              | JSON string. i.e.  `[{"params": "["name"]}]`,`params` should be  JSON string of list. |
+| [bfe.ingress.kubernetes.io/rewrite-url.query-rename][] | Delete all queries except specified query. | JSON string. i.e. `[{"params": "{"name": "user"}"}]`,`params` should be  JSON string of dict. |
+| [bfe.ingress.kubernetes.io/rewrite-url.query-delete-all-except][] | Rename query.                              | JSON string. i.e. `[{"params": "name"}]`,`params` should be dict JSON string. |
 
 ## BFE-Reserved
 
@@ -61,3 +88,13 @@
 [bfe.ingress.kubernetes.io/redirect.scheme-set]: ../ingress/redirect.md#set-scheme
 
 [bfe.ingress.kubernetes.io/redirect.response-status]: ../ingress/redirect.md#response-status-code
+[bfe.ingress.kubernetes.io/rewrite-url.host]: ../ingress/rewrite.md#static-host
+[bfe.ingress.kubernetes.io/rewrite-url.host-from-path-prefix]: ../ingress/rewrite.md#dynamic-host
+[bfe.ingress.kubernetes.io/rewrite-url.path]: ../ingress/rewrite.md#static-path
+[bfe.ingress.kubernetes.io/rewrite-url.path-prefix-add]: ../ingress/rewrite.md#add-path-prefix
+[bfe.ingress.kubernetes.io/rewrite-url.path-prefix-trim]: ../ingress/rewrite.md#delete-path-prefix
+[bfe.ingress.kubernetes.io/rewrite-url.path-prefix-strip]: ../ingress/rewrite.md#strip-path-prefix
+[bfe.ingress.kubernetes.io/rewrite-url.query-add]: ../ingress/rewrite.md#add-query
+[bfe.ingress.kubernetes.io/rewrite-url.query-delete]: ../ingress/rewrite.md#delete-query
+[bfe.ingress.kubernetes.io/rewrite-url.query-rename]: ../ingress/rewrite.md#rename-query
+[bfe.ingress.kubernetes.io/rewrite-url.query-delete-all-except]: ../ingress/rewrite.md#delete-all-queries-except
