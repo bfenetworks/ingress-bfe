@@ -36,32 +36,32 @@
 |:---|:---|:---|
 | [bfe.ingress.kubernetes.io/redirect.response-status][] | 设置重定向Response的状态码，该Annotation为可选项 | 数字形式的字符串。可选：`301`、`302`、`303`、`307`、`308`，默认为`302` |
 
-## URL重写
+## 配置URL重写
 
 ### Host
 
-| Annotation名                                                 | 作用                                         | 值                                                           |
-| :----------------------------------------------------------- | :------------------------------------------- | :----------------------------------------------------------- |
-| [bfe.ingress.kubernetes.io/rewrite-url.host][]               | 设置重写URL的Host为固定值。                  | JSON字符串。示例：`[{"params": "baidu.com"}]` ，`params`字段类型为字符串。 |
-| [bfe.ingress.kubernetes.io/rewrite-url.host-from-path-prefix][] | 设置重写URL的Host为原始URL的path前缀中的值。 | JSON字符串。示例：`[{"params": "true"}]`，`params`字段为布尔字符串。 |
+| Annotation名                                                 | 作用                            | 值                                            |
+| :----------------------------------------------------------- | :------------------------------ | :-------------------------------------------- |
+| [bfe.ingress.kubernetes.io/rewrite-url.host][]               | 设置Host为指定值。              | JSON字符串。示例：`[{"params": "baidu.com"}]` |
+| [bfe.ingress.kubernetes.io/rewrite-url.host-from-path-prefix][] | 以原始URL中的Path前缀作为Host。 | JSON字符串。示例：`[{"params": true}]`        |
 
 ### Path
 
-| Annotation名                                                | 作用                                           | 值                                                           |
-| :---------------------------------------------------------- | :--------------------------------------------- | :----------------------------------------------------------- |
-| [bfe.ingress.kubernetes.io/rewrite-url.path][]              | 设置重写URL的Path为指定值，替换原URL中的Path。 | JSON字符串。示例：`[{"params": "/foo/bar"}]`，`params`字段类型为路径前缀字符串。 |
-| [bfe.ingress.kubernetes.io/rewrite-url.path-prefix-add][]   | 添加Path指定前缀。                             | JSON字符串。示例：`[{"params": "/bar"}]`，`params`字段类型为路径前缀字符串。 |
-| [bfe.ingress.kubernetes.io/rewrite-url.path-prefix-trim][]  | 移除Path指定前缀。                             | JSON字符串。示例：`[{"params": "/bar"}]`，`params`字段类型为路径前缀字符串。 |
-| [bfe.ingress.kubernetes.io/rewrite-url.path-prefix-strip][] | 截断Path指定长度的segment。                    | JSON字符串。示例：`[{"params": "1"}]`，`params`字段类型为数字字符串。 |
+| Annotation名                                                | 作用                             | 值                                           |
+| :---------------------------------------------------------- | :------------------------------- | :------------------------------------------- |
+| [bfe.ingress.kubernetes.io/rewrite-url.path][]              | 设置Path为指定值。               | JSON字符串。示例：`[{"params": "/foo/bar"}]` |
+| [bfe.ingress.kubernetes.io/rewrite-url.path-prefix-add][]   | 为Path添加指定前缀。             | JSON字符串。示例：`[{"params": "/bar"}]`     |
+| [bfe.ingress.kubernetes.io/rewrite-url.path-prefix-trim][]  | 从Path中移除指定前缀。           | JSON字符串。示例：`[{"params": "/bar"}]`     |
+| [bfe.ingress.kubernetes.io/rewrite-url.path-prefix-strip][] | 从Path中剥离指定数量的前缀片段。 | JSON字符串。示例：`[{"params": 1}]`          |
 
 ### Query
 
-| Annotation名                                                 | 作用                             | 值                                                           |
-| :----------------------------------------------------------- | :------------------------------- | :----------------------------------------------------------- |
-| [bfe.ingress.kubernetes.io/rewrite-url.query-add][]          | 添加指定Query。                  | JSON字符串。示例：`[{"params": "{"name": "alice"}"}]`，`params`字段类型为字典类型JSON字符串。 |
-| [bfe.ingress.kubernetes.io/rewrite-url.query-delete][]       | 删除指定Query。                  | JSON字符串。示例：`[{"params": "["name"]}]`，`params`字段类型为数组类型JSON字符串。 |
-| [bfe.ingress.kubernetes.io/rewrite-url.query-rename][]       | 重命名指定Query。                | JSON字符串。示例：`[{"params": "{"name": "user"}"}]`，`params`字段类型为字典类型JSON字符串。 |
-| [bfe.ingress.kubernetes.io/rewrite-url.query-delete-all-except][] | 仅保留指定Query，删除其他Query。 | JSON字符串。示例：`[{"params": "name"}]`，`params`字段类型为字符串。 |
+| Annotation名                                                 | 作用                             | 值                                                  |
+| :----------------------------------------------------------- | :------------------------------- | :-------------------------------------------------- |
+| [bfe.ingress.kubernetes.io/rewrite-url.query-add][]          | 添加指定Query。                  | JSON字符串。示例：`[{"params": {"name": "alice"}}]` |
+| [bfe.ingress.kubernetes.io/rewrite-url.query-delete][]       | 删除指定Query。                  | JSON字符串。示例：`[{"params": ["name"]}]`          |
+| [bfe.ingress.kubernetes.io/rewrite-url.query-rename][]       | 重命名指定Query。                | JSON字符串。示例：`[{"params": {"name": "user"}}]`  |
+| [bfe.ingress.kubernetes.io/rewrite-url.query-delete-all-except][] | 仅保留指定Query，删除其他Query。 | JSON字符串。示例：`[{"params": "name"}]`            |
 
 ## 系统保留
 
@@ -94,8 +94,8 @@
 [bfe.ingress.kubernetes.io/rewrite-url.path]: ../ingress/rewrite.md#静态Path
 [bfe.ingress.kubernetes.io/rewrite-url.path-prefix-add]: ../ingress/rewrite.md#添加Path前缀
 [bfe.ingress.kubernetes.io/rewrite-url.path-prefix-trim]: ../ingress/rewrite.md#删除Path前缀
-[bfe.ingress.kubernetes.io/rewrite-url.path-prefix-strip]: ../ingress/rewrite.md#截断Path前缀
+[bfe.ingress.kubernetes.io/rewrite-url.path-prefix-strip]: ../ingress/rewrite.md#剥离Path前缀
 [bfe.ingress.kubernetes.io/rewrite-url.query-add]: ../ingress/rewrite.md#新增Query
-[bfe.ingress.kubernetes.io/rewrite-url.query-delete]: ../ingress/rewrite.md#删除Query
-[bfe.ingress.kubernetes.io/rewrite-url.query-rename]: ../ingress/rewrite.md#重命名Query
-[bfe.ingress.kubernetes.io/rewrite-url.query-delete-all-except]: ../ingress/rewrite.md#仅保留Query
+[bfe.ingress.kubernetes.io/rewrite-url.query-delete]: ../ingress/rewrite.md#删除指定Query
+[bfe.ingress.kubernetes.io/rewrite-url.query-rename]: ../ingress/rewrite.md#重命名指定Query
+[bfe.ingress.kubernetes.io/rewrite-url.query-delete-all-except]: ../ingress/rewrite.md#仅保留指定Query

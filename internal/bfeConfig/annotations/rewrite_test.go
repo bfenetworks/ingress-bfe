@@ -286,11 +286,11 @@ func TestGetRewriteAction(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := GetRewriteAction(map[string]string{tt.args.key: tt.args.value})
 			if (err != nil) != tt.wantErr {
-				t.Errorf("GetPathStripPrefix(), name=%s, error = %v, wantErr %v", tt.name, err, tt.wantErr)
+				t.Errorf("GetRewriteAction(), name=%s, error = %v, wantErr %v", tt.name, err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetPathStripPrefix() = %v, want %v", got, tt.want)
+				t.Errorf("GetRewriteAction() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -404,7 +404,7 @@ func TestCheckAllowedCallBack(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			err := CheckAllowedCallBack(tt.args.value)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("GetPathStripPrefix(), name=%s, error = %v, wantErr %v", tt.name, err, tt.wantErr)
+				t.Errorf("CheckAllowedCallBack(), name=%s, error = %v, wantErr %v", tt.name, err, tt.wantErr)
 				return
 			}
 		})

@@ -40,28 +40,28 @@
 
 ### Host
 
-| Annotation Name                                              | Function                           | Value                                                        |
-| :----------------------------------------------------------- | :--------------------------------- | :----------------------------------------------------------- |
-| [bfe.ingress.kubernetes.io/rewrite-url.host][]               | Set the host to specified value.   | JSON string. i.e. `[{"params": "baidu.com"}]` ,`params` should be string. |
-| [bfe.ingress.kubernetes.io/rewrite-url.host-from-path-prefix][] | Set host to specified path prefix. | JSON string.  i.e. `[{"params": "true"}]`,`params` should be bool string. |
+| Annotation Name                                              | Function                           | Value                                         |
+| :----------------------------------------------------------- | :--------------------------------- | :-------------------------------------------- |
+| [bfe.ingress.kubernetes.io/rewrite-url.host][]               | Set the host to specified value.   | JSON string. i.e. `[{"params": "baidu.com"}]` |
+| [bfe.ingress.kubernetes.io/rewrite-url.host-from-path-prefix][] | Set host to specified path prefix. | JSON string.  i.e. `[{"params": true}]`       |
 
 ### Path
 
-| Annotation Name                                             | Function                                  | Value                                                        |
-| :---------------------------------------------------------- | :---------------------------------------- | :----------------------------------------------------------- |
-| [bfe.ingress.kubernetes.io/rewrite-url.path][]              | Set path to specified value.              | JSON string. i.e. `[{"params": "/foo/bar"}]`,`params` should be path string. |
-| [bfe.ingress.kubernetes.io/rewrite-url.path-prefix-add][]   | Add prefix to original path.              | JSON string. i.e. `[{"params": "/bar"}]`,`params` should be path prefix string. |
-| [bfe.ingress.kubernetes.io/rewrite-url.path-prefix-trim][]  | Trim prefix from original path.           | JSON string. i.e. `[{"params": "/bar"}]`,`params` should be path prefix string. |
-| [bfe.ingress.kubernetes.io/rewrite-url.path-prefix-strip][] | Strip prefix segments from original path. | JSON string. i.e.  `[{"params": "1"}]`,`params` should be number string. |
+| Annotation Name                                             | Function                                                     | Value                                        |
+| :---------------------------------------------------------- | :----------------------------------------------------------- | :------------------------------------------- |
+| [bfe.ingress.kubernetes.io/rewrite-url.path][]              | Set path to specified value.                                 | JSON string. i.e. `[{"params": "/foo/bar"}]` |
+| [bfe.ingress.kubernetes.io/rewrite-url.path-prefix-add][]   | Add prefix to original path.                                 | JSON string. i.e. `[{"params": "/bar"}]`     |
+| [bfe.ingress.kubernetes.io/rewrite-url.path-prefix-trim][]  | Trim prefix from original path.                              | JSON string. i.e. `[{"params": "/bar"}]`     |
+| [bfe.ingress.kubernetes.io/rewrite-url.path-prefix-strip][] | Strip the indicated number of prefix segments from original path. | JSON string. i.e.  `[{"params": 1}]`         |
 
 ### Query
 
-| Annotation Name                                              | Function                                   | Value                                                        |
-| :----------------------------------------------------------- | :----------------------------------------- | :----------------------------------------------------------- |
-| [bfe.ingress.kubernetes.io/rewrite-url.query-add][] | Add query.                                 | JSON string. i.e.  `[{"params": "{"name": "alice"}"}]`,`params` should be  JSON string of dict. |
-| [bfe.ingress.kubernetes.io/rewrite-url.query-delete][] | Delete query.                              | JSON string. i.e.  `[{"params": "["name"]}]`,`params` should be  JSON string of list. |
-| [bfe.ingress.kubernetes.io/rewrite-url.query-rename][] | Delete all queries except specified query. | JSON string. i.e. `[{"params": "{"name": "user"}"}]`,`params` should be  JSON string of dict. |
-| [bfe.ingress.kubernetes.io/rewrite-url.query-delete-all-except][] | Rename query.                              | JSON string. i.e. `[{"params": "name"}]`,`params` should be dict JSON string. |
+| Annotation Name                                              | Function                                   | Value                                                |
+| :----------------------------------------------------------- | :----------------------------------------- | :--------------------------------------------------- |
+| [bfe.ingress.kubernetes.io/rewrite-url.query-add][]          | Add query.                                 | JSON string. i.e.  `[{"params": {"name": "alice"}}]` |
+| [bfe.ingress.kubernetes.io/rewrite-url.query-delete][]       | Delete query.                              | JSON string. i.e.  `[{"params": ["name"]}]`          |
+| [bfe.ingress.kubernetes.io/rewrite-url.query-rename][]       | Rename query.                              | JSON string. i.e. `[{"params": {"name": "user"} }]`  |
+| [bfe.ingress.kubernetes.io/rewrite-url.query-delete-all-except][] | Delete all queries except specified query. | JSON string. i.e. `[{"params": "name"}]`             |
 
 ## BFE-Reserved
 

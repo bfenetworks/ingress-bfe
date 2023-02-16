@@ -1,14 +1,14 @@
 # Rewrite
 
-The BFE engine provides multiple ways to modify the url of HTTP request, including modifying host, path and query.
+The BFE engine provides multiple ways to [modify the url of HTTP request](https://www.bfe-networks.net/en_us/modules/mod_rewrite/mod_rewrite/), including modifying host, path and query.
 
-The BFE Ingress Controller supports parsing the related annotations and modifying the url of matched requests. 
+The BFE Ingress Controller supports modifying the url of matched requests by annotations. 
 
 ## How to Config
 
 * In the Ingress object,
   - `spec.rules` define the route rules
-  - `metadata.annotations` define the rewrite actions for modifying the matched requests
+  - `metadata.annotations` define the rewrite actions for the matched requests
 
 Reference format:
 
@@ -41,17 +41,19 @@ spec:
 
 ## Rewrite Host
 
-The BFE Ingress Controller supports for configuring host information by annotations, including set static host or dynamic host.
+The BFE Ingress Controller supports configuring rewrite actions of "host" by annotations, including set static host or dynamic host.
 
 ### Static Host
 
-Use `bfe.ingress.kubernetes.io/rewrite-url.host` to configure the rewrite action of setting host to specified value.
+Use `bfe.ingress.kubernetes.io/rewrite-url.host` to rewrite host to a specified value. 
 
 For example：
 
 ```yaml
 bfe.ingress.kubernetes.io/rewrite-url.host: '[{"params": "baidu.com", "when": "AfterLocation"}]'
 ```
+
+Set `params` field to the expected host and the type of `params` field should be string. 
 
 Corresponding scenario:
 
@@ -60,7 +62,7 @@ Corresponding scenario:
 
 ### Dynamic Host
 
-Use `bfe.ingress.kubernetes.io/rewrite-url.host-from-path-prefix` to set host to specified path prefix.
+Use `bfe.ingress.kubernetes.io/rewrite-url.host-from-path-prefix` to set host to specified path prefix, value of `params` field is fixed to `true`.
 
 For example：
 
@@ -91,6 +93,8 @@ For example:
 bfe.ingress.kubernetes.io/rewrite-url.path: '[{"params": "/index"}]'
 ```
 
+Set `params` field to the expected path and type of `params` field should be string.
+
 Corresponding scenario:
 
 - Original url: http://host/path?query-key=value
@@ -98,7 +102,7 @@ Corresponding scenario:
 
 ### Dynamic Path
 
-Modify the prefix of url path, including add, delete and strip prefix. Be careful about setting the `order` value in the rewrite rule.
+Modify the prefix of url path, including add, delete and strip prefix. Be careful with the `order` value in the rewrite rule.
 
 #### Add Path Prefix 
 
@@ -109,6 +113,8 @@ For example：
 ```yaml
 bfe.ingress.kubernetes.io/rewrite-url.path-prefix-add: '[{"params": "/foo/"}]'
 ```
+
+Set `params` field to the added prefix and type of `params` field should be string.
 
 Corresponding scenario:
 
@@ -125,6 +131,8 @@ For example：
 bfe.ingress.kubernetes.io/rewrite-url.path-prefix-trim: '[{"params": "/foo/"}]'
 ```
 
+Set `params` field to the trimmed prefix and type of `params` field should be string.
+
 Corresponding scenario:
 
 * Original url: https://host/foo/path?query-key=value
@@ -133,13 +141,15 @@ Corresponding scenario:
 
 #### Strip Path Prefix
 
-Use `bfe.ingress.kubernetes.io/rewrite-url.path-prefix-strip` to strip the segments of original path.
+Use `bfe.ingress.kubernetes.io/rewrite-url.path-prefix-strip` to strip the indicated number of prefix segments from original path.
 
 For example：
 
 ```yaml
-bfe.ingress.kubernetes.io/rewrite-url.path-prefix-strip: '[{"params": "1"}]'
+bfe.ingress.kubernetes.io/rewrite-url.path-prefix-strip: '[{"params": 1}]'
 ```
+
+Set `params` field to a positive number and type of `params` field should be string of number.
 
 Corresponding scenario:
 
@@ -149,7 +159,7 @@ Corresponding scenario:
 
 #### Order of Rewrite Rule
 
-You can define multiple annotations to modify traffic's path, but be careful about the order of rules.
+You can define multiple annotations to modify path of url, but be careful about the order of rules.
 
 For example:
 
@@ -165,17 +175,17 @@ bfe.ingress.kubernetes.io/rewrite-url.path-prefix-add: '[{"params": "/index/", "
 bfe.ingress.kubernetes.io/rewrite-url.path-prefix-trim: '[{"params": "/bar", "order": 1}]'
 ```
 
-The matched url is https://host/bar/other-path?query-key=value.
+The url of the request is https://host/bar/other-path?query-key=value.
 
-For config of `case1` :
+For  `case1` :
 
-1. Add `/index`  prefix, the url is modified to https://host/index/bar/other-path?query-key=value.
-2. Because of adding a new path prefix, the path is not matched to `/bar`  prefix, so the engine won't trim prefix. the url still is https://host/index/bar/other-path?query-key=value.
+1. Prefix  `/index`  will be added and the url will be rewrited to https://host/index/bar/other-path?query-key=value.
+2. Because a new prefix added, the path prefix is not `/bar`, thus the prefix trim will not be performed. The url will still be https://host/index/bar/other-path?query-key=value.
 
- For config of `case2`：
+ For  `case2`：
 
-1. Because of matching to `/bar`  prefix, trim the prefix at first, then the url is modified to https://host/other-path?query-key=value.
-2. Add `/index`  prefix, the url is modified to https://host/index/other-path?query-key=value.
+1. With the prefix trim rule configured with order=1, the path will be trimmed first. So the url will be rewrited to https://host/other-path?query-key=value.
+2. Prefix `/index` will be added and the url will be rewrited to https://host/index/other-path?query-key=value.
 
 ## Rewrite Query
 
@@ -188,13 +198,15 @@ The BFE Ingresss Controller supports multiple ways to modify query params. be ca
 
 ### Add Query
 
-Use `bfe.ingress.kubernetes.io/rewrite-url.query-add` to add new query, the type of  `params`  should be dict.
+Use `bfe.ingress.kubernetes.io/rewrite-url.query-add` to add new query.
 
 For example：
 
 ```yaml
 bfe.ingress.kubernetes.io/rewrite-url.query-add: '[{"params": {"b": "2"}}]'
 ```
+
+Value of `params` field should be the added queries and the type of  `params` field should be dict.
 
 Corresponding scenario：
 
@@ -203,13 +215,15 @@ Corresponding scenario：
 
 ### Delete Query
 
-Use  `bfe.ingress.kubernetes.io/rewrite-url.query-delete`  to delete query params, the type of  `params`  should be list.
+Use  `bfe.ingress.kubernetes.io/rewrite-url.query-delete`  to delete query params.
 
 For example：
 
 ```yaml
 bfe.ingress.kubernetes.io/rewrite-url.query-delete: '[{"params": ["a"]}]'
 ```
+
+Value of `params` field should be the keys of removed queries, and the type of  `params`  should be list.
 
 Corresponding scenario：
 
@@ -218,13 +232,15 @@ Corresponding scenario：
 
 ### Rename Query
 
-Use `bfe.ingress.kubernetes.io/rewrite-url.query-rename` to rename query, the type of `params` should be dict.
+Use `bfe.ingress.kubernetes.io/rewrite-url.query-rename` to rename query.
 
 For example：
 
 ```yaml
-bfe.ingress.kubernetes.io/rewrite-url.query-add: '[{"params": {"a": "b"}}]'
+bfe.ingress.kubernetes.io/rewrite-url.query-rename: '[{"params": {"a": "b"}}]'
 ```
+
+Value of `params` field should be key-key mappings of renamed queries and the type of `params` should be dict.
 
 Corresponding scenario：
 
@@ -233,13 +249,15 @@ Corresponding scenario：
 
 ### Delete All Queries Except
 
-Use `bfe.ingress.kubernetes.io/rewrite-url.query-rename` to delete all queries except specified query,  the type of `params` should be string.
+Use `bfe.ingress.kubernetes.io/rewrite-url.query-delete-all-except` to delete all queries except specified query.
 
 For example：
 
 ```yaml
-bfe.ingress.kubernetes.io/rewrite-url.query-add: '[{"params": "a"}]'
+bfe.ingress.kubernetes.io/rewrite-url.query-delete-all-except: '[{"params": "a"}]'
 ```
+
+Value of `params` field should be the key of the only reserved query and the type of `params` should be string.
 
 Corresponding scenario：
 

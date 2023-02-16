@@ -2,7 +2,7 @@
 
 BFE引擎提供了丰富的[URL重写能力](https://www.bfe-networks.net/en_us/modules/mod_rewrite/mod_rewrite/)，包含对host、path、query等三部分url信息的修改操作。
 
-BFE Ingress Controller支持解析Ingress配置中的URL重写相关注解（Annotations），对当前Ingress匹配的流量进行URL重写。
+BFE Ingress Controller可以根据Ingress配置中的相关注解（Annotations），对Ingress匹配的流量进行URL重写。
 
 ## 配置方式
 
@@ -54,6 +54,8 @@ BFE Ingress Controller支持用户通过annotation配置Host重写，可选择�
 bfe.ingress.kubernetes.io/rewrite-url.host: '[{"params": "baidu.com", "when": "AfterLocation"}]'
 ```
 
+`params`字段的值为指定的host，类型需为字符串。
+
 对应实例：
 
 * 重写前: http://host/path?query-key=value
@@ -69,6 +71,8 @@ bfe.ingress.kubernetes.io/rewrite-url.host: '[{"params": "baidu.com", "when": "A
 bfe.ingress.kubernetes.io/rewrite-url.host-from-path-prefix: '[{"params": "true"}]'
 ```
 
+ `params`字段的值仅能设置为`true`。
+
 对应示例：
 
 - 重写前: https://old-host/new-host/path?query-key=value
@@ -80,17 +84,19 @@ bfe.ingress.kubernetes.io/rewrite-url.host-from-path-prefix: '[{"params": "true"
 
 * 静态Path
 
-* 动态Path，包含Path前缀的添加、删除与截断。
+* 动态Path，包含Path前缀的添加、删除与剥离。
 
 ### 静态Path
 
-设置`bfe.ingress.kubernetes.io/rewrite-url.path`，可将匹配流量的path设置为固定值。
+设置`bfe.ingress.kubernetes.io/rewrite-url.path`，将Path设置为指定值。
 
 例如：
 
 ```yaml
 bfe.ingress.kubernetes.io/rewrite-url.path: '[{"params": "/index"}]'
 ```
+
+`params`字段的值为指定的路径，类型需为字符串。
 
 对应示例
 
@@ -103,13 +109,15 @@ bfe.ingress.kubernetes.io/rewrite-url.path: '[{"params": "/index"}]'
 
 #### 添加Path前缀
 
-设置`bfe.ingress.kubernetes.io/rewrite-url.path-prefix-add`，可将匹配流量的path添加指定前缀。
+设置`bfe.ingress.kubernetes.io/rewrite-url.path-prefix-add`，向Path添加指定前缀。
 
 例如：
 
 ```yaml
 bfe.ingress.kubernetes.io/rewrite-url.path-prefix-add: '[{"params": "/foo/"}]'
 ```
+
+`params`字段的值为需添加的路径前缀，类型需为字符串。
 
 对应示例
 
@@ -118,7 +126,7 @@ bfe.ingress.kubernetes.io/rewrite-url.path-prefix-add: '[{"params": "/foo/"}]'
 
 #### 删除Path前缀
 
-设置`bfe.ingress.kubernetes.io/rewrite-url.path-prefix-trim`，可将匹配流量的path删除指定前缀。
+设置`bfe.ingress.kubernetes.io/rewrite-url.path-prefix-trim`，从Path中删除指定的前缀。
 
 例如：
 
@@ -126,21 +134,25 @@ bfe.ingress.kubernetes.io/rewrite-url.path-prefix-add: '[{"params": "/foo/"}]'
 bfe.ingress.kubernetes.io/rewrite-url.path-prefix-trim: '[{"params": "/foo/"}]'
 ```
 
+`params`字段的值为被移除的路径前缀，类型需为字符串。
+
 对应示例
 
 * 重写前: https://host/foo/path?query-key=value
 
 - 重写后: https://host/path?query-key=value
 
-#### 截断Path前缀
+#### 剥离Path前缀
 
-设置`bfe.ingress.kubernetes.io/rewrite-url.path-prefix-strip`，可将匹配流量的path的前缀按照长度进行截断。
+设置`bfe.ingress.kubernetes.io/rewrite-url.path-prefix-strip`，从Path中剥离指定数量的前缀片段。
 
 例如：
 
 ```yaml
 bfe.ingress.kubernetes.io/rewrite-url.path-prefix-strip: '[{"params": "1"}]'
 ```
+
+`params`字段的值为需剥离的前缀片段数量，类型需为数字形式字符串。
 
 对应示例
 
@@ -189,7 +201,7 @@ BFE Ingresss Controller支持多种query修改，使用时需注意顺序字段�
 
 ### 新增Query
 
-设置`bfe.ingress.kubernetes.io/rewrite-url.query-add`，添加指定query参数，`params`参数类型为字典类型。
+设置`bfe.ingress.kubernetes.io/rewrite-url.query-add`，添加指定query参数。
 
 例如：
 
@@ -197,14 +209,16 @@ BFE Ingresss Controller支持多种query修改，使用时需注意顺序字段�
 bfe.ingress.kubernetes.io/rewrite-url.query-add: '[{"params": {"b": "2"}}]'
 ```
 
+`params`字段的值为需添加Query的键值对，类型为字典。
+
 对应示例：
 
 - 重写前: https://host/path?a=1
 - 重写后: https://host/path?a=1&b=2
 
-### 删除Query
+### 删除指定Query
 
-设置`bfe.ingress.kubernetes.io/rewrite-url.query-delete`，删除指定query参数，`params`参数类型为数组类型。
+设置`bfe.ingress.kubernetes.io/rewrite-url.query-delete`，删除指定query参数。
 
 例如：
 
@@ -212,35 +226,41 @@ bfe.ingress.kubernetes.io/rewrite-url.query-add: '[{"params": {"b": "2"}}]'
 bfe.ingress.kubernetes.io/rewrite-url.query-delete: '[{"params": ["a"]}]'
 ```
 
+`params`字段的值为需删除Query的键，类型为字符串数组。
+
 对应示例：
 
 - 重写前: https://host/path?a=1
 - 重写后: https://host/path
 
-### 重命名Query
+### 重命名指定Query
 
-设置`bfe.ingress.kubernetes.io/rewrite-url.query-rename`，重命名指定query参数，`params`参数类型为字典类型。
+设置`bfe.ingress.kubernetes.io/rewrite-url.query-rename`，重命名指定query参数。
 
 例如：
 
 ```yaml
-bfe.ingress.kubernetes.io/rewrite-url.query-add: '[{"params": {"a": "b"}}]'
+bfe.ingress.kubernetes.io/rewrite-url.query-rename: '[{"params": {"a": "b"}}]'
 ```
+
+`params`字段的值为需重命名Query的键-键映射关系，类型为字典。
 
 对应示例：
 
 - 重写前: https://host/path?a=1
 - 重写后: https://host/path?b=1
 
-### 仅保留Query
+### 仅保留指定Query
 
-设置`bfe.ingress.kubernetes.io/rewrite-url.query-rename`，重命名指定query参数，`params`参数类型为字符串类型。
+设置`bfe.ingress.kubernetes.io/rewrite-url.query-delete-all-except`，重命名指定query参数。
 
 例如：
 
 ```yaml
-bfe.ingress.kubernetes.io/rewrite-url.query-add: '[{"params": "a"}]'
+bfe.ingress.kubernetes.io/rewrite-url.query-delete-all-except: '[{"params": "a"}]'
 ```
+
+`params`字段值为仅保留Query的键，类型为字符串。
 
 对应示例：
 
