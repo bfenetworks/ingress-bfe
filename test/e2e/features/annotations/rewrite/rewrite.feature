@@ -40,7 +40,7 @@ Feature: Rewrite
     metadata:
       name: rewrite-host-dynamic
       annotations:
-        bfe.ingress.kubernetes.io/rewrite-url.host-from-path-prefix: '[{"params": "true"}]'
+        bfe.ingress.kubernetes.io/rewrite-url.host-from-path-prefix: '[{"params": true}]'
     spec:
       rules:
         - host: "rewrite-url.com"
@@ -68,7 +68,7 @@ Feature: Rewrite
     metadata:
       name: rewrite-host-dynamic
       annotations:
-        bfe.ingress.kubernetes.io/rewrite-url.host-from-path-prefix: '[{"params": "true"}]'
+        bfe.ingress.kubernetes.io/rewrite-url.host-from-path-prefix: '[{"params": true}]'
     spec:
       rules:
         - host: "rewrite-url.com"
@@ -205,7 +205,7 @@ Feature: Rewrite
     metadata:
       name: rewrite-path-strip
       annotations:
-        bfe.ingress.kubernetes.io/rewrite-url.path-prefix-strip: '[{"params": "1"}]'
+        bfe.ingress.kubernetes.io/rewrite-url.path-prefix-strip: '[{"params": 1}]'
     spec:
       rules:
         - host: "rewrite-url.com"
@@ -233,7 +233,7 @@ Feature: Rewrite
     metadata:
       name: rewrite-path-strip
       annotations:
-        bfe.ingress.kubernetes.io/rewrite-url.path-prefix-strip: '[{"params": "3"}]'
+        bfe.ingress.kubernetes.io/rewrite-url.path-prefix-strip: '[{"params": 3}]'
     spec:
       rules:
         - host: "rewrite-url.com"
