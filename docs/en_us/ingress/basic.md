@@ -163,7 +163,22 @@ Set `kubernetes.io/ingress.class` in annotations of Ingress. Default value is `b
 
 ### Set in IngressClass
 
-For K8S versions from 1.18, set controller to `bfe-networks.com/ingress-controller` in IngressClass of K8S Cluster. Example:
+the format of set IngressClass in k8s are varies from the versions of K8S.
+
+#### set IngressClass
+For k8s versions from 1.19
+```yaml
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: external-lb
+  labels:
+    app.kubernetes.io/component: controller
+  annotations:
+    ingressclass.kubernetes.io/is-default-class: 'true'
+spec:
+  controller: bfe-networks.com/ingress-controller
+```
+For K8S versions from 1.14 to 1.18, set controller to `bfe-networks.com/ingress-controller` in IngressClass of K8S Cluster. Example:
 
 ```yaml
 apiVersion: networking.k8s.io/v1beta1
@@ -173,6 +188,7 @@ metadata:
   controller: bfe-networks.com/ingress-controller
 ```
 
+#### Then Ingress
 Then set `ingressClassName` to `external-lb` in Ingress:
 
 ```yaml
