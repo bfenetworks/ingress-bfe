@@ -156,7 +156,18 @@ BFE Ingress Controller支持两种方式设置ingress class。
 
 ### IngressClass方式
 
-如果k8s版本>=1.18，可以在K8S集群中配置IngressClass，指定controller为`bfe-networks.com/ingress-controller`:
+k8s 1.19+
+
+```yaml
+kind: IngressClass
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: external-lb
+spec:
+  controller: bfe-networks.com/ingress-controller
+```
+
+如果k8s版本为1.14~1.18，可以在K8S集群中配置IngressClass，指定controller为`bfe-networks.com/ingress-controller`:
 
 ```yaml
 apiVersion: networking.k8s.io/v1beta1
