@@ -12,6 +12,7 @@
     * [TLS  Configuration](ingress/tls.md)
     * [Load Balance](ingress/load-balance.md)
     * [Redirect](ingress/redirect.md)
+    * [Rewrite](ingress/rewrite.md)
 * Configuration Examples
     * [Config File Example](example/example.md)
     * [Canary Release Example](example/canary-release.md)
