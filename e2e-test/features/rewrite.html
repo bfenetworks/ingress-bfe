@@ -229,7 +229,7 @@ kbd {
      <div class="mx-auto">
         <strong>BFE-ingress-controller</strong>
         <strong>version:</strong> <em class="pl-1 pr-3">0.3.0-dev</em>
-        <strong>time:</strong> <em class="pl-1 pr-3">2023-01-12T09:39:49Z</em>
+        <strong>time:</strong> <em class="pl-1 pr-3">2023-03-31T08:30:12Z</em>
       </div>
    </nav>
    <main role="main" class="container">
@@ -272,13 +272,13 @@ kbd {
           <td>
             <p data-toggle="tooltip" data-placement="left" title="Scenario passed">Passed</p>
           </td>
-          <td class="percentage">94.74%</td>
+          <td class="percentage">100.00%</td>
         </tr>
         <tr>
           <td>
             <p data-toggle="tooltip" data-placement="left" title="Scenario failed">Failed</p>
           </td>
-          <td class="percentage">5.26%</td>
+          <td class="percentage">0.00%</td>
       </tbody>
     </table>
   </div>
@@ -293,7 +293,7 @@ kbd {
   <div class="card m-1">
     <div class="card-body">
       <div class="card-title m-0">
-        <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario0" class="h5 text-danger">
+        <a data-toggle="collapse" href="#" aria-expanded="true" aria-controls="scenario0" class="h5 text-success">
           Scenario: <span class="text-muted">An Ingress with annotation `bfe.ingress.kubernetes.io/rewrite-url.host`</span>
         </a>
         <p></p>
@@ -347,19 +347,20 @@ kbd {
       <div class="scenario-step-container">
         
         
-        <div class="label" data-toggle="tooltip" data-placement="top" title="Step failed"> <i class="material-icons text-danger">error</i>
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
         </div>
         
         
         <div class="text">
           <span class="keyword highlight">And </span>
-                    <span class="duration">5m0s</span>
+                    <span class="duration">3s</span>
                               
           The Ingress status shows the IP address or FQDN where it is exposed          
           
         </div>
         
-        <a class="btn text-danger" href="#error01-error" data-toggle="collapse">+Show Error</a>
+        
         
         
         
@@ -367,10 +368,6 @@ kbd {
         
       </div>
       
-      
-      <div id="error01-error" class="scenario-step-collapse collapse bg-danger p-2 ml-3 mr-3">
-        <pre class="info text-white p-0 m-0">waiting for ingress status update: timed out waiting for the condition</pre>
-      </div>
       
       
       
@@ -385,8 +382,8 @@ kbd {
       <div class="scenario-step-container">
         
         
-        <div class="label" data-toggle="tooltip" data-placement="top" title="Step is skipped">
-          <i class="material-icons skipped-color">double_arrow</i>
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
         </div>
         
         
@@ -420,8 +417,8 @@ kbd {
       <div class="scenario-step-container">
         
         
-        <div class="label" data-toggle="tooltip" data-placement="top" title="Step is skipped">
-          <i class="material-icons skipped-color">double_arrow</i>
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
         </div>
         
         
@@ -455,8 +452,8 @@ kbd {
       <div class="scenario-step-container">
         
         
-        <div class="label" data-toggle="tooltip" data-placement="top" title="Step is skipped">
-          <i class="material-icons skipped-color">double_arrow</i>
+        <div class="label" title="Success">
+          <i class="material-icons passed-color" data-toggle="tooltip" data-placement="top" title="Step passed">check_circle</i>
         </div>
         
         
@@ -488,19 +485,15 @@ kbd {
       
       </div>
     </div>
-    <div class="card-footer p-1 border-danger pl-3 pr-3">
-      Duration: 5m5s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+    <div class="card-footer p-1 border-success pl-3 pr-3">
+      Duration: 8s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
       <div class="d-inline-block float-right">
         
         
         
-        <span class="step skipped-background" data-toggle="tooltip" title="Scenario is skipped">3</span>
         
         
-        <span class="step failed-background" data-toggle="tooltip" title="Scenario failed">1</span>
-        
-        
-        <span class="step passed-background" data-toggle="tooltip" title="Scenario passed">1</span>
+        <span class="step passed-background" data-toggle="tooltip" title="Scenario passed">5</span>
         
         
       </div>
@@ -531,13 +524,13 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">Given </span>
-                    <span class="duration">5s</span>
+                    <span class="duration">10s</span>
                               
           an Ingress resource with rewrite annotation          
           <a class="btn text-primary" data-toggle="collapse" href="#rewrite-an-ingress-with-annotation--bfe-ingress-kubernetes-io-rewrite-url-host-from-path-prefix--an-Ingress-resource-with-rewrite-annotation">+Show Parameter</a>
           <div id="rewrite-an-ingress-with-annotation--bfe-ingress-kubernetes-io-rewrite-url-host-from-path-prefix--an-Ingress-resource-with-rewrite-annotation" class="collapse ml-3 mr-3">
             <code>
-              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: rewrite-host-dynamic<br />  annotations:<br />    bfe.ingress.kubernetes.io/rewrite-url.host-from-path-prefix: '[{"params": "true"}]'<br />spec:<br />  rules:<br />    - host: "rewrite-url.com"<br />      http:<br />        paths:<br />          - path: /baidu.com/bar<br />            pathType: Prefix<br />            backend:<br />              service:<br />                name: foo-exact<br />                port:<br />                  number: 3000</pre>
+              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: rewrite-host-dynamic<br />  annotations:<br />    bfe.ingress.kubernetes.io/rewrite-url.host-from-path-prefix: '[{"params": true}]'<br />spec:<br />  rules:<br />    - host: "rewrite-url.com"<br />      http:<br />        paths:<br />          - path: /baidu.com/bar<br />            pathType: Prefix<br />            backend:<br />              service:<br />                name: foo-exact<br />                port:<br />                  number: 3000</pre>
             </code>
           </div>
           
@@ -740,7 +733,7 @@ kbd {
       </div>
     </div>
     <div class="card-footer p-1 border-success pl-3 pr-3">
-      Duration: 8s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      Duration: 13s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
       <div class="d-inline-block float-right">
         
         
@@ -784,7 +777,7 @@ kbd {
           <a class="btn text-primary" data-toggle="collapse" href="#rewrite-an-ingress-with-annotation--bfe-ingress-kubernetes-io-rewrite-url-host-from-path-prefix--and-the-route-path-doesn-t-has-host-prefix-an-Ingress-resource-with-rewrite-annotation">+Show Parameter</a>
           <div id="rewrite-an-ingress-with-annotation--bfe-ingress-kubernetes-io-rewrite-url-host-from-path-prefix--and-the-route-path-doesn-t-has-host-prefix-an-Ingress-resource-with-rewrite-annotation" class="collapse ml-3 mr-3">
             <code>
-              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: rewrite-host-dynamic<br />  annotations:<br />    bfe.ingress.kubernetes.io/rewrite-url.host-from-path-prefix: '[{"params": "true"}]'<br />spec:<br />  rules:<br />    - host: "rewrite-url.com"<br />      http:<br />        paths:<br />          - path: /bar<br />            pathType: Prefix<br />            backend:<br />              service:<br />                name: foo-exact<br />                port:<br />                  number: 3000</pre>
+              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: rewrite-host-dynamic<br />  annotations:<br />    bfe.ingress.kubernetes.io/rewrite-url.host-from-path-prefix: '[{"params": true}]'<br />spec:<br />  rules:<br />    - host: "rewrite-url.com"<br />      http:<br />        paths:<br />          - path: /bar<br />            pathType: Prefix<br />            backend:<br />              service:<br />                name: foo-exact<br />                port:<br />                  number: 3000</pre>
             </code>
           </div>
           
@@ -820,7 +813,7 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">And </span>
-                    <span class="duration">3s</span>
+                    <span class="duration">6s</span>
                               
           The Ingress status shows the IP address or FQDN where it is exposed          
           
@@ -987,7 +980,7 @@ kbd {
       </div>
     </div>
     <div class="card-footer p-1 border-success pl-3 pr-3">
-      Duration: 8s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      Duration: 11s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
       <div class="d-inline-block float-right">
         
         
@@ -1067,7 +1060,7 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">And </span>
-                    <span class="duration">3s</span>
+                    <span class="duration">6s</span>
                               
           The Ingress status shows the IP address or FQDN where it is exposed          
           
@@ -1199,7 +1192,7 @@ kbd {
       </div>
     </div>
     <div class="card-footer p-1 border-success pl-3 pr-3">
-      Duration: 8s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      Duration: 11s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
       <div class="d-inline-block float-right">
         
         
@@ -1279,7 +1272,7 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">And </span>
-                    <span class="duration">6s</span>
+                    <span class="duration">3s</span>
                               
           The Ingress status shows the IP address or FQDN where it is exposed          
           
@@ -1411,7 +1404,7 @@ kbd {
       </div>
     </div>
     <div class="card-footer p-1 border-success pl-3 pr-3">
-      Duration: 11s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      Duration: 8s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
       <div class="d-inline-block float-right">
         
         
@@ -1449,7 +1442,7 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">Given </span>
-                    <span class="duration">5s</span>
+                    <span class="duration">10s</span>
                               
           an Ingress resource with rewrite annotation          
           <a class="btn text-primary" data-toggle="collapse" href="#rewrite-an-ingress-with-annotation--bfe-ingress-kubernetes-io-rewrite-url-path-prefix-trim--an-Ingress-resource-with-rewrite-annotation">+Show Parameter</a>
@@ -1491,7 +1484,7 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">And </span>
-                    <span class="duration">3s</span>
+                    <span class="duration">6s</span>
                               
           The Ingress status shows the IP address or FQDN where it is exposed          
           
@@ -1623,7 +1616,7 @@ kbd {
       </div>
     </div>
     <div class="card-footer p-1 border-success pl-3 pr-3">
-      Duration: 8s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      Duration: 16s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
       <div class="d-inline-block float-right">
         
         
@@ -1703,7 +1696,7 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">And </span>
-                    <span class="duration">6s</span>
+                    <span class="duration">3s</span>
                               
           The Ingress status shows the IP address or FQDN where it is exposed          
           
@@ -1835,7 +1828,7 @@ kbd {
       </div>
     </div>
     <div class="card-footer p-1 border-success pl-3 pr-3">
-      Duration: 11s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      Duration: 8s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
       <div class="d-inline-block float-right">
         
         
@@ -1879,7 +1872,7 @@ kbd {
           <a class="btn text-primary" data-toggle="collapse" href="#rewrite-an-ingress-with-annotation--bfe-ingress-kubernetes-io-rewrite-url-path-prefix-strip--an-Ingress-resource-with-rewrite-annotation">+Show Parameter</a>
           <div id="rewrite-an-ingress-with-annotation--bfe-ingress-kubernetes-io-rewrite-url-path-prefix-strip--an-Ingress-resource-with-rewrite-annotation" class="collapse ml-3 mr-3">
             <code>
-              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: rewrite-path-strip<br />  annotations:<br />    bfe.ingress.kubernetes.io/rewrite-url.path-prefix-strip: '[{"params": "1"}]'<br />spec:<br />  rules:<br />    - host: "rewrite-url.com"<br />      http:<br />        paths:<br />          - path: /foo/bar<br />            pathType: Prefix<br />            backend:<br />              service:<br />                name: foo-exact<br />                port:<br />                  number: 3000</pre>
+              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: rewrite-path-strip<br />  annotations:<br />    bfe.ingress.kubernetes.io/rewrite-url.path-prefix-strip: '[{"params": 1}]'<br />spec:<br />  rules:<br />    - host: "rewrite-url.com"<br />      http:<br />        paths:<br />          - path: /foo/bar<br />            pathType: Prefix<br />            backend:<br />              service:<br />                name: foo-exact<br />                port:<br />                  number: 3000</pre>
             </code>
           </div>
           
@@ -2091,7 +2084,7 @@ kbd {
           <a class="btn text-primary" data-toggle="collapse" href="#rewrite-an-ingress-with-annotation--bfe-ingress-kubernetes-io-rewrite-url-path-prefix-strip---an-Ingress-resource-with-rewrite-annotation">+Show Parameter</a>
           <div id="rewrite-an-ingress-with-annotation--bfe-ingress-kubernetes-io-rewrite-url-path-prefix-strip---an-Ingress-resource-with-rewrite-annotation" class="collapse ml-3 mr-3">
             <code>
-              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: rewrite-path-strip<br />  annotations:<br />    bfe.ingress.kubernetes.io/rewrite-url.path-prefix-strip: '[{"params": "3"}]'<br />spec:<br />  rules:<br />    - host: "rewrite-url.com"<br />      http:<br />        paths:<br />          - path: /<br />            pathType: Prefix<br />            backend:<br />              service:<br />                name: foo-exact<br />                port:<br />                  number: 3000</pre>
+              <pre>apiVersion: networking.k8s.io/v1<br />kind: Ingress<br />metadata:<br />  name: rewrite-path-strip<br />  annotations:<br />    bfe.ingress.kubernetes.io/rewrite-url.path-prefix-strip: '[{"params": 3}]'<br />spec:<br />  rules:<br />    - host: "rewrite-url.com"<br />      http:<br />        paths:<br />          - path: /<br />            pathType: Prefix<br />            backend:<br />              service:<br />                name: foo-exact<br />                port:<br />                  number: 3000</pre>
             </code>
           </div>
           
@@ -2509,7 +2502,7 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">Given </span>
-                    <span class="duration">5s</span>
+                    <span class="duration">10s</span>
                               
           an Ingress resource with rewrite annotation          
           <a class="btn text-primary" data-toggle="collapse" href="#rewrite-an-ingress-with-annotation--bfe-ingress-kubernetes-io-rewrite-url-query-delete--an-Ingress-resource-with-rewrite-annotation">+Show Parameter</a>
@@ -2683,7 +2676,7 @@ kbd {
       </div>
     </div>
     <div class="card-footer p-1 border-success pl-3 pr-3">
-      Duration: 11s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      Duration: 16s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
       <div class="d-inline-block float-right">
         
         
@@ -2933,7 +2926,7 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">Given </span>
-                    <span class="duration">5s</span>
+                    <span class="duration">10s</span>
                               
           an Ingress resource with rewrite annotation          
           <a class="btn text-primary" data-toggle="collapse" href="#rewrite-an-ingress-with-annotation--bfe-ingress-kubernetes-io-rewrite-url-query-delete-all-except--an-Ingress-resource-with-rewrite-annotation">+Show Parameter</a>
@@ -3107,7 +3100,7 @@ kbd {
       </div>
     </div>
     <div class="card-footer p-1 border-success pl-3 pr-3">
-      Duration: 11s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      Duration: 16s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
       <div class="d-inline-block float-right">
         
         
@@ -3827,7 +3820,7 @@ kbd {
         
         <div class="text">
           <span class="keyword highlight">And </span>
-                    <span class="duration">6s</span>
+                    <span class="duration">3s</span>
                               
           The Ingress status shows the IP address or FQDN where it is exposed          
           
@@ -3959,7 +3952,7 @@ kbd {
       </div>
     </div>
     <div class="card-footer p-1 border-success pl-3 pr-3">
-      Duration: 11s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
+      Duration: 8s <span class="new badge"><i class="material-icons" style="font-size: 15px;">query_builder</i></span>
       <div class="d-inline-block float-right">
         
         
@@ -4016,8 +4009,8 @@ kbd {
           datasets: [
             {
               data: [
-                18,
-                1,
+                19,
+                0,
                 0,
                 0,
                 0,
