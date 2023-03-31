@@ -20,6 +20,7 @@ import (
 
 	netv1 "k8s.io/api/networking/v1"
 	netv1beta1 "k8s.io/api/networking/v1beta1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/bfenetworks/ingress-bfe/internal/bfeConfig/annotations"
@@ -38,8 +39,7 @@ func IngressClassFilter(ctx context.Context, r client.Reader, annots map[string]
 			if class.Spec.Controller != option.Opts.Ingress.ControllerName {
 				continue
 			}
-			if (ingressClassName != nil && *ingressClassName == class.Name) ||
-				(ingressClassName == nil && strings.EqualFold(class.Annotations[annotations.IsDefaultIngressClass], "true")) {
+			if matchIngressClass(ingressClassName, &class) {
 				return true
 			}
 		}
@@ -54,11 +54,27 @@ func IngressClassFilter(ctx context.Context, r client.Reader, annots map[string]
 		if classV1Beta1.Spec.Controller != option.Opts.Ingress.ControllerName {
 			continue
 		}
-		if (ingressClassName != nil && *ingressClassName == classV1Beta1.Name) ||
-			(ingressClassName == nil && strings.EqualFold(classV1Beta1.Annotations[annotations.IsDefaultIngressClass], "true")) {
+		if matchIngressClass(ingressClassName, &classV1Beta1) {
 			return true
 		}
 	}
 
 	return false
+}
+
+// matchIngressClass matches for specific or default ingress class
+// Params:
+//	targetCls: target ingress class name
+//		if non-nil, matches ingress class with the same name
+//		if nil, matches default ingress class
+func matchIngressClass(targetCls *string, testCls v1.Object) bool {
+	// specific ingress class
+	if targetCls != nil {
+		return *targetCls == testCls.GetName()
+	}
+
+	// default ingress class
+	annots := testCls.GetAnnotations()
+	return strings.EqualFold(annots[annotations.IsDefaultIngressClass], "true")
+
 }

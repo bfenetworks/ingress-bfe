@@ -2,6 +2,8 @@
 
 English | [中文](README-CN.md)
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/bfenetworks/ingress-bfe)](https://goreportcard.com/report/github.com/bfenetworks/ingress-bfe)
+
 ## Overview
 
 BFE Ingress Controller is an implementation of Kubernetes [Ingress Controller][] based on [BFE][], to fulfill [Ingress][] in Kubernetes.

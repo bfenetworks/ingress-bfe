@@ -2,6 +2,8 @@
 
 中文 | [English](README.md)
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/bfenetworks/ingress-bfe)](https://goreportcard.com/report/github.com/bfenetworks/ingress-bfe)
+
 ## 简介
 
 BFE Ingress Controller 为基于 [BFE][] 实现的[Kubernetes Ingress Controller][]，用于支持在 Kubernetes 中使用 [Ingress][] 进行流量接入，并利用BFE的众多优秀特点和强大能力。

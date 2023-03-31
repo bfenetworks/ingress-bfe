@@ -20,9 +20,10 @@ package rewrite
 import (
 	"context"
 	"fmt"
-	"github.com/cucumber/godog"
 	"net/url"
 	"time"
+
+	"github.com/cucumber/godog"
 
 	"github.com/bfenetworks/ingress-bfe/test/e2e/pkg/kubernetes"
 	tstate "github.com/bfenetworks/ingress-bfe/test/e2e/pkg/state"
