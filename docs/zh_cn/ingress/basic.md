@@ -156,7 +156,22 @@ BFE Ingress Controller支持两种方式设置ingress class。
 
 ### IngressClass方式
 
-如果k8s版本>=1.18，可以在K8S集群中配置IngressClass，指定controller为`bfe-networks.com/ingress-controller`:
+k8s 1.19+
+
+```yaml
+kind: IngressClass
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: external-lb
+  labels:
+    app.kubernetes.io/component: controller
+  annotations:
+    ingressclass.kubernetes.io/is-default-class: 'true'
+spec:
+  controller: bfe-networks.com/ingress-controller
+```
+
+如果k8s版本为1.14~1.18，可以在K8S集群中配置IngressClass，指定controller为`bfe-networks.com/ingress-controller`:
 
 ```yaml
 apiVersion: networking.k8s.io/v1beta1
@@ -184,4 +199,4 @@ spec:
 [Ingress介绍]: https://kubernetes.io/docs/concepts/services-networking/ingress/#what-is-ingress
 [pathType]: https://kubernetes.io/docs/concepts/services-networking/ingress/#path-types
 [hostname-wildcards]: https://kubernetes.io/docs/concepts/services-networking/ingress/#hostname-wildcards
-[IngressClass]: https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#extended-configuration-with-ingress-classes
+[IngressClass]: https://kubernetes.io/docs/concepts/services-networking/ingress/#default-ingress-class
